@@ -1,33 +1,32 @@
 import {
   createContext,
-  Dispatch,
-  ReactNode,
-  SetStateAction,
-  useEffect,
   useState,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
 } from "react";
 import { data } from "../data";
 import type { coursesType } from "../pages/Main";
 
 export type contextType = {
-  selectedCourse: coursesType | null;
-  changeSelectedCourse: (newCourse: coursesType) => void;
-  progress: number;
-  setProgress: Dispatch<SetStateAction<number>>;
-  isOpenProfile: boolean;
-  setIsOpenProfile: Dispatch<SetStateAction<boolean>>;
-  isAuth: boolean;
-  setIsAuth: Dispatch<SetStateAction<boolean>>;
-  user: userType | null;
-  setUser: Dispatch<SetStateAction<userType | null>>;
-  changeUser: (newUser: userType) => void;
-  workout: workoutType[];
-  error: string;
-  setError: Dispatch<SetStateAction<string>>;
-  isLoading: boolean;
-  setIsLoading: Dispatch<SetStateAction<boolean>>;
-  changeAccounts: (newAccount: userType) => void;
-  setAccounts: Dispatch<SetStateAction<userType[]>>;
+  selectedCourse?: coursesType | null;
+  changeSelectedCourse?: (newCourse: coursesType) => void;
+  progress?: number;
+  setProgress?: Dispatch<SetStateAction<number>>;
+  isOpenProfile?: boolean;
+  setIsOpenProfile?: Dispatch<SetStateAction<boolean>>;
+  isAuth?: boolean;
+  setIsAuth?: Dispatch<SetStateAction<boolean>>;
+  user?: userType | null;
+  setUser?: Dispatch<SetStateAction<userType | null>>;
+  changeUser?: (newUser: userType) => void;
+  workout?: workoutType[];
+  error?: string;
+  setError?: Dispatch<SetStateAction<string>>;
+  isLoading?: boolean;
+  setIsLoading?: Dispatch<SetStateAction<boolean>>;
+  changeAccounts?: (newAccount: userType) => void;
+  setAccounts?: Dispatch<SetStateAction<userType[]>>;
 };
 
 type MyProps = {
@@ -55,17 +54,15 @@ export type userType = {
 
 export const SetContext = createContext<contextType | null>(null);
 export const SettingProvider = ({ children }: MyProps) => {
-  const [selectedCourse, setSelectedCourse] = useState<coursesType | null>(
-    null
-  );
+  let [selectedCourse, setSelectedCourse] = useState<coursesType | null>(null);
   const [progress, setProgress] = useState<number>(1);
   const [isOpenProfile, setIsOpenProfile] = useState<boolean>(false);
   const [isAuth, setIsAuth] = useState<boolean>(false);
   const [user, setUser] = useState<userType | null>(null);
-  const [workout, setWorkout] = useState<workoutType[]>(data.workouts);
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [accounts, setAccounts] = useState<userType[]>([]);
+  const workout: workoutType[] = data.workouts;
 
   const changeSelectedCourse = (newCourse: coursesType) => {
     localStorage.setItem("selectedCourse", JSON.stringify(newCourse));
@@ -82,17 +79,6 @@ export const SettingProvider = ({ children }: MyProps) => {
     setUser(newUser);
     localStorage.setItem("user", JSON.stringify(newUser));
   };
-
-  useEffect(() => {
-    let LSuser = localStorage.getItem("user");
-    let LSaccounts = localStorage.getItem("accounts");
-    if (LSuser) {
-      setUser(JSON.parse(LSuser));
-    }
-    if (LSaccounts) {
-      setAccounts(JSON.parse(LSaccounts));
-    }
-  }, []);
 
   return (
     <SetContext.Provider

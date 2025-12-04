@@ -1,10 +1,9 @@
-"use client";
-
-import { SetContext } from "@/src/context";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useContext } from "react";
-import { coursesType } from "../main/page";
+import { useContext, useState } from "react";
+import { SetContext } from "../context/context";
+import type { coursesType } from "./Main";
+import { Header } from "../components/Header";
+import { useNavigate } from "react-router-dom";
+import { router } from "./router";
 
 export default function Profile() {
   const {
@@ -12,29 +11,45 @@ export default function Profile() {
     setUser,
     progress,
     setIsOpenProfile,
-    setIsOpenPage,
+    isAuth,
     changeSelectedCourse,
+    setIsAuth,
   } = useContext(SetContext);
+  const [isOpenSetting, setIsOpenSetting] = useState<boolean>(false);
 
-  const router = useRouter();
+  const navigate = useNavigate();
+
+  const handleOpenSetting = () => {
+    setIsOpenSetting(!isOpenSetting);
+  };
 
   const handleLogout = () => {
     setUser(null);
-
+    navigate(router.main);
     setIsOpenProfile(false);
-    router.push("/main");
+    setIsAuth(false);
     localStorage.removeItem("user");
   };
 
-  const handleWorkoutBtn = () => {
-    setIsOpenPage("selectWorkout");
-  };
+  const handleWorkoutBtn = () => {};
 
   return (
     <>
       <div className="px-[16px] pb-[24px]">
+        <Header />
         <p className="text-[24px] font-medium pb-[24px]">Профиль</p>
         <div className="md:flex md:gap-[33px] md:items-center shadow-[0px_0px_10px_-7px] p-[30px] rounded-[30px]">
+          <div
+            onClick={handleOpenSetting}
+            className="flex flex-col gap-[5px] place-self-end cursor-pointer"
+          >
+            <div className="bg-[#4f4f4f] rounded-full w-[5px] h-[5px]"></div>
+            <div className="bg-[#4f4f4f] rounded-full w-[5px] h-[5px]"></div>
+            <div className="bg-[#4f4f4f] rounded-full w-[5px] h-[5px]"></div>
+          </div>
+          {isOpenSetting && (
+            <div className="w-[200px] h-[100px] mt-[10px] rounded-[10px] bg-[#f4f4f4] place-self-end mr-[10px] shadow-[0px_0px_10px_-5px]"></div>
+          )}
           <svg
             className="flex place-self-center mb-[30px] w-[141px] md:w-[200px] h-[141px] md:h-[200px]"
             viewBox="0 0 141 141"
@@ -92,7 +107,7 @@ export default function Profile() {
         <div>
           <h1 className="text-[24px] font-medium pt-[24px]">Мои курсы</h1>
           <div className="flex flex-wrap justify-center gap-[24px] md:justify-start">
-            {user !== null
+            {isAuth
               ? user.myCourses.map((i: coursesType, index: number) => (
                   <div
                     onClick={() => changeSelectedCourse(i)}
@@ -115,10 +130,8 @@ export default function Profile() {
                           fill="white"
                         />
                       </svg>
-                      <Image
+                      <img
                         className="rounded-[30px] mb-[25px] place-self-center"
-                        width={343}
-                        height={343}
                         src={i.img}
                         alt={i.nameEN}
                       />
