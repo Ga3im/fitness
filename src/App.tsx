@@ -6,6 +6,7 @@ import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
 import Profile from "./pages/Profile";
 import Course from "./pages/Courses";
+import { Workout } from "./pages/Workout";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       </Route>
       <Route path={router.profile} element={<Profile />} />
       <Route path={router.courses} element={<Course />} />
+      <Route path={router.workout} element={<Workout />} />
     </Routes>
   );
 }

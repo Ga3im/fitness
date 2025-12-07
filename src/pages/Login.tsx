@@ -30,11 +30,6 @@ export const Login = () => {
     navigate(router.main);
   };
 
-  const handleLogoClick = () => {
-    navigate(router.main);
-    setIsOpenProfile(false);
-  };
-
   const handleLogin = () => {
     setIsLoading(true);
     if (loginRef.current?.value === "") {

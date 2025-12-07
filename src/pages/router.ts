@@ -4,4 +4,5 @@ export const router = {
   register: "/register",
   profile: "/profile",
   courses:'/course/:courseId',
+  workout:'/workout/:workoutId',
 };

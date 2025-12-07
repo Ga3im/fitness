@@ -1,5 +1,6 @@
 import {
   createContext,
+  useEffect,
   useState,
   type Dispatch,
   type ReactNode,
@@ -68,6 +69,15 @@ export const SettingProvider = ({ children }: MyProps) => {
     localStorage.setItem("selectedCourse", JSON.stringify(newCourse));
     setSelectedCourse(newCourse);
   };
+
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+      setIsAuth(true);
+    }
+  }, []);
 
   const changeAccounts = (newAccount: userType) => {
     const arr = [...accounts, newAccount];

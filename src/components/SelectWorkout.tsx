@@ -1,20 +1,30 @@
-import { SetContext, workoutType } from "@/src/context";
-import { useContext, useState } from "react";
+import { useContext, type Dispatch, type SetStateAction } from "react";
+import { SetContext, type workoutType } from "../context/context";
 
-export const SelectWorkout = () => {
-  const { workout, selectedCourse, setIsOpenPage } = useContext(SetContext);
-  const [isChecked, setIsChecked] = useState(false);
+type selectedWorkoutType = {
+  setIsSelectedWorkout: Dispatch<SetStateAction<boolean>>;
+  selectedWorkout: workoutType | null;
+  setSelectedWorkout: Dispatch<SetStateAction<workoutType | null>>;
+};
+
+export const SelectWorkout = ({
+  setIsSelectedWorkout,
+  selectedWorkout,
+  setSelectedWorkout,
+}: selectedWorkoutType) => {
+  const { workout, selectedCourse } = useContext(SetContext);
+
   const handleBackBtn = () => {
-    setIsOpenPage("");
+    setIsSelectedWorkout(false);
   };
 
-  const handleCheckboxClick = () => {
-    setIsChecked(!isChecked);
+  const handleCheckboxClick = (workout: workoutType) => {
+    setSelectedWorkout(workout);
   };
 
-  const handleStartWorkout =()=>{
-    
-  }
+  const handleStartWorkout = () => {
+    setIsSelectedWorkout(false);
+  };
 
   return (
     <div className="w-screen h-screen flex justify-center items-center z-1 bg-[rgb(0,0,0,0.2)] absolute">
@@ -32,7 +42,7 @@ export const SelectWorkout = () => {
               if (item._id === i) {
                 return (
                   <div
-                    onClick={handleCheckboxClick}
+                    onClick={() => handleCheckboxClick(item)}
                     key={item._id}
                     className="py-[10px] flex gap-[12px] items-center border-b-[#C4C4C4] border-b-[1px]"
                   >
@@ -41,7 +51,7 @@ export const SelectWorkout = () => {
                       id="checkbox"
                       type="checkbox"
                     />
-                    {isChecked ? (
+                    {selectedWorkout === item ? (
                       <svg
                         className="min-w-[20px] cursor-pointer"
                         width="20"
@@ -58,9 +68,7 @@ export const SelectWorkout = () => {
                         />
                       </svg>
                     ) : (
-                      <div
-                        className="cursor-pointer min-w-[20px] h-[20px] rounded-[50%] border-[2px]"
-                      ></div>
+                      <div className="cursor-pointer min-w-[20px] h-[20px] rounded-[50%] border-[2px]"></div>
                     )}
 
                     <p>{item.name}</p>
@@ -70,7 +78,10 @@ export const SelectWorkout = () => {
             })
           )}
         </div>
-        <button onClick={handleStartWorkout} className="flex justify-center place-self-center w-full mr-[30px] mt-[34px] text-[18px] rounded-[45px] bg-[#BCEC30] px-[16px] py-[16px] mb-[10px]">
+        <button
+          onClick={handleStartWorkout}
+          className="flex justify-center place-self-center w-full mr-[30px] mt-[34px] text-[18px] rounded-[45px] bg-[#BCEC30] px-[16px] py-[16px] mb-[10px]"
+        >
           Начать
         </button>
       </div>

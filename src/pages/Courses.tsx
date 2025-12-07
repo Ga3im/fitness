@@ -18,10 +18,12 @@ export default function Course() {
     userInfo = JSON.parse(savedUser);
   }
 
-  window.scrollTo({
-    top: 0,
-    left: 0,
-  });
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+    });
+  }, []);
 
   if (selectedCourse === null) {
     let savedSelectedCourse = localStorage.getItem("selectedCourse");
@@ -48,11 +50,11 @@ export default function Course() {
   const handleAddCourse = () => {
     if (isAuth) {
       if (!isIncludesCourse) {
+        setIsIncludesCourse(true);
         userInfo.myCourses = [...userInfo.myCourses, selectedCourse];
         changeUser(userInfo);
-      }
-      else{
-        // выбор тренировки и переход в воркоут
+      } else {
+        navigate(`/workout/${selectedCourse._id}`);
       }
     } else {
       navigate(router.login);

@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { SetContext } from "../context/context";
 import type { coursesType } from "./Main";
 import { Header } from "../components/Header";
@@ -10,12 +10,17 @@ export default function Profile() {
     user,
     setUser,
     progress,
+    selectedCourse,
     setIsOpenProfile,
     isAuth,
     changeSelectedCourse,
     setIsAuth,
   } = useContext(SetContext);
   const [isOpenSetting, setIsOpenSetting] = useState<boolean>(false);
+
+  useEffect(() => {
+    setIsOpenProfile(true);
+  }, []);
 
   const navigate = useNavigate();
 
@@ -31,7 +36,9 @@ export default function Profile() {
     localStorage.removeItem("user");
   };
 
-  const handleWorkoutBtn = () => {};
+  const handleWorkoutBtn = () => {
+    navigate(`/workout/${selectedCourse._id}`);
+  };
 
   return (
     <>
@@ -105,7 +112,7 @@ export default function Profile() {
         </div>
 
         <div>
-          <h1 className="text-[24px] font-medium pt-[24px]">Мои курсы</h1>
+          <h1 className="text-[24px] font-medium py-[24px]">Мои курсы</h1>
           <div className="flex flex-wrap justify-center gap-[24px] md:justify-start">
             {isAuth
               ? user.myCourses.map((i: coursesType, index: number) => (
@@ -114,9 +121,9 @@ export default function Profile() {
                     key={index}
                     className="rounded-[30px] pb-[15px] shadow-[0px_0px_10px_-7px] hover:cursor-pointer"
                   >
-                    <div>
+                    <div className="max-w-[343px] place-self-center">
                       <svg
-                        className="place-self-end relative top-[40px] right-[40px]"
+                        className="place-self-end relative top-[40px] right-[15px] hover:scale-[1.3] hover:border-[#000000] hover:border-[1px] rounded-full transition-[0.3s]"
                         width="27"
                         height="27"
                         viewBox="0 0 27 27"

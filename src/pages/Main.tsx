@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { SetContext, type userType } from "../context/context";
+import { SetContext } from "../context/context";
 import { data } from "../data";
 import { Header } from "../components/Header";
 import { Outlet, useNavigate } from "react-router-dom";
@@ -17,27 +17,34 @@ export type coursesType = {
 };
 
 export default function Main() {
-  const { changeSelectedCourse, user, isAuth } = useContext(SetContext);
+  const { changeSelectedCourse, user, isAuth, changeUser } =
+    useContext(SetContext);
   const courses: coursesType[] = data.courses;
   const navigate = useNavigate();
-  const coursesId: string[] = [];
+  const [coursesId, setCoursesId] = useState<string[]>([]);
 
-  if (isAuth) {
-    user.myCourses.map((i: string) => {
-      coursesId.push(i._id);
-    });
-  }
-  console.log(coursesId);
+  useEffect(() => {
+    if (isAuth) {
+      user.myCourses.map((i: coursesType) => {
+        setCoursesId([...coursesId, i._id]);
+      });
+    }
+  }, []);
 
-  const handleAddCourse = (e) => {
-    e.stopPropigination();
-    e.preventDefault();
-
-    // course;
-  };
-
-  const handleRemoveCourse = (e) => {
-    e.stopPropigination();
+  const handleAddRemoveCourse = (
+    e: React.MouseEvent<SVGSVGElement, MouseEvent>,
+    course: coursesType
+  ) => {
+    e.stopPropagation();
+    if (coursesId.includes(course._id)) {
+      user.myCourses = user.myCourses?.filter((i:coursesType) => i._id !== course._id);
+      setCoursesId(coursesId.filter((i: string) => i !== course._id));
+      changeUser(user);
+    } else {
+      user.myCourses = [...user.myCourses, course];
+      setCoursesId([...coursesId, course._id]);
+      changeUser(user);
+    }
   };
 
   const handleCourseClick = (course: coursesType) => {
@@ -72,7 +79,7 @@ export default function Main() {
                 {isAuth ? (
                   coursesId.includes(i._id) ? (
                     <svg
-                      onClick={(e) => handleRemoveCourse(e)}
+                      onClick={(e) => handleAddRemoveCourse(e, i)}
                       className="place-self-end relative top-[65px] right-[15px] hover:scale-[1.3] hover:border-[#000000] hover:border-[1px] rounded-full transition-[0.3s]"
                       width="27"
                       height="27"
@@ -89,7 +96,7 @@ export default function Main() {
                     </svg>
                   ) : (
                     <svg
-                      onClick={(e) => handleAddCourse(e)}
+                      onClick={(e) => handleAddRemoveCourse(e, i)}
                       className="place-self-end relative top-[65px] right-[15px] hover:scale-[1.3] hover:border-[#000000] hover:border-[1px] rounded-full transition-[0.3s]"
                       width="27"
                       height="27"
