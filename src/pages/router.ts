@@ -3,6 +3,8 @@ export const router = {
   login: "/login",
   register: "/register",
   profile: "/profile",
-  courses:'/course/:courseId',
-  workout:'/workout/:workoutId',
+  courses: "/course/:courseId",
+  workout: "/workout/:workoutId",
+  selectWorkout: "/select-workout",
+  workoutFilling: "/workout/:workoutId/filling-workout",
 };

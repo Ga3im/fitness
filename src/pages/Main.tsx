@@ -17,13 +17,14 @@ export type coursesType = {
 };
 
 export default function Main() {
-  const { changeSelectedCourse, user, isAuth, changeUser } =
+  const { changeSelectedCourse, user, isAuth, changeUser, setIsOpenProfile } =
     useContext(SetContext);
   const courses: coursesType[] = data.courses;
   const navigate = useNavigate();
   const [coursesId, setCoursesId] = useState<string[]>([]);
 
   useEffect(() => {
+    setIsOpenProfile(false);
     if (isAuth) {
       user.myCourses.map((i: coursesType) => {
         setCoursesId([...coursesId, i._id]);
@@ -37,7 +38,9 @@ export default function Main() {
   ) => {
     e.stopPropagation();
     if (coursesId.includes(course._id)) {
-      user.myCourses = user.myCourses?.filter((i:coursesType) => i._id !== course._id);
+      user.myCourses = user.myCourses?.filter(
+        (i: coursesType) => i._id !== course._id
+      );
       setCoursesId(coursesId.filter((i: string) => i !== course._id));
       changeUser(user);
     } else {

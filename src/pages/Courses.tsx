@@ -54,7 +54,7 @@ export default function Course() {
         userInfo.myCourses = [...userInfo.myCourses, selectedCourse];
         changeUser(userInfo);
       } else {
-        navigate(`/workout/${selectedCourse._id}`);
+        navigate(router.selectWorkout);
       }
     } else {
       navigate(router.login);

@@ -1,24 +1,22 @@
 import { useNavigate } from "react-router-dom";
 import { Header } from "../components/Header";
 import { router } from "./router";
-import { useState } from "react";
-import { SelectWorkout } from "../components/SelectWorkout";
-import type { workoutType } from "../context/context";
-import { Progress } from "../components/Progress";
+import { useContext } from "react";
+import { SetContext } from "../context/context";
+
+type exercisesType = {
+  name: string;
+  quantity: number;
+};
 
 export const Workout = () => {
-  const [isSelectedWorkout, setIsSelectedWorkout] = useState<boolean>(true);
-  const [isFillProgress, setIsFillProgress] = useState<boolean>(false);
-  const [selectedWorkout, setSelectedWorkout] = useState<workoutType | null>(
-    null
-  );
-
-  console.log(selectedWorkout);
-
+  const { selectedWorkout } = useContext(SetContext);
   const navigate = useNavigate();
+
   const handleBackBtn = () => {
     navigate(router.main);
     localStorage.removeItem("selectedCourse");
+    localStorage.removeItem("selectedWorkout");
   };
 
   let selectedCourse;
@@ -28,26 +26,11 @@ export const Workout = () => {
   }
 
   const handleFillProgress = () => {
-    setIsFillProgress(true);
+    navigate(router.workoutFilling);
   };
 
   return (
     <>
-      {isSelectedWorkout && (
-        <SelectWorkout
-          setIsSelectedWorkout={setIsSelectedWorkout}
-          selectedWorkout={selectedWorkout}
-          setSelectedWorkout={setSelectedWorkout}
-        />
-      )}
-      {isFillProgress && (
-        <Progress
-          setIsFillProgress={setIsFillProgress}
-          selectedWorkout={selectedWorkout}
-          setSelectedWorkout={setSelectedWorkout}
-        />
-      )}
-
       <div className="px-[16px]">
         <Header />
         <div
@@ -71,7 +54,7 @@ export const Workout = () => {
         <div className="shadow-[0px_0px_10px_-5px] p-[30px] mt-[24px] rounded-[30px]">
           <p className="text-[32px] pb-[20px]">{selectedWorkout?.name}</p>
           <div>
-            {selectedWorkout?.exercises?.map((exercises) => (
+            {selectedWorkout?.exercises?.map((exercises: exercisesType) => (
               <div key={exercises.name} className="text-[18px] pb-[24px]">
                 <p>{exercises.name}</p>
                 <progress

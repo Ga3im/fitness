@@ -28,6 +28,9 @@ export type contextType = {
   setIsLoading?: Dispatch<SetStateAction<boolean>>;
   changeAccounts?: (newAccount: userType) => void;
   setAccounts?: Dispatch<SetStateAction<userType[]>>;
+  selectedWorkout: workoutType | null;
+  setSelectedWorkout: Dispatch<SetStateAction<workoutType | null>>;
+  changeSelectedWorkout: (newWorkout: workoutType) => void;
 };
 
 type MyProps = {
@@ -64,15 +67,21 @@ export const SettingProvider = ({ children }: MyProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [accounts, setAccounts] = useState<userType[]>([]);
   const workout: workoutType[] = data.workouts;
+  const [selectedWorkout, setSelectedWorkout] = useState<workoutType | null>(
+    null
+  );
 
   const changeSelectedCourse = (newCourse: coursesType) => {
     localStorage.setItem("selectedCourse", JSON.stringify(newCourse));
     setSelectedCourse(newCourse);
   };
 
-
   useEffect(() => {
+    const savedSelectedWorkout = localStorage.getItem("selectedWorkout");
     const savedUser = localStorage.getItem("user");
+    if (savedSelectedWorkout) {
+      setSelectedWorkout(JSON.parse(savedSelectedWorkout));
+    }
     if (savedUser) {
       setUser(JSON.parse(savedUser));
       setIsAuth(true);
@@ -88,6 +97,11 @@ export const SettingProvider = ({ children }: MyProps) => {
   const changeUser = (newUser: userType) => {
     setUser(newUser);
     localStorage.setItem("user", JSON.stringify(newUser));
+  };
+
+  const changeSelectedWorkout = (newWorkout: workoutType) => {
+    setSelectedWorkout(newWorkout);
+    localStorage.setItem("selectedWorkout", JSON.stringify(newWorkout));
   };
 
   return (
@@ -111,6 +125,8 @@ export const SettingProvider = ({ children }: MyProps) => {
         isLoading,
         setIsLoading,
         changeAccounts,
+        selectedWorkout,
+        changeSelectedWorkout,
       }}
     >
       {children}
