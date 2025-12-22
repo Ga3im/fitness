@@ -1,8 +1,8 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { SetContext } from "../context/context";
 import { data } from "../data";
 import { Header } from "../components/Header";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 
 export type coursesType = {
   _id: string;
@@ -17,11 +17,42 @@ export type coursesType = {
 };
 
 export default function Main() {
-  const { changeSelectedCourse } = useContext(SetContext);
-  const [courses, setCourses] = useState<coursesType[]>(data.courses);
+  const { changeSelectedCourse, user, isAuth, changeUser, setIsOpenProfile } =
+    useContext(SetContext);
+  const courses: coursesType[] = data.courses;
+  const navigate = useNavigate();
+  const [coursesId, setCoursesId] = useState<string[]>([]);
+
+  useEffect(() => {
+    setIsOpenProfile(false);
+    if (isAuth) {
+      user.myCourses.map((i: coursesType) => {
+        setCoursesId([...coursesId, i._id]);
+      });
+      console.log(user);
+    }
+  }, []);
+
+  const handleAddRemoveCourse = (
+    e: React.MouseEvent<SVGSVGElement, MouseEvent>,
+    course: coursesType
+  ) => {
+    e.stopPropagation();
+    if (coursesId.includes(course._id)) {
+      user.myCourses = user.myCourses?.filter(
+        (i: coursesType) => i._id !== course._id
+      );
+      setCoursesId(coursesId.filter((i: string) => i !== course._id));
+      changeUser(user);
+    } else {
+      user.myCourses = [...user.myCourses, course];
+      setCoursesId([...coursesId, course._id]);
+      changeUser(user);
+    }
+  };
 
   const handleCourseClick = (course: coursesType) => {
-    // router.push(`/courses/${course._id}`);
+    navigate(`/course/${course._id}`);
     changeSelectedCourse(course);
   };
 
@@ -41,31 +72,60 @@ export default function Main() {
         <h1 className="text-[32px] font-medium leading-none mb-[34px]">
           Начните заниматься спортом и улучшите качество жизни
         </h1>
-        <div className="flex gap-[24px] flex-wrap">
+        <div className="flex gap-[24px] flex-wrap justify-center">
           {courses.map((i) => (
             <div
               onClick={() => handleCourseClick(i)}
-              className="rounded-[30px] pb-[15px] shadow-[0px_0px_10px_-7px] hover:cursor-pointer"
+              className="rounded-[30px] px-[16px] t-[] pb-[15px] shadow-[0px_0px_10px_-7px] hover:cursor-pointer"
               key={i._id}
             >
-              <div className="px-[16px]">
-                <svg
-                  className="place-self-end relative top-[40px]"
-                  width="27"
-                  height="27"
-                  viewBox="0 0 27 27"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M13.3333 26.6667C20.6971 26.6667 26.6667 20.6971 26.6667 13.3333C26.6667 5.96954 20.6971 0 13.3333 0C5.96954 0 0 5.96954 0 13.3333C0 20.6971 5.96954 26.6667 13.3333 26.6667ZM12 12V6.66667H14.6667V12H20V14.6667H14.6667V20H12V14.6667H6.66667V12H12Z"
-                    fill="white"
-                  />
-                </svg>
+              <div className="max-w-[343px] place-self-center">
+                {isAuth ? (
+                  coursesId.includes(i._id) ? (
+                    <svg
+                      onClick={(e) => handleAddRemoveCourse(e, i)}
+                      className="place-self-end relative top-[65px] right-[15px] hover:scale-[1.3] hover:border-[#000000] hover:border-[1px] rounded-full transition-[0.3s]"
+                      width="27"
+                      height="27"
+                      viewBox="0 0 27 27"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        clipRule="evenodd"
+                        d="M13.3333 26.6667C20.6971 26.6667 26.6667 20.6971 26.6667 13.3333C26.6667 5.96954 20.6971 0 13.3333 0C5.96954 0 0 5.96954 0 13.3333C0 20.6971 5.96954 26.6667 13.3333 26.6667ZM6.66667 12V14.6667H20V12H6.66667Z"
+                        fill="white"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      onClick={(e) => handleAddRemoveCourse(e, i)}
+                      className="place-self-end relative top-[65px] right-[15px] hover:scale-[1.3] hover:border-[#000000] hover:border-[1px] rounded-full transition-[0.3s]"
+                      width="27"
+                      height="27"
+                      viewBox="0 0 27 27"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        clipRule="evenodd"
+                        d="M13.3333 26.6667C20.6971 26.6667 26.6667 20.6971 26.6667 13.3333C26.6667 5.96954 20.6971 0 13.3333 0C5.96954 0 0 5.96954 0 13.3333C0 20.6971 5.96954 26.6667 13.3333 26.6667ZM12 12V6.66667H14.6667V12H20V14.6667H14.6667V20H12V14.6667H6.66667V12H12Z"
+                        fill="white"
+                      />
+                    </svg>
+                  )
+                ) : (
+                  ""
+                )}
+
                 <img
-                  className="rounded-[30px] mb-[25px] place-self-center"
+                  className={
+                    isAuth
+                      ? "rounded-[30px] mt-[20px] mb-[25px] place-self-center"
+                      : "rounded-[30px] mt-[50px] mb-[25px] place-self-center"
+                  }
                   src={i.img}
                   alt={i.nameEN}
                 />
@@ -161,7 +221,7 @@ export default function Main() {
         </div>
         <button
           onClick={handleToTopBtn}
-          className="flex place-self-end md:place-self-center text-[18px] rounded-[45px] bg-[#BCEC30] px-[16px] py-[8px] mb-[30px] "
+          className="flex place-self-end mt-[30px] md:place-self-center text-[18px] rounded-[45px] bg-[#BCEC30] px-[16px] py-[8px] mb-[30px] "
         >
           Наверх &#8593;
         </button>
