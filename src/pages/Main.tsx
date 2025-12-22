@@ -29,6 +29,7 @@ export default function Main() {
       user.myCourses.map((i: coursesType) => {
         setCoursesId([...coursesId, i._id]);
       });
+      console.log(user);
     }
   }, []);
 
