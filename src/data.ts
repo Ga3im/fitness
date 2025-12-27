@@ -361,3 +361,16 @@ export const result = [
   "заряжают бодростью",
   "помогают противостоять стресса",
 ];
+
+export const workouts = [
+  {
+    id:"ups3303",
+    name: "Подтягивание",
+    img: '/workouts/pull-ups.jpg',
+  },
+   {
+    id: "pushups1221",
+    name: "Отжимание",
+    img: '/workouts/push-ups.jpg',
+  }
+]

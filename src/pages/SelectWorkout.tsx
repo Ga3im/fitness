@@ -23,8 +23,8 @@ export const SelectWorkout = () => {
     navigate(`/workout/${selectedCourse._id}`);
   };
   return (
-    <div className="w-screen h-screen flex justify-center items-center z-1 bg-[rgb(0,0,0,0.2)] absolute">
-      <div className="fixed rounded-[30px] mx-[16px] pb-[40px] pl-[40px] pt-[10px] pr-[10px] bg-white">
+    <div className="w-screen h-screen flex justify-center items-center z-1 absolute">
+      <div className="fixed rounded-[30px] mx-[16px] pb-[40px] pl-[40px] pt-[10px] pr-[10px] bg-white shadow-[0px_0px_10px_5px]">
         <div
           onClick={handleBackBtn}
           className="place-self-end pr-[10px] hover:cursor-pointer"

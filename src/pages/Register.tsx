@@ -164,7 +164,7 @@ export const Register = () => {
             className={
               isLoading
                 ? "text-[18px] rounded-[45px] bg-[#F7F7F7] text-[#999999] px-[16px] py-[8px] mb-[10px]"
-                : "text-[18px] rounded-[45px] bg-[#BCEC30] hover:bg-[#C6FF00] active:bg-[#000000] active:text-[white] px-[16px] py-[8px] mb-[10px]"
+                : "text-[18px] rounded-[45px] bg-[#BCEC30] hover:bg-[#C6FF00] active:bg-[#A0B000] active:text-[white] px-[16px] py-[8px] mb-[10px]"
             }
           >
             Зарегистрироваться

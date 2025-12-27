@@ -24,7 +24,8 @@ export const Header = () => {
 
   return (
     <>
-      <header className="py-[40px] flex justify-between items-center">
+      <header className="mb-[20px] py-[40px] px-[16px] flex justify-between items-center bg-gradient-to-b bg-[#007386] to-[#ebfdff]">
+        {/* bg-[url('new-year-bg.gif')] */}
         <Logo />
         {isAuth ? (
           <div

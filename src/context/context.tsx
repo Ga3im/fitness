@@ -31,6 +31,10 @@ export type contextType = {
   selectedWorkout: workoutType | null;
   setSelectedWorkout: Dispatch<SetStateAction<workoutType | null>>;
   changeSelectedWorkout: (newWorkout: workoutType) => void;
+  filteredCourses: coursesType[];
+  setFilteredCourses: Dispatch<SetStateAction<coursesType[]>>;
+  courses: coursesType[];
+  setCourses: Dispatch<SetStateAction<coursesType[]>>;
 };
 
 type MyProps = {
@@ -70,6 +74,8 @@ export const SettingProvider = ({ children }: MyProps) => {
   const [selectedWorkout, setSelectedWorkout] = useState<workoutType | null>(
     null
   );
+  const [filteredCourses, setFilteredCourses] = useState<coursesType[]>([]);
+  const [courses, setCourses] = useState<coursesType[]>(data.courses);
 
   const changeSelectedCourse = (newCourse: coursesType) => {
     localStorage.setItem("selectedCourse", JSON.stringify(newCourse));
@@ -127,6 +133,10 @@ export const SettingProvider = ({ children }: MyProps) => {
         changeAccounts,
         selectedWorkout,
         changeSelectedWorkout,
+        filteredCourses,
+        setFilteredCourses,
+        courses,
+        setCourses,
       }}
     >
       {children}

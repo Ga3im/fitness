@@ -14,7 +14,7 @@ export const Workout = () => {
   const navigate = useNavigate();
 
   const handleBackBtn = () => {
-    navigate(router.main);
+    navigate(router.profile);
     localStorage.removeItem("selectedCourse");
     localStorage.removeItem("selectedWorkout");
   };
@@ -31,8 +31,8 @@ export const Workout = () => {
 
   return (
     <>
+      <Header />
       <div className="px-[16px]">
-        <Header />
         <div
           onClick={handleBackBtn}
           className="text-[24px] opacity-[0.7] pb-[10px] hover:underline cursor-pointer"
@@ -41,10 +41,13 @@ export const Workout = () => {
         </div>
         <div>
           <h1 className="text-[32px] font-medium">{selectedCourse.nameRU}</h1>
+
           <iframe
-            className="rounded-[10px] mt-[24px] bg-[red] w-full h-[200px]"
-            src={selectedCourse.video}
-            title=""
+            className="rounded-[10px] mt-[24px] bg-[#e7e7e7] w-full h-[200px]"
+            width="1071"
+            height="602"
+            src="https://www.youtube.com/embed/oqe98Dxivns"
+            title="Утренняя практика / Йога на каждый день / 1 день / Алексей Казубский"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             referrerPolicy="strict-origin-when-cross-origin"
@@ -67,7 +70,7 @@ export const Workout = () => {
           </div>
           <button
             onClick={handleFillProgress}
-            className="mt-[16px] text-[18px] rounded-[45px] bg-[#BCEC30] hover:bg-[#C6FF00] active:bg-[#000000] active:text-[white] w-full py-[16px] mb-[10px]"
+            className="mt-[16px] text-[18px] rounded-[45px] bg-[#BCEC30] hover:bg-[#C6FF00] active:bg-[#A0B000] active:text-[white] w-full py-[16px] mb-[10px]"
           >
             Заполнить свой прогресс
           </button>

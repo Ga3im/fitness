@@ -4,6 +4,7 @@ import type { coursesType } from "./Main";
 import { Header } from "../components/Header";
 import { useNavigate } from "react-router-dom";
 import { router } from "./router";
+import { Filter } from "../components/Filter";
 
 export default function Profile() {
   const {
@@ -17,6 +18,7 @@ export default function Profile() {
     setIsAuth,
   } = useContext(SetContext);
   const [isOpenSetting, setIsOpenSetting] = useState<boolean>(false);
+  const [search, setSearch] = useState<string>("");
 
   useEffect(() => {
     setIsOpenProfile(true);
@@ -26,6 +28,10 @@ export default function Profile() {
 
   const handleOpenSetting = () => {
     setIsOpenSetting(!isOpenSetting);
+  };
+
+  const handleCreateWorkout = () => {
+    navigate(router.createWorkout);
   };
 
   const handleLogout = () => {
@@ -42,8 +48,8 @@ export default function Profile() {
 
   return (
     <>
+      <Header />
       <div className="px-[16px] pb-[24px]">
-        <Header />
         <p className="text-[24px] font-medium pb-[24px]">Профиль</p>
         <div className="md:flex md:gap-[33px] md:items-center shadow-[0px_0px_10px_-7px] p-[30px] rounded-[30px]">
           <div
@@ -102,9 +108,16 @@ export default function Profile() {
               <span>Логин:</span>
               <span> {user ? user.login : ""}</span>
             </div>
+
+            <button
+              onClick={handleCreateWorkout}
+              className="mb-[20px] py-[16px] w-full flex justify-center rounded-[46px] text-center cursor-pointer bg-[#BCEC30] hover:bg-[#C6FF00] active:bg-[#A0B000]"
+            >
+              Создать тренировку
+            </button>
             <button
               onClick={handleLogout}
-              className="py-[16px] w-full flex justify-center rounded-[46px] border-1 text-center cursor-pointer hover:bg-[#f7f7f7] active:bg-[#E9ECED]"
+              className="py-[16px] w-full flex justify-center rounded-[46px] border-1 text-center cursor-pointer hover:bg-[#f7f7f7] active:bg-[#f7f7f7] "
             >
               Выйти
             </button>
@@ -113,13 +126,14 @@ export default function Profile() {
 
         <div>
           <h1 className="text-[24px] font-medium py-[24px]">Мои курсы</h1>
+          <Filter search={search} setSearch={setSearch}  />
           <div className="flex flex-wrap justify-center gap-[24px] md:justify-start">
             {isAuth
               ? user.myCourses.map((i: coursesType, index: number) => (
                   <div
                     onClick={() => changeSelectedCourse(i)}
                     key={index}
-                    className="rounded-[30px] pb-[15px] shadow-[0px_0px_10px_-7px] hover:cursor-pointer"
+                    className="px-[20px] rounded-[30px] pb-[15px] shadow-[0px_0px_10px_-7px] hover:cursor-pointer"
                   >
                     <div className="max-w-[343px] place-self-center">
                       <svg

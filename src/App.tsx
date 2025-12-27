@@ -9,6 +9,7 @@ import Course from "./pages/Courses";
 import { Workout } from "./pages/Workout";
 import { SelectWorkout } from "./pages/SelectWorkout";
 import { Progress } from "./pages/Progress";
+import { CreateWorkout } from "./pages/CreateWorkout";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path={router.selectWorkout} element={<SelectWorkout />} />
       </Route>
       <Route path={router.profile} element={<Profile />} />
+      <Route path={router.createWorkout} element={<CreateWorkout />} />
       <Route path={router.courses} element={<Course />} />
       <Route path={router.workout} element={<Workout />}>
         <Route path={router.workoutFilling} element={<Progress />} />
