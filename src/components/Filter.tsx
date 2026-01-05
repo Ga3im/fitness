@@ -4,7 +4,7 @@ import type { coursesType } from "../pages/Main";
 type filterProp = {
   search: string;
   setSearch: Dispatch<SetStateAction<string>>;
-  array: [];
+  array: coursesType[];
   setFilteredArray: (arr: coursesType[]) => void;
 };
 

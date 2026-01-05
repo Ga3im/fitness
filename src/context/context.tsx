@@ -6,7 +6,6 @@ import {
   type ReactNode,
   type SetStateAction,
 } from "react";
-import { data } from "../data";
 import type { coursesType } from "../pages/Main";
 
 export type contextType = {
@@ -21,7 +20,6 @@ export type contextType = {
   user?: userType | null;
   setUser?: Dispatch<SetStateAction<userType | null>>;
   changeUser?: (newUser: userType) => void;
-  workout?: workoutType[];
   error?: string;
   setError?: Dispatch<SetStateAction<string>>;
   isLoading?: boolean;
@@ -31,10 +29,11 @@ export type contextType = {
   selectedWorkout: workoutType | null;
   setSelectedWorkout: Dispatch<SetStateAction<workoutType | null>>;
   changeSelectedWorkout: (newWorkout: workoutType) => void;
-  filteredCourses: coursesType[];
-  setFilteredCourses: Dispatch<SetStateAction<coursesType[]>>;
   courses: coursesType[];
   setCourses: Dispatch<SetStateAction<coursesType[]>>;
+  changeCourses: (courses: contextType[]) => void;
+  workout: customWorkoutType;
+  setWorkout: Dispatch<SetStateAction<customWorkoutType>>;
 };
 
 type MyProps = {
@@ -60,6 +59,19 @@ export type userType = {
   myCourses?: coursesType[];
 };
 
+type customWorkoutType = {
+  _id: string;
+  order: number;
+  img: string;
+  nameRU: string;
+  nameEN: string;
+  selectedExercise: exercisesType[] | [];
+  sets: number;
+  setsTime: number;
+  reps: number;
+  repsTime: number;
+};
+
 export const SetContext = createContext<contextType | null>(null);
 export const SettingProvider = ({ children }: MyProps) => {
   let [selectedCourse, setSelectedCourse] = useState<coursesType | null>(null);
@@ -70,16 +82,31 @@ export const SettingProvider = ({ children }: MyProps) => {
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [accounts, setAccounts] = useState<userType[]>([]);
-  const workout: workoutType[] = data.workouts;
   const [selectedWorkout, setSelectedWorkout] = useState<workoutType | null>(
     null
   );
-  const [filteredCourses, setFilteredCourses] = useState<coursesType[]>([]);
-  const [courses, setCourses] = useState<coursesType[]>(data.courses);
+  const [courses, setCourses] = useState<coursesType[]>([]);
+  const [workout, setWorkout] = useState<customWorkoutType>({
+    _id: "",
+    order: 10,
+    img: "",
+    nameRU: "",
+    nameEN: "",
+    selectedExercise: [],
+    sets: 1,
+    setsTime: 0,
+    reps: 0,
+    repsTime: 0,
+  });
 
   const changeSelectedCourse = (newCourse: coursesType) => {
     localStorage.setItem("selectedCourse", JSON.stringify(newCourse));
     setSelectedCourse(newCourse);
+  };
+
+  const changeCourses = (courses: coursesType[]) => {
+    setCourses(courses);
+    localStorage.setItem("courses", JSON.stringify(courses));
   };
 
   useEffect(() => {
@@ -125,7 +152,6 @@ export const SettingProvider = ({ children }: MyProps) => {
         setUser,
         changeUser,
         setAccounts,
-        workout,
         error,
         setError,
         isLoading,
@@ -133,10 +159,11 @@ export const SettingProvider = ({ children }: MyProps) => {
         changeAccounts,
         selectedWorkout,
         changeSelectedWorkout,
-        filteredCourses,
-        setFilteredCourses,
         courses,
         setCourses,
+        changeCourses,
+        workout,
+        setWorkout,
       }}
     >
       {children}

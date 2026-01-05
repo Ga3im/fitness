@@ -15,6 +15,18 @@ export type coursesType = {
   order: number;
   workouts: string[];
   img: string;
+  sets?: number;
+  setsTime?: number;
+  reps?: number;
+  repsTime?: number;
+};
+
+export const sortArray = (a, b) => {
+  if (a.order < b.order) {
+    return 1;
+  } else {
+    return -1;
+  }
 };
 
 export default function Main() {
@@ -24,14 +36,24 @@ export default function Main() {
     isAuth,
     changeUser,
     setIsOpenProfile,
-    filteredCourses,
-    setFilteredCourses,
     courses,
+    changeCourses,
   } = useContext(SetContext);
   const navigate = useNavigate();
   const [coursesId, setCoursesId] = useState<string[]>([]);
   const [search, setSearch] = useState<string>("");
+  const [filteredCourses, setFilteredCourses] = useState<coursesType[] | []>(
+    []
+  );
 
+  useEffect(() => {
+    const savedCourses = localStorage.getItem("courses");
+    if (savedCourses) {
+      changeCourses(JSON.parse(savedCourses).sort(sortArray));
+    } else {
+      changeCourses(data.courses.sort(sortArray));
+    }
+  }, []);
 
   useEffect(() => {
     setIsOpenProfile(false);
@@ -71,8 +93,16 @@ export default function Main() {
   };
 
   const handleCourseClick = (course: coursesType) => {
-    navigate(`/course/${course._id}`);
+    const newCourses: coursesType[] = [];
+    courses.map((i: coursesType) => {
+      if (i._id === course._id) {
+        i.order = course.order + 1;
+      }
+      newCourses.push(i);
+    });
+    changeCourses(newCourses);
     changeSelectedCourse(course);
+    navigate(`/course/${course._id}`);
   };
 
   const handleToTopBtn = () => {
@@ -102,7 +132,7 @@ export default function Main() {
             ? courses.map((i: coursesType) => (
                 <div
                   onClick={() => handleCourseClick(i)}
-                  className="rounded-[30px] px-[16px] t-[] pb-[15px] shadow-[0px_0px_10px_-7px] hover:cursor-pointer"
+                  className="rounded-[30px] px-[16px] pb-[15px] shadow-[0px_0px_10px_-7px] hover:cursor-pointer"
                   key={i._id}
                 >
                   <div className="max-w-[343px] place-self-center">
@@ -110,7 +140,7 @@ export default function Main() {
                       coursesId.includes(i._id) ? (
                         <svg
                           onClick={(e) => handleAddRemoveCourse(e, i)}
-                          className="place-self-end relative top-[65px] right-[15px] hover:scale-[1.3] hover:border-[#000000] hover:border-[1px] rounded-full transition-[0.3s]"
+                          className="place-self-end relative top-[45px] right-[15px] hover:scale-[1.3] hover:border-[#000000] hover:border-[1px] rounded-full transition-[0.3s]"
                           width="27"
                           height="27"
                           viewBox="0 0 27 27"
@@ -127,7 +157,7 @@ export default function Main() {
                       ) : (
                         <svg
                           onClick={(e) => handleAddRemoveCourse(e, i)}
-                          className="place-self-end relative top-[65px] right-[15px] hover:scale-[1.3] hover:border-[#000000] hover:border-[1px] rounded-full transition-[0.3s]"
+                          className="place-self-end relative top-[45px] right-[15px] hover:scale-[1.3] hover:border-[#000000] hover:border-[1px] rounded-full transition-[0.3s]"
                           width="27"
                           height="27"
                           viewBox="0 0 27 27"
@@ -149,8 +179,8 @@ export default function Main() {
                     <img
                       className={
                         isAuth
-                          ? "rounded-[30px] mt-[20px] mb-[25px] place-self-center"
-                          : "rounded-[30px] mt-[50px] mb-[25px] place-self-center"
+                          ? "rounded-[30px] mb-[25px] place-self-center"
+                          : "rounded-[30px] mt-[20px] mb-[25px] place-self-center"
                       }
                       src={i.img}
                       alt={i.nameEN}
@@ -273,7 +303,7 @@ export default function Main() {
                       ) : (
                         <svg
                           onClick={(e) => handleAddRemoveCourse(e, i)}
-                          className="place-self-end relative top-[65px] right-[15px] hover:scale-[1.3] hover:border-[#000000] hover:border-[1px] rounded-full transition-[0.3s]"
+                          className="place-self-end relative top-[45px] right-[15px] hover:scale-[1.3] hover:border-[#000000] hover:border-[1px] rounded-full transition-[0.3s]"
                           width="27"
                           height="27"
                           viewBox="0 0 27 27"
@@ -295,8 +325,8 @@ export default function Main() {
                     <img
                       className={
                         isAuth
-                          ? "rounded-[30px] mt-[20px] mb-[25px] place-self-center"
-                          : "rounded-[30px] mt-[50px] mb-[25px] place-self-center"
+                          ? "rounded-[30px] mb-[25px] place-self-center"
+                          : "rounded-[30px] mb-[25px] place-self-center"
                       }
                       src={i.img}
                       alt={i.nameEN}

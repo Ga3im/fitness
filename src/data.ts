@@ -1,3 +1,9 @@
+export type exercisesType = {
+  id: string;
+  name: string;
+  img: string;
+};
+
 export const data = {
   courses: [
     {
@@ -362,15 +368,25 @@ export const result = [
   "помогают противостоять стресса",
 ];
 
-export const workouts = [
+export const exercises = [
   {
-    id:"ups3303",
+    id: "ups3303",
     name: "Подтягивание",
-    img: '/workouts/pull-ups.jpg',
+    img: "/workouts/pull-ups.jpg",
   },
-   {
+  {
     id: "pushups1221",
     name: "Отжимание",
-    img: '/workouts/push-ups.jpg',
-  }
-]
+    img: "/workouts/push-ups.jpg",
+  },
+  {
+    id: "press1221",
+    name: "Подьем ног",
+    img: "/workouts/press.png",
+  },
+  {
+    id: "prised3321",
+    name: "Приседание",
+    img: "/workouts/prised.jpg",
+  },
+];

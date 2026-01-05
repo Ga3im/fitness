@@ -2,14 +2,11 @@ import { useContext } from "react";
 import { SetContext, type workoutType } from "../context/context";
 import { useNavigate } from "react-router-dom";
 import { router } from "./router";
+import { data } from "../data";
 
 export const SelectWorkout = () => {
-  const {
-    workout,
-    selectedCourse,
-    selectedWorkout,
-    changeSelectedWorkout,
-  } = useContext(SetContext);
+  const { workout, selectedCourse, selectedWorkout, changeSelectedWorkout } =
+    useContext(SetContext);
   const navigate = useNavigate();
 
   const handleCheckboxClick = (workout: workoutType) => {
@@ -24,7 +21,7 @@ export const SelectWorkout = () => {
   };
   return (
     <div className="w-screen h-screen flex justify-center items-center z-1 absolute">
-      <div className="fixed rounded-[30px] mx-[16px] pb-[40px] pl-[40px] pt-[10px] pr-[10px] bg-white shadow-[0px_0px_10px_5px]">
+      <div className="fixed rounded-[30px] mx-[16px] pb-[40px] pl-[40px] pt-[10px] pr-[10px] bg-white shadow-[0px_0px_10px]">
         <div
           onClick={handleBackBtn}
           className="place-self-end pr-[10px] hover:cursor-pointer"
@@ -34,7 +31,7 @@ export const SelectWorkout = () => {
         <h1 className="text-[32px] pb-[34px] pr-[30px]">Выберите тренировку</h1>
         <div className="max-h-[250px] overflow-y-scroll pr-[20px] mr-[30px] scrollbar-thin [&::-webkit-scrollbar-track]:bg-[#F7F7F7] [&::-webkit-scrollbar-track]:rounded-[10px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[10px] [&::-webkit-scrollbar-thumb]:bg-black">
           {selectedCourse.workouts.map((i: string) =>
-            workout.map((item: workoutType) => {
+            data.workouts.map((item: workoutType) => {
               if (item._id === i) {
                 return (
                   <div
