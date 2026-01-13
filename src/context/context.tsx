@@ -6,11 +6,11 @@ import {
   type ReactNode,
   type SetStateAction,
 } from "react";
-import type { coursesType } from "../pages/Main";
+import type { workoutType } from "../pages/Main";
 
 export type contextType = {
-  selectedCourse?: coursesType | null;
-  changeSelectedCourse?: (newCourse: coursesType) => void;
+  selectedCourse?: workoutType | null;
+  changeSelectedCourse?: (newCourse: workoutType) => void;
   progress?: number;
   setProgress?: Dispatch<SetStateAction<number>>;
   isOpenProfile?: boolean;
@@ -26,11 +26,11 @@ export type contextType = {
   setIsLoading?: Dispatch<SetStateAction<boolean>>;
   changeAccounts?: (newAccount: userType) => void;
   setAccounts?: Dispatch<SetStateAction<userType[]>>;
-  selectedWorkout: workoutType | null;
+  selectedExercise: workoutType | null;
   setSelectedWorkout: Dispatch<SetStateAction<workoutType | null>>;
   changeSelectedWorkout: (newWorkout: workoutType) => void;
-  courses: coursesType[];
-  setCourses: Dispatch<SetStateAction<coursesType[]>>;
+  courses: workoutType[];
+  setCourses: Dispatch<SetStateAction<workoutType[]>>;
   changeCourses: (courses: contextType[]) => void;
   workout: customWorkoutType;
   setWorkout: Dispatch<SetStateAction<customWorkoutType>>;
@@ -56,7 +56,7 @@ export type userType = {
   name: string;
   login: string;
   password: string;
-  myCourses?: coursesType[];
+  myCourses?: workoutType[];
 };
 
 type customWorkoutType = {
@@ -74,7 +74,7 @@ type customWorkoutType = {
 
 export const SetContext = createContext<contextType | null>(null);
 export const SettingProvider = ({ children }: MyProps) => {
-  let [selectedCourse, setSelectedCourse] = useState<coursesType | null>(null);
+  let [selectedCourse, setSelectedCourse] = useState<workoutType | null>(null);
   const [progress, setProgress] = useState<number>(1);
   const [isOpenProfile, setIsOpenProfile] = useState<boolean>(false);
   const [isAuth, setIsAuth] = useState<boolean>(false);
@@ -82,10 +82,10 @@ export const SettingProvider = ({ children }: MyProps) => {
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [accounts, setAccounts] = useState<userType[]>([]);
-  const [selectedWorkout, setSelectedWorkout] = useState<workoutType | null>(
+  const [selectedExercise, setSelectedWorkout] = useState<workoutType | null>(
     null
   );
-  const [courses, setCourses] = useState<coursesType[]>([]);
+  const [courses, setCourses] = useState<workoutType[]>([]);
   const [workout, setWorkout] = useState<customWorkoutType>({
     _id: "",
     order: 10,
@@ -99,18 +99,18 @@ export const SettingProvider = ({ children }: MyProps) => {
     repsTime: 0,
   });
 
-  const changeSelectedCourse = (newCourse: coursesType) => {
+  const changeSelectedCourse = (newCourse: workoutType) => {
     localStorage.setItem("selectedCourse", JSON.stringify(newCourse));
     setSelectedCourse(newCourse);
   };
 
-  const changeCourses = (courses: coursesType[]) => {
+  const changeCourses = (courses: workoutType[]) => {
     setCourses(courses);
     localStorage.setItem("courses", JSON.stringify(courses));
   };
 
   useEffect(() => {
-    const savedSelectedWorkout = localStorage.getItem("selectedWorkout");
+    const savedSelectedWorkout = localStorage.getItem("selectedExercise");
     const savedUser = localStorage.getItem("user");
     if (savedSelectedWorkout) {
       setSelectedWorkout(JSON.parse(savedSelectedWorkout));
@@ -134,7 +134,7 @@ export const SettingProvider = ({ children }: MyProps) => {
 
   const changeSelectedWorkout = (newWorkout: workoutType) => {
     setSelectedWorkout(newWorkout);
-    localStorage.setItem("selectedWorkout", JSON.stringify(newWorkout));
+    localStorage.setItem("selectedExercise", JSON.stringify(newWorkout));
   };
 
   return (
@@ -157,7 +157,7 @@ export const SettingProvider = ({ children }: MyProps) => {
         isLoading,
         setIsLoading,
         changeAccounts,
-        selectedWorkout,
+        selectedExercise,
         changeSelectedWorkout,
         courses,
         setCourses,

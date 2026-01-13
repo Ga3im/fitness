@@ -1,11 +1,11 @@
 import type { Dispatch, SetStateAction } from "react";
-import type { coursesType } from "../pages/Main";
+import type { workoutType } from "../pages/Main";
 
 type filterProp = {
   search: string;
   setSearch: Dispatch<SetStateAction<string>>;
-  array: coursesType[];
-  setFilteredArray: (arr: coursesType[]) => void;
+  array: workoutType[];
+  setFilteredArray: (arr: workoutType[]) => void;
 };
 
 export const Filter = ({
@@ -15,8 +15,8 @@ export const Filter = ({
   setFilteredArray,
 }: filterProp) => {
   const handleSearchBtn = () => {
-    const arr: coursesType[] = [];
-    array.map((i: coursesType) => {
+    const arr: workoutType[] = [];
+    array.map((i: workoutType) => {
       if (i.nameRU.toLowerCase().includes(search.toLowerCase())) {
         arr.push(i);
       }
@@ -26,7 +26,7 @@ export const Filter = ({
 
   return (
     <>
-      <div className="py-[30px] flex justify-center">
+      <div className="flex justify-center">
         <div className="border-2 border-[#9c9c9c] rounded-[10px] px-[10px] py-[5px] group focus-within:border-[#000000]">
           <input
             onChange={(e) => setSearch(e.target.value)}

@@ -75,7 +75,7 @@ export const Logo = () => {
             </filter>
           </defs>
         </svg>
-        <p className="font-bold text-[24px]">SkyFitnessPro</p>
+        <p className="font-bold text-[24px]">King Workout</p>
       </div>
     </>
   );

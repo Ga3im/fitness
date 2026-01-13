@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { Header } from "../components/Header";
 import { router } from "./router";
 import { useContext } from "react";
@@ -10,13 +10,13 @@ type exercisesType = {
 };
 
 export const Workout = () => {
-  const { selectedWorkout } = useContext(SetContext);
+  const { selectedExercise } = useContext(SetContext);
   const navigate = useNavigate();
 
   const handleBackBtn = () => {
     navigate(router.profile);
     localStorage.removeItem("selectedCourse");
-    localStorage.removeItem("selectedWorkout");
+    localStorage.removeItem("selectedExercise");
   };
 
   let selectedCourse;
@@ -26,11 +26,16 @@ export const Workout = () => {
   }
 
   const handleFillProgress = () => {
-    navigate(router.workoutFilling);
+    navigate(`/workout/${selectedExercise._id}/filling-workout`);
+  };
+
+  const handleNextExerces = () => {
+    console.log(selectedCourse.workouts.indexOf(selectedExercise._id) + 1);
   };
 
   return (
     <>
+      <Outlet />
       <Header />
       <div className="px-[16px]">
         <div
@@ -55,9 +60,9 @@ export const Workout = () => {
           ></iframe>
         </div>
         <div className="shadow-[0px_0px_10px_-5px] p-[30px] mt-[24px] rounded-[30px]">
-          <p className="text-[32px] pb-[20px]">{selectedWorkout?.name}</p>
+          <p className="text-[32px] pb-[20px]">{selectedExercise?.name}</p>
           <div>
-            {selectedWorkout?.exercises?.map((exercises: exercisesType) => (
+            {selectedExercise?.exercises?.map((exercises: exercisesType) => (
               <div key={exercises.name} className="text-[18px] pb-[24px]">
                 <p>{exercises.name}</p>
                 <progress
@@ -74,6 +79,13 @@ export const Workout = () => {
           >
             Заполнить свой прогресс
           </button>
+          <div className="flex justify-between mt-[20px]">
+            <div className="w-[20px] h-[20px] border-l-2 border-b-2 rotate-[45deg]"></div>
+            <div
+              onClick={handleNextExerces}
+              className="w-[20px] h-[20px] border-r-2 border-b-2 rotate-[-45deg]"
+            ></div>
+          </div>
         </div>
       </div>
     </>

@@ -4,7 +4,7 @@ import { SetContext } from "../context/context";
 
 export const Progress = () => {
   const navigate = useNavigate();
-  const { selectedCourse } = useContext(SetContext);
+  const { selectedCourse, selectedExercise } = useContext(SetContext);
 
   const handleBackBtn = () => {
     navigate(`/workout/${selectedCourse._id}`);
@@ -25,7 +25,7 @@ export const Progress = () => {
         <div className="pl-[40px] pr-[40px] pb-[40px]">
           <h1 className="text-[32px] pb-[34px] pr-[30px]">Мой прогресс</h1>
           <div className="text-[16px]">
-            {selectedWorkout?.exercises?.map((exercises) => (
+            {selectedExercise?.exercises?.map((exercises) => (
               <div className="pb-[20px]">
                 <p>
                   <span>Сколько раз сделали </span>
@@ -40,7 +40,7 @@ export const Progress = () => {
           </div>
           <button
             onClick={handleSaveBtn}
-            className="flex justify-center place-self-center w-full mr-[30px] mt-[34px] text-[18px] rounded-[45px] bg-[#BCEC30] px-[16px] py-[16px] mb-[10px]"
+            className="flex justify-center place-self-center w-full mt-[34px] text-[18px] rounded-[45px] bg-[#BCEC30] px-[16px] py-[16px] mb-[10px]"
           >
             Сохранить
           </button>

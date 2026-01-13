@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { SetContext } from "../context/context";
-import { sortArray, type coursesType } from "./Main";
+import { sortArray, type workoutType } from "./Main";
 import { Header } from "../components/Header";
 import { useNavigate } from "react-router-dom";
 import { router } from "./router";
@@ -20,7 +20,7 @@ export default function Profile() {
   const [isOpenSetting, setIsOpenSetting] = useState<boolean>(false);
   const [search, setSearch] = useState<string>("");
   const [filteredMyCourses, setFilteredMyCourses] = useState<
-    coursesType[] | []
+    workoutType[] | []
   >([]);
 
   useEffect(() => {
@@ -31,9 +31,9 @@ export default function Profile() {
   }, []);
 
   useEffect(() => {
-    const arr: coursesType[] = [];
+    const arr: workoutType[] = [];
     isAuth
-      ? user.myCourses.map((i: coursesType) => {
+      ? user.myCourses.map((i: workoutType) => {
           if (i.nameRU.toLowerCase().includes(search.toLowerCase())) {
             arr.push(i);
           }
@@ -52,7 +52,7 @@ export default function Profile() {
     setIsOpenSetting(!isOpenSetting);
   };
 
-  const handleCourseClick = (course: coursesType) => {
+  const handleCourseClick = (course: workoutType) => {
     changeSelectedCourse(course);
     navigate(`/course/${course._id}`);
   };
@@ -162,7 +162,7 @@ export default function Profile() {
           <div className="flex flex-wrap justify-center gap-[24px] md:justify-start">
             {isAuth
               ? search === ""
-                ? user.myCourses.map((i: coursesType, index: number) => (
+                ? user.myCourses.map((i: workoutType, index: number) => (
                     <div
                       onClick={() => handleCourseClick(i)}
                       key={index}
@@ -314,7 +314,7 @@ export default function Profile() {
                       </div>
                     </div>
                   ))
-                : filteredMyCourses.map((i: coursesType, index: number) => (
+                : filteredMyCourses.map((i: workoutType, index: number) => (
                     <div
                       onClick={() => changeSelectedCourse(i)}
                       key={index}

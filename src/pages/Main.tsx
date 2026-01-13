@@ -5,14 +5,13 @@ import { Header } from "../components/Header";
 import { Outlet, useNavigate } from "react-router-dom";
 import { Filter } from "../components/Filter";
 
-export type coursesType = {
+export type workoutType = {
   _id: string;
   description: string;
-  directions: string[];
-  fitting: string[];
   nameEN: string;
   nameRU: string;
   order: number;
+  gym: boolean;
   workouts: string[];
   img: string;
   sets?: number;
@@ -42,7 +41,7 @@ export default function Main() {
   const navigate = useNavigate();
   const [coursesId, setCoursesId] = useState<string[]>([]);
   const [search, setSearch] = useState<string>("");
-  const [filteredCourses, setFilteredCourses] = useState<coursesType[] | []>(
+  const [filteredCourses, setFilteredCourses] = useState<workoutType[] | []>(
     []
   );
 
@@ -51,22 +50,22 @@ export default function Main() {
     if (savedCourses) {
       changeCourses(JSON.parse(savedCourses).sort(sortArray));
     } else {
-      changeCourses(data.courses.sort(sortArray));
+      changeCourses(data.workouts.sort(sortArray));
     }
   }, []);
 
   useEffect(() => {
     setIsOpenProfile(false);
     if (isAuth) {
-      user.myCourses.map((i: coursesType) => {
+      user.myCourses.map((i: workoutType) => {
         setCoursesId([...coursesId, i._id]);
       });
     }
   }, []);
 
   useEffect(() => {
-    const arr: coursesType[] = [];
-    courses.map((i: coursesType) => {
+    const arr: workoutType[] = [];
+    courses.map((i: workoutType) => {
       if (i.nameRU.toLowerCase().includes(search.toLowerCase())) {
         arr.push(i);
       }
@@ -76,12 +75,12 @@ export default function Main() {
 
   const handleAddRemoveCourse = (
     e: React.MouseEvent<SVGSVGElement, MouseEvent>,
-    course: coursesType
+    course: workoutType
   ) => {
     e.stopPropagation();
     if (coursesId.includes(course._id)) {
       user.myCourses = user.myCourses?.filter(
-        (i: coursesType) => i._id !== course._id
+        (i: workoutType) => i._id !== course._id
       );
       setCoursesId(coursesId.filter((i: string) => i !== course._id));
       changeUser(user);
@@ -92,9 +91,9 @@ export default function Main() {
     }
   };
 
-  const handleCourseClick = (course: coursesType) => {
-    const newCourses: coursesType[] = [];
-    courses.map((i: coursesType) => {
+  const handleCourseClick = (course: workoutType) => {
+    const newCourses: workoutType[] = [];
+    courses.map((i: workoutType) => {
       if (i._id === course._id) {
         i.order = course.order + 1;
       }
@@ -118,7 +117,7 @@ export default function Main() {
       <Outlet />
       <Header />
       <div className="px-[16px]">
-        <h1 className="text-[32px] font-medium leading-none">
+        <h1 className="pb-[30px] text-[32px] font-medium leading-none">
           Начните заниматься спортом и улучшите качество жизни
         </h1>
         <Filter
@@ -127,9 +126,9 @@ export default function Main() {
           array={courses}
           setFilteredArray={setFilteredCourses}
         />
-        <div className="flex gap-[24px] flex-wrap justify-center">
+        <div className="pt-[20px] flex gap-[24px] flex-wrap justify-center">
           {search === ""
-            ? courses.map((i: coursesType) => (
+            ? courses.map((i: workoutType) => (
                 <div
                   onClick={() => handleCourseClick(i)}
                   className="rounded-[30px] px-[16px] pb-[15px] shadow-[0px_0px_10px_-7px] hover:cursor-pointer"
@@ -138,39 +137,20 @@ export default function Main() {
                   <div className="max-w-[343px] place-self-center">
                     {isAuth ? (
                       coursesId.includes(i._id) ? (
-                        <svg
+                        <div
                           onClick={(e) => handleAddRemoveCourse(e, i)}
-                          className="place-self-end relative top-[45px] right-[15px] hover:scale-[1.3] hover:border-[#000000] hover:border-[1px] rounded-full transition-[0.3s]"
-                          width="27"
-                          height="27"
-                          viewBox="0 0 27 27"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
+                          className="bg-[red] shadow-[0px_0px_20px_5px_red] place-self-end relative top-[45px] right-[15px] hover:scale-[1.3] hover:border-[#000000] hover:border-[1px] transition-[0.3s] w-[27px] h-[27px] rounded-[100%] relative"
                         >
-                          <path
-                            fillRule="evenodd"
-                            clipRule="evenodd"
-                            d="M13.3333 26.6667C20.6971 26.6667 26.6667 20.6971 26.6667 13.3333C26.6667 5.96954 20.6971 0 13.3333 0C5.96954 0 0 5.96954 0 13.3333C0 20.6971 5.96954 26.6667 13.3333 26.6667ZM6.66667 12V14.6667H20V12H6.66667Z"
-                            fill="white"
-                          />
-                        </svg>
+                          <div className="h-[3px] w-[15px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
+                        </div>
                       ) : (
-                        <svg
+                        <div
                           onClick={(e) => handleAddRemoveCourse(e, i)}
-                          className="place-self-end relative top-[45px] right-[15px] hover:scale-[1.3] hover:border-[#000000] hover:border-[1px] rounded-full transition-[0.3s]"
-                          width="27"
-                          height="27"
-                          viewBox="0 0 27 27"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
+                          className="bg-[green] shadow-[0px_0px_20px_5px_green] place-self-end relative top-[45px] right-[15px] hover:scale-[1.3] hover:border-[#000000] hover:border-[1px] transition-[0.3s] w-[27px] h-[27px] rounded-[100%] relative"
                         >
-                          <path
-                            fillRule="evenodd"
-                            clipRule="evenodd"
-                            d="M13.3333 26.6667C20.6971 26.6667 26.6667 20.6971 26.6667 13.3333C26.6667 5.96954 20.6971 0 13.3333 0C5.96954 0 0 5.96954 0 13.3333C0 20.6971 5.96954 26.6667 13.3333 26.6667ZM12 12V6.66667H14.6667V12H20V14.6667H14.6667V20H12V14.6667H6.66667V12H12Z"
-                            fill="white"
-                          />
-                        </svg>
+                          <div className="h-[15px] w-[3px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
+                          <div className="h-[3px] w-[15px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
+                        </div>
                       )
                     ) : (
                       ""
@@ -192,44 +172,27 @@ export default function Main() {
                       {i.nameRU}
                     </p>
                     <div className="flex flex-wrap gap-[6px]">
-                      <div className="flex gap-[5px] items-center bg-[#F7F7F7] rounded-[50px] p-[10px]">
-                        <svg
-                          width="15"
-                          height="15"
-                          viewBox="0 0 15 15"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M6 1.5C6 0.671573 5.32843 0 4.5 0C3.67157 0 3 0.671573 3 1.5C1.34315 1.5 0 2.84315 0 4.5H15C15 2.84315 13.6569 1.5 12 1.5C12 0.671573 11.3284 0 10.5 0C9.67157 0 9 0.671573 9 1.5H6Z"
-                            fill="#202020"
-                          />
-                          <path
-                            fillRule="evenodd"
-                            clipRule="evenodd"
-                            d="M0 6H15V10.2C15 11.8802 15 12.7202 14.673 13.362C14.3854 13.9265 13.9265 14.3854 13.362 14.673C12.7202 15 11.8802 15 10.2 15H4.8C3.11984 15 2.27976 15 1.63803 14.673C1.07354 14.3854 0.614601 13.9265 0.32698 13.362C0 12.7202 0 11.8802 0 10.2V6ZM9 10.2C9 9.77996 9 9.56994 9.08175 9.40951C9.15365 9.26838 9.26838 9.15365 9.40951 9.08175C9.56994 9 9.77996 9 10.2 9H10.8C11.22 9 11.4301 9 11.5905 9.08175C11.7316 9.15365 11.8463 9.26838 11.9183 9.40951C12 9.56994 12 9.77996 12 10.2V10.8C12 11.22 12 11.4301 11.9183 11.5905C11.8463 11.7316 11.7316 11.8463 11.5905 11.9183C11.4301 12 11.22 12 10.8 12H10.2C9.77996 12 9.56994 12 9.40951 11.9183C9.26838 11.8463 9.15365 11.7316 9.08175 11.5905C9 11.4301 9 11.22 9 10.8V10.2Z"
-                            fill="#202020"
-                          />
-                        </svg>
-                        <p>25 дней</p>
+                      <div className="flex gap-[5px] items-center bg-[#F7F7F7] rounded-[50px] p-[10px] pr-[20px]">
+                        <img
+                          className="w-[30px] pr-[5px]"
+                          src="exercise.png"
+                          alt=""
+                        />
+                        <p>{i.workouts.length}</p>
                       </div>
-                      <div className="flex gap-[5px] items-center bg-[#F7F7F7] rounded-[50px] p-[10px]">
-                        <svg
-                          width="15"
-                          height="15"
-                          viewBox="0 0 15 15"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            clipRule="evenodd"
-                            d="M7.5 15C11.6421 15 15 11.6421 15 7.5C15 3.35786 11.6421 0 7.5 0C3.35786 0 0 3.35786 0 7.5C0 11.6421 3.35786 15 7.5 15ZM6.75 3V7.5C6.75 7.91421 7.08579 8.25 7.5 8.25H11.25V6.75H8.25V3H6.75Z"
-                            fill="#202020"
+                      {i.gym ? (
+                        ""
+                      ) : (
+                        <div className="pr-[20px] flex gap-[5px] items-center bg-[#F7F7F7] rounded-[50px] box-border p-[10px]">
+                          <img
+                            className="w-[30px] pr-[5px]"
+                            src="home.png"
+                            alt=""
                           />
-                        </svg>
-                        <p>20-50 мин/день</p>
-                      </div>
+                          <p>Можно дома</p>
+                        </div>
+                      )}
+
                       <div className="flex gap-[5px] items-center bg-[#F7F7F7] rounded-[50px] p-[10px]">
                         <svg
                           width="18"
@@ -275,7 +238,7 @@ export default function Main() {
                   </div>
                 </div>
               ))
-            : filteredCourses.map((i: coursesType) => (
+            : filteredCourses.map((i: workoutType) => (
                 <div
                   onClick={() => handleCourseClick(i)}
                   className="rounded-[30px] px-[16px] t-[] pb-[15px] shadow-[0px_0px_10px_-7px] hover:cursor-pointer"

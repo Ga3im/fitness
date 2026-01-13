@@ -4,6 +4,7 @@ import { router } from "./router";
 import { useContext, useEffect, useState } from "react";
 import { exercises, type exercisesType } from "../data";
 import { SetContext, type workoutType } from "../context/context";
+import { Filter } from "../components/Filter";
 
 export const CreateWorkout = () => {
   const { changeCourses, courses, workout, setWorkout } =
@@ -13,9 +14,43 @@ export const CreateWorkout = () => {
   const [errName, setErrName] = useState(false);
   const [errSelected, setErrSelected] = useState(false);
   const [errReps, setErrReps] = useState(false);
+  const [workoutExercises, setWorkoutExercises] = useState<exercisesType[]>([]);
   const [selectedExercise, setSelectedExercise] = useState<string[]>([]);
+  const [search, setSearch] = useState<string>("");
+  const [filteredExercises, setFilteredExercises] = useState<[]>([]);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const arr = [];
+    exercises.map((i) => {
+      if (i.name.toLowerCase().includes(search.toLowerCase())) {
+        arr.push(i);
+      }
+    });
+    setFilteredExercises(arr);
+  }, [search]);
+
+  useEffect(() => {
+    const arr: exercisesType[] = [];
+    for (let index = 0; index <= 5; index++) {
+      const element: exercisesType = exercises[index];
+      arr.push(element);
+    }
+    setWorkoutExercises(arr);
+  }, []);
+
+  useEffect(() => {
+    if (workout.nameRU !== "") {
+      setErrName(false);
+    }
+    if (selectedExercise.length !== 0) {
+      setErrSelected(false);
+    }
+    if (workout.reps > 0) {
+      setErrReps(false);
+    }
+  }, [workout, selectedExercise]);
 
   const handleExerciseClick = (exercise: exercisesType) => {
     if (selectedExercise.length === 0) {
@@ -30,9 +65,22 @@ export const CreateWorkout = () => {
       }
     }
   };
-  console.log(selectedExercise);
 
-  const handleMoreExercisesClick = () => {};
+  const handleMoreExercisesClick = () => {
+    const arr: exercisesType[] = [];
+    for (
+      let i = workoutExercises.length;
+      i < workoutExercises.length + 6;
+      i++
+    ) {
+      const element = exercises[i];
+      console.log(element);
+      if (element !== undefined) {
+        arr.push(element);
+      }
+    }
+    setWorkoutExercises([...workoutExercises, ...arr]);
+  };
 
   const handleBackBtn = () => {
     navigate(router.profile);
@@ -143,21 +191,43 @@ export const CreateWorkout = () => {
           }
         >
           <p className="text-[20px] pb-[10px]">Упражнения:</p>
-          <div className="flex flex-wrap gap-[20px] justify-center">
-            {exercises.map((i) => (
-              <div
-                onClick={() => handleExerciseClick(i)}
-                key={i.id}
-                className={
-                  selectedExercise.includes(i.id)
-                    ? `p-[20px] border-[red] border-1 rounded-[20px] cursor-pointer shadow-[0px_0px_10px_0px_red]`
-                    : `p-[20px] border-1 rounded-[20px] cursor-pointer shadow-[0px_0px_10px_0px]`
-                }
-              >
-                <img className="w-[100px] mb-[10px]" src={i.img} />
-                <p>{i.name}</p>
-              </div>
-            ))}
+          <Filter
+            search={search}
+            setSearch={setSearch}
+            array={exercises}
+            setFilteredArray={setFilteredExercises}
+          />
+          <div className="flex pt-[20px] flex-wrap gap-[20px] justify-center">
+            {search === ""
+              ? workoutExercises.map((i) => (
+                  <div
+                    onClick={() => handleExerciseClick(i)}
+                    key={i.id}
+                    className={
+                      selectedExercise.includes(i.id)
+                        ? `w-[140px] h-[180px] p-[20px] border-[#00ff14] border-1 rounded-[20px] cursor-pointer shadow-[0px_0px_10px_0px_#00ff14]`
+                        : `w-[140px] h-[180px] p-[20px] border-1 rounded-[20px] cursor-pointer shadow-[0px_0px_10px_0px]`
+                    }
+                  >
+                    <img className="mb-[10px]" src={i.img} />
+                    <p>{i.name}</p>
+                  </div>
+                ))
+              : filteredExercises.map((i) => (
+                  <div
+                    onClick={() => handleExerciseClick(i)}
+                    key={i.id}
+                    className={
+                      selectedExercise.includes(i.id)
+                        ? `w-[140px] h-[180px] p-[20px] border-[#00ff14] border-1 rounded-[20px] cursor-pointer shadow-[0px_0px_10px_0px_#00ff14]`
+                        : `w-[140px] h-[180px] p-[20px] border-1 rounded-[20px] cursor-pointer shadow-[0px_0px_10px_0px]`
+                    }
+                  >
+                    <img className="mb-[10px]" src={i.img} />
+                    <p>{i.name}</p>
+                  </div>
+                ))}
+
             <div
               onClick={handleMoreExercisesClick}
               className="h-[30px] w-full bg-[#d1d1d1] flex justify-center shadow-[0px_0px_20px_10px_#d1d1d1] rounded-[5px]"
@@ -194,13 +264,16 @@ export const CreateWorkout = () => {
               }
               className="border-[1px] border-[#000000] px-[16px] py-[8px] rounded-[10px]"
               type="number"
-              placeholder=""
+              placeholder="Отдых между подходами"
             />
           </div>
         )}
         <div className="flex flex-col gap-[10px] pb-[10px]">
           <p className="text-[20px]">Повторения:</p>
           <input
+            onChange={(e) =>
+              setWorkout({ ...workout, reps: Number(e.target.value) })
+            }
             className={
               errReps
                 ? "border-[2px] border-[red] px-[16px] py-[8px] rounded-[10px]"
@@ -227,7 +300,7 @@ export const CreateWorkout = () => {
             <input
               className="border-[1px] border-[#000000] px-[16px] py-[8px] rounded-[10px]"
               type="number"
-              placeholder="Количество подходов"
+              placeholder="Отдых между повторениями"
             />
           </div>
         )}

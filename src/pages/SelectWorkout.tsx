@@ -5,7 +5,7 @@ import { router } from "./router";
 import { data } from "../data";
 
 export const SelectWorkout = () => {
-  const { workout, selectedCourse, selectedWorkout, changeSelectedWorkout } =
+  const { workout, selectedCourse, selectedExercise, changeSelectedWorkout } =
     useContext(SetContext);
   const navigate = useNavigate();
 
@@ -17,7 +17,7 @@ export const SelectWorkout = () => {
     navigate(router.main);
   };
   const handleStartWorkout = () => {
-    navigate(`/workout/${selectedCourse._id}`);
+    navigate(`/workout/${selectedExercise._id}`);
   };
   return (
     <div className="w-screen h-screen flex justify-center items-center z-1 absolute">
@@ -44,7 +44,7 @@ export const SelectWorkout = () => {
                       id="checkbox"
                       type="checkbox"
                     />
-                    {selectedWorkout === item ? (
+                    {selectedExercise === item ? (
                       <svg
                         className="min-w-[20px] cursor-pointer"
                         width="20"
