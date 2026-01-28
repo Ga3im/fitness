@@ -1,22 +1,14 @@
-import type { Dispatch, SetStateAction } from "react";
 import type { workoutType } from "../pages/Main";
-
-type filterProp = {
-  search: string;
-  setSearch: Dispatch<SetStateAction<string>>;
-  array: workoutType[];
-  setFilteredArray: (arr: workoutType[]) => void;
-};
 
 export const Filter = ({
   search,
   setSearch,
   array,
   setFilteredArray,
-}: filterProp) => {
+}) => {
   const handleSearchBtn = () => {
     const arr: workoutType[] = [];
-    array.map((i: workoutType) => {
+    array.map((i: any) => {
       if (i.nameRU.toLowerCase().includes(search.toLowerCase())) {
         arr.push(i);
       }

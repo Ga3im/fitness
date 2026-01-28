@@ -32,7 +32,7 @@ export const Register = () => {
     name: "",
     login: "",
     password: "",
-    myCourses: [],
+    myWorkouts: [],
   };
 
   const navigate = useNavigate();
@@ -52,7 +52,7 @@ export const Register = () => {
       name: nameRef.current?.value,
       login: loginRef.current?.value.toLowerCase(),
       password: passwordRef.current?.value,
-      myCourses: [],
+      myWorkouts: [],
     };
     setIsLoading(true);
     if (nameRef.current?.value === "") {

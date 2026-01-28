@@ -2,24 +2,62 @@ import { useNavigate } from "react-router-dom";
 import { Header } from "../components/Header";
 import { router } from "./router";
 import { useContext, useEffect, useState } from "react";
-import { exercises, type exercisesType } from "../data";
-import { SetContext, type workoutType } from "../context/context";
 import { Filter } from "../components/Filter";
+import { SetContext } from "../context/context";
+import type { errInfoType, exercisesType } from "../types/types";
+import { exercises } from "../data";
+import { Exercese } from "../components/Exercese";
 
 export const CreateWorkout = () => {
-  const { changeCourses, courses, workout, setWorkout } =
+  const { changeWorkouts, workouts, workout, changeWorkout } =
     useContext(SetContext);
-  const [isTimeReps, setIsTimeReps] = useState<boolean>(false);
-  const [isTimeSets, setIsTimeSets] = useState<boolean>(false);
-  const [errName, setErrName] = useState(false);
-  const [errSelected, setErrSelected] = useState(false);
-  const [errReps, setErrReps] = useState(false);
-  const [workoutExercises, setWorkoutExercises] = useState<exercisesType[]>([]);
-  const [selectedExercise, setSelectedExercise] = useState<string[]>([]);
+  const [errInfo, setErrInfo] = useState<errInfoType>({
+    workoutName: false,
+    exercise: false,
+    reps: [],
+  });
+
+  const [displayedExercises, setDisplayedExercisess] = useState<
+    exercisesType[]
+  >([]);
   const [search, setSearch] = useState<string>("");
   const [filteredExercises, setFilteredExercises] = useState<[]>([]);
+  const [scroll, setScroll] = useState(false);
+  const [lowerPos, setLowerPos] = useState(false);
 
   const navigate = useNavigate();
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.scrollY + window.innerHeight >=
+        document.documentElement.scrollHeight - 100
+      ) {
+        setLowerPos(true);
+      } else {
+        setLowerPos(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    const scrollChange = () => {
+      if (window.scrollY > 200) {
+        setScroll(true);
+      } else {
+        setScroll(false);
+      }
+    };
+    window.addEventListener("scroll", scrollChange);
+    return () => {
+      window.removeEventListener("scroll", scrollChange);
+    };
+  }, []);
 
   useEffect(() => {
     const arr = [];
@@ -37,40 +75,45 @@ export const CreateWorkout = () => {
       const element: exercisesType = exercises[index];
       arr.push(element);
     }
-    setWorkoutExercises(arr);
+    setDisplayedExercisess(arr);
   }, []);
 
   useEffect(() => {
     if (workout.nameRU !== "") {
-      setErrName(false);
+      setErrInfo({ ...errInfo, workoutName: false });
     }
-    if (selectedExercise.length !== 0) {
-      setErrSelected(false);
+    if (workout.workouts.length !== 0) {
+      setErrInfo({ ...errInfo, exercise: false });
     }
-    if (workout.reps > 0) {
-      setErrReps(false);
-    }
-  }, [workout, selectedExercise]);
+  }, [workout]);
 
-  const handleExerciseClick = (exercise: exercisesType) => {
-    if (selectedExercise.length === 0) {
-      setSelectedExercise([...selectedExercise, exercise.id]);
-    } else {
-      setSelectedExercise(
-        selectedExercise.filter((item) => item !== exercise.id)
-      );
-      if (selectedExercise.includes(exercise.id)) {
-      } else {
-        setSelectedExercise([...selectedExercise, exercise.id]);
+  useEffect(() => {
+    changeWorkout({
+      ...workout,
+      id: Math.random().toString(32),
+      img: "/img/custom.jpg",
+    });
+  }, []);
+
+  const backBtn = () => {
+    navigate(router.profile);
+  };
+
+  const fileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files instanceof FileList) {
+      const file = e.target.files[0];
+      if (file) {
+        const previewUrl = URL.createObjectURL(file);
+        changeWorkout({ ...workout, img: previewUrl });
       }
     }
   };
 
-  const handleMoreExercisesClick = () => {
+  const moreExercisesBtn = () => {
     const arr: exercisesType[] = [];
     for (
-      let i = workoutExercises.length;
-      i < workoutExercises.length + 6;
+      let i = displayedExercises.length;
+      i < displayedExercises.length + 6;
       i++
     ) {
       const element = exercises[i];
@@ -79,55 +122,44 @@ export const CreateWorkout = () => {
         arr.push(element);
       }
     }
-    setWorkoutExercises([...workoutExercises, ...arr]);
+    setDisplayedExercisess([...displayedExercises, ...arr]);
   };
 
-  const handleBackBtn = () => {
-    navigate(router.profile);
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const previewUrl = URL.createObjectURL(file);
-      setWorkout({ ...workout, img: previewUrl });
-    }
-  };
-
-  const handleAddTimeSets = () => {
-    setIsTimeSets(!isTimeSets);
-  };
-
-  const handleAddTimeReps = () => {
-    setIsTimeReps(!isTimeReps);
-  };
-
-  const handleCreateWorkout = () => {
+  const createWorkoutBtn = () => {
     if (workout.nameRU === "") {
       {
-        setErrName(true);
+        setErrInfo({ ...errInfo, workoutName: true });
       }
     } else {
-      setErrName(false);
+      setErrInfo({ ...errInfo, workoutName: false });
     }
-    if (typeof workout.selectedExercise === "object") {
+    if (workout.workouts.length === 0) {
       {
-        setErrSelected(true);
+        setErrInfo({ ...errInfo, exercise: true });
       }
     } else {
-      setErrSelected(false);
+      setErrInfo({ ...errInfo, exercise: false });
     }
-    if (workout.reps === 0) {
-      {
-        setErrReps(true);
+    const errRepsH: string[] = [];
+    workout.workouts.map((i: exercisesType) => {
+      if (i.reps === 0 || i.reps == null) {
+        {
+          errRepsH.push(i.id);
+        }
       }
-    } else {
-      setErrReps(false);
+    });
+    setErrInfo({ ...errInfo, reps: errRepsH });
+
+    changeWorkout({ ...workout });
+    if (
+      errInfo.workoutName !== true &&
+      errInfo.exercise !== true &&
+      errInfo.reps.length === 0
+    ) {
+      changeWorkouts([...workouts, workout]);
+      navigate(router.main);
+      localStorage.removeItem("workout");
     }
-    let customWorkout = courses.push(workout);
-    console.log(customWorkout);
-    // changeCourses(customWorkout);
-    // navigate(router.main);
   };
   return (
     <>
@@ -135,7 +167,7 @@ export const CreateWorkout = () => {
 
       <div className="px-[16px]">
         <div
-          onClick={handleBackBtn}
+          onClick={backBtn}
           className="text-[24px] opacity-[0.7] pb-[10px] hover:underline cursor-pointer"
         >
           &laquo; Назад
@@ -146,9 +178,11 @@ export const CreateWorkout = () => {
         <div className="flex flex-col gap-[10px] pb-[20px]">
           <p className="text-[26px]">Название тренировки:</p>
           <input
-            onChange={(e) => setWorkout({ ...workout, nameRU: e.target.value })}
+            onChange={(e) =>
+              changeWorkout({ ...workout, nameRU: e.target.value })
+            }
             className={
-              errName
+              errInfo.workoutName
                 ? "border-[2px] border-[red] px-[16px] py-[8px] rounded-[10px]"
                 : "border-[1px] border-[#000000] px-[16px] py-[8px] rounded-[10px]"
             }
@@ -159,15 +193,14 @@ export const CreateWorkout = () => {
         <div className="text-center mt-[10px] text-[18px] w-full rounded-[45px] bg-[#BCEC30] hover:bg-[#C6FF00] active:bg-[#A0B000] active:text-[white] px-[16px] py-[8px] mb-[10px]">
           <label htmlFor="mainWorkoutPhoto">Загрузить фото тренировки</label>
           <input
-            onChange={(e) => handleFileChange(e)}
+            onChange={(e) => fileChange(e)}
             id="mainWorkoutPhoto"
             type="file"
             className="hidden"
           />
         </div>
-        {workout.img === "" ? (
-          ""
-        ) : (
+
+        {workout.img === "" || workout.img === "/img/custom.jpg" ? null : (
           <>
             <img
               className="rounded-[10px] max-h-[200px] place-self-center"
@@ -175,17 +208,26 @@ export const CreateWorkout = () => {
               alt=""
             />
             <p
-              onClick={() => setWorkout({ ...workout, img: "" })}
+              onClick={() => changeWorkout({ ...workout, img: "" })}
               className="underline text-center cursor-pointer"
             >
               Удалить фото
             </p>
           </>
         )}
+        <textarea
+          onChange={(e) =>
+            changeWorkout({ ...workout, descreption: e.target.value })
+          }
+          className="resize-none w-full mt-[10px] px-[10px] py-[5px] border-1 rounded-[10px]"
+          name=""
+          placeholder="Добавить описание"
+          id=""
+        ></textarea>
 
         <div
           className={
-            errSelected
+            errInfo.exercise
               ? "pb-[20px] border-2 border-[red] rounded-[10px] p-[10px]"
               : "pb-[20px]"
           }
@@ -199,119 +241,40 @@ export const CreateWorkout = () => {
           />
           <div className="flex pt-[20px] flex-wrap gap-[20px] justify-center">
             {search === ""
-              ? workoutExercises.map((i) => (
-                  <div
-                    onClick={() => handleExerciseClick(i)}
-                    key={i.id}
-                    className={
-                      selectedExercise.includes(i.id)
-                        ? `w-[140px] h-[180px] p-[20px] border-[#00ff14] border-1 rounded-[20px] cursor-pointer shadow-[0px_0px_10px_0px_#00ff14]`
-                        : `w-[140px] h-[180px] p-[20px] border-1 rounded-[20px] cursor-pointer shadow-[0px_0px_10px_0px]`
-                    }
-                  >
-                    <img className="mb-[10px]" src={i.img} />
-                    <p>{i.name}</p>
-                  </div>
+              ? displayedExercises.map((i) => (
+                  <Exercese i={i} errInfo={errInfo} setErrInfo={setErrInfo} />
                 ))
-              : filteredExercises.map((i) => (
-                  <div
-                    onClick={() => handleExerciseClick(i)}
-                    key={i.id}
-                    className={
-                      selectedExercise.includes(i.id)
-                        ? `w-[140px] h-[180px] p-[20px] border-[#00ff14] border-1 rounded-[20px] cursor-pointer shadow-[0px_0px_10px_0px_#00ff14]`
-                        : `w-[140px] h-[180px] p-[20px] border-1 rounded-[20px] cursor-pointer shadow-[0px_0px_10px_0px]`
-                    }
-                  >
-                    <img className="mb-[10px]" src={i.img} />
-                    <p>{i.name}</p>
-                  </div>
+              : filteredExercises.map((i: exercisesType) => (
+                  <Exercese i={i} errInfo={errInfo} setErrInfo={setErrInfo} />
                 ))}
 
             <div
-              onClick={handleMoreExercisesClick}
+              onClick={moreExercisesBtn}
               className="h-[30px] w-full bg-[#d1d1d1] flex justify-center shadow-[0px_0px_20px_10px_#d1d1d1] rounded-[5px]"
             >
               <div className="w-[20px] h-[20px] border-l-2 border-b-2 rotate-[-45deg]"></div>
             </div>
           </div>
         </div>
-        <div className="flex flex-col gap-[10px] pb-[10px]">
-          <p className="text-[20px]">Подходы:</p>
-          <input
-            onChange={(e) =>
-              setWorkout({ ...workout, sets: Number(e.target.value) })
-            }
-            className="border-[1px] border-[#000000] px-[16px] py-[8px] rounded-[10px]"
-            type="number"
-            placeholder="Количество подходов"
-          />
-        </div>
-        <div className="pb-[20px]" onClick={handleAddTimeSets}>
-          <input
-            className="mr-[5px]"
-            type="checkbox"
-            checked={isTimeSets ? true : false}
-          />
-          <span>Добавить время между походами</span>
-        </div>
-        {isTimeSets && (
-          <div className="flex flex-col gap-[10px] pb-[20px]">
-            <p className="text-[20px]">Отдых между подходами:</p>
-            <input
-              onChange={(e) =>
-                setWorkout({ ...workout, setsTime: Number(e.target.value) })
-              }
-              className="border-[1px] border-[#000000] px-[16px] py-[8px] rounded-[10px]"
-              type="number"
-              placeholder="Отдых между подходами"
-            />
-          </div>
-        )}
-        <div className="flex flex-col gap-[10px] pb-[10px]">
-          <p className="text-[20px]">Повторения:</p>
-          <input
-            onChange={(e) =>
-              setWorkout({ ...workout, reps: Number(e.target.value) })
-            }
+        {scroll && !lowerPos ? (
+          <button
+            onClick={createWorkoutBtn}
             className={
-              errReps
-                ? "border-[2px] border-[red] px-[16px] py-[8px] rounded-[10px]"
-                : "border-[1px] border-[#000000] px-[16px] py-[8px] rounded-[10px]"
+              "fixed bottom-0 right-0 mt-[20px] mx-[16px] text-[18px] rounded-[45px] bg-[#BCEC30] hover:bg-[#C6FF00] active:bg-[#A0B000] active:text-[white] px-[16px] py-[8px] mb-[10px]"
             }
-            type="number"
-            placeholder="Количество повторений"
-          />
-        </div>
-        <div className="pb-[20px]" onClick={handleAddTimeReps}>
-          <input
-            onChange={(e) =>
-              setWorkout({ ...workout, repsTime: Number(e.target.value) })
+          >
+            Создать
+          </button>
+        ) : (
+          <button
+            onClick={createWorkoutBtn}
+            className={
+              "w-full mt-[20px] text-[18px] rounded-[45px] bg-[#BCEC30] hover:bg-[#C6FF00] active:bg-[#A0B000] active:text-[white] px-[16px] py-[8px] mb-[10px]"
             }
-            className="mr-[5px]"
-            type="checkbox"
-            checked={isTimeReps ? true : false}
-          />
-          <span>Добавить время между походами</span>
-        </div>
-        {isTimeReps && (
-          <div className="flex flex-col gap-[10px] pb-[20px]">
-            <p className="text-[20px]">Отдых между повторами:</p>
-            <input
-              className="border-[1px] border-[#000000] px-[16px] py-[8px] rounded-[10px]"
-              type="number"
-              placeholder="Отдых между повторениями"
-            />
-          </div>
+          >
+            Создать
+          </button>
         )}
-        <button
-          onClick={handleCreateWorkout}
-          className={
-            "mt-[20px] text-[18px] w-full rounded-[45px] bg-[#BCEC30] hover:bg-[#C6FF00] active:bg-[#A0B000] active:text-[white] px-[16px] py-[8px] mb-[10px]"
-          }
-        >
-          Создать
-        </button>
       </div>
     </>
   );

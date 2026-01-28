@@ -1,43 +1,143 @@
-export type exercisesType = {
-  id: string;
-  name: string;
-  img: string;
-};
-
 export const data = {
   workouts: [
     {
-      _id: "fullbody",
+      id: "fullbody",
       description:
-        " - комплексное занятие, прорабатывающее все основные группы мышц тела, она отлично подходит для новичков, экономии времени и частого тренировочного цикла, включая в себя базовые многосуставные упражнения",
+        "Фулбоди - комплексное занятие, прорабатывающее все основные группы мышц тела, она отлично подходит для новичков, экономии времени и частого тренировочного цикла, включая в себя базовые многосуставные упражнения",
       nameEN: "Fullbody",
       nameRU: "Фулбоди",
       order: 1,
-      workouts: ["pullup", "pushup", "squat", "leglift"],
+      workouts: [
+        {
+          id: "pullup",
+          name: "Подтягивание",
+          img: "/workouts/pull-ups.jpg",
+          sets: 4,
+          reps: 12,
+        },
+        {
+          id: "pushup",
+          name: "Отжимание",
+          img: "/workouts/push-ups.jpg",
+          sets: 4,
+          reps: 30,
+        },
+        {
+          id: "squat",
+          name: "Приседание",
+          img: "/workouts/prised.jpg",
+          sets: 4,
+          reps: 30,
+        },
+        {
+          id: "leglift",
+          name: "Подьем ног",
+          img: "/workouts/press.png",
+          sets: 4,
+          reps: 15,
+        },
+      ],
       img: "/img/fullbody.jpg",
-      gym: false,
     },
     {
-      _id: "pecstriceps",
+      id: "pecstriceps",
       description:
-        " - грудная мыщца самая большая и заметная мышца, она покрывает всю переднюю часть грудной клетки, придает объем и красоту, отвечают за приведение и сгибание рук, вращение плеча и дыхание. Трицепс - трехглавая мышца плеча, производит разгибание локтя, находится на задней стороне плечевой кости, один из основных двигательных мыщц руки",
+        "Грудные мыщцы - самая большая и заметная мышца, она покрывает всю переднюю часть грудной клетки, придает объем и красоту, отвечают за приведение и сгибание рук, вращение плеча и дыхание. Трицепс - трехглавая мышца плеча, производит разгибание локтя, находится на задней стороне плечевой кости, один из основных двигательных мыщц руки",
       nameEN: "Pecs and triceps",
       nameRU: "Грудные мыщцы и трицепс",
       order: 2,
-      workouts: ["pushup", "dips", "lyingdumbbellfly", "benchpress"],
+      workouts: [
+        {
+          id: "benchpress",
+          name: "Жим лежа",
+          img: "/workouts/bench press.jpg",
+          sets: 4,
+          reps: 12,
+        },
+        {
+          id: "pushup",
+          name: "Отжимание",
+          img: "/workouts/push-ups.jpg",
+          sets: 4,
+          reps: 30,
+        },
+        {
+          id: "lyingdumbbellfly",
+          name: "Разведение гантелей лежа",
+          img: "/workouts/lying dumbbell fly.png",
+          sets: 4,
+          reps: 30,
+        },
+        {
+          id: "dips",
+          name: "Отжимание на брусьях",
+          img: "/workouts/bars-push-ups.png",
+          sets: 4,
+          reps: 15,
+        },
+      ],
       img: "/img/pecs.jpg",
       gym: false,
     },
+    {
+      id: "legs",
+      description:
+        "Тренировка ног — это комплекс упражнений, направленных на укрепление мышц нижних конечностей. Ноги играют ключевую роль в повседневной активности",
+      nameEN: "Leg workout",
+      nameRU: "Тренировка ног",
+      order: 3,
+      workouts: [
+        {
+          id: "lunges",
+          name: "Выпады",
+          img: "/workouts/lunges.jpg",
+          sets: 4,
+          reps: 30,
+        },
+        {
+          id: "squat",
+          name: "Приседание",
+          img: "/workouts/prised.jpg",
+          sets: 4,
+          reps: 40,
+        },
+        {
+          id: "stepup",
+          name: "Вышагивания",
+          img: "/workouts/step up.png",
+          sets: 4,
+          reps: 20,
+        },
+      ],
+      img: "/img/legs.jpg",
+    },
+    {
+      id: "abs",
+      description:
+        "Сильный и рельефный живот — это не только эстетика, но и здоровье спины. Упражнения на пресс помогают поддерживать фигуру и укреплять мышцы кора.",
+      nameEN: "Abs training",
+      nameRU: "Тренировка пресса",
+      order: 4,
+      workouts: [
+        {
+          id: "leglift",
+          name: "Подьем ног",
+          img: "/workouts/press.png",
+          sets: 4,
+          reps: 15,
+        },
+        {
+          id: "press",
+          name: "Пресс",
+          img: "/workouts/presslie.png",
+          sets: 4,
+          reps: 40,
+        },
+      ],
+      img: "/img/abs.jpg",
+    },
   ],
 };
-
-export const result = [
-  "проработка всех групп мышц",
-  "  суставов",
-  "улучшается циркуляция крови",
-  "заряжают бодростью",
-  "помогают противостоять стресса",
-];
 
 export const exercises = [
   {
@@ -127,7 +227,7 @@ export const exercises = [
   },
   {
     id: "horizontalrow",
-    name: "Горизонталь-ная тяга",
+    name: "Горизонтальная тяга",
     img: "/workouts/horizontal row.png",
   },
   {

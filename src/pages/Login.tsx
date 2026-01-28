@@ -52,7 +52,7 @@ export const Login = () => {
             name: "Admin",
             login: loginRef.current?.value.toLowerCase(),
             password: passwordRef.current?.value,
-            myCourses: [],
+            myWorkouts: [],
           });
         } else {
           accounts.map((i: userType) => {
