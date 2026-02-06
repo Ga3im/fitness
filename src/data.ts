@@ -7,7 +7,8 @@ export const data = {
       nameEN: "Fullbody",
       nameRU: "Фулбоди",
       order: 1,
-      workouts: [
+      img: "/img/fullbody.jpg",
+      exercises: [
         {
           id: "pullup",
           name: "Подтягивание",
@@ -37,7 +38,6 @@ export const data = {
           reps: 15,
         },
       ],
-      img: "/img/fullbody.jpg",
     },
     {
       id: "pecstriceps",
@@ -46,7 +46,9 @@ export const data = {
       nameEN: "Pecs and triceps",
       nameRU: "Грудные мыщцы и трицепс",
       order: 2,
-      workouts: [
+      img: "/img/pecs.jpg",
+      gym: false,
+      exercises: [
         {
           id: "benchpress",
           name: "Жим лежа",
@@ -76,8 +78,6 @@ export const data = {
           reps: 15,
         },
       ],
-      img: "/img/pecs.jpg",
-      gym: false,
     },
     {
       id: "legs",
@@ -86,7 +86,9 @@ export const data = {
       nameEN: "Leg workout",
       nameRU: "Тренировка ног",
       order: 3,
-      workouts: [
+      img: "/img/legs.jpg",
+
+      exercises: [
         {
           id: "lunges",
           name: "Выпады",
@@ -109,7 +111,6 @@ export const data = {
           reps: 20,
         },
       ],
-      img: "/img/legs.jpg",
     },
     {
       id: "abs",
@@ -118,7 +119,9 @@ export const data = {
       nameEN: "Abs training",
       nameRU: "Тренировка пресса",
       order: 4,
-      workouts: [
+      img: "/img/abs.jpg",
+
+      exercises: [
         {
           id: "leglift",
           name: "Подьем ног",
@@ -133,8 +136,72 @@ export const data = {
           sets: 4,
           reps: 40,
         },
+        {
+          id: "elbowplanc",
+          name: "Планка на локтях",
+          img: "/workouts/elbow planck.jpg",
+          static: true,
+          sets: 4,
+          reps: 60,
+        },
       ],
-      img: "/img/abs.jpg",
+    },
+    {
+      id: "streetworkout",
+      description:
+        "Street Workout - это популярное молодежное спортивное направление, базирующееся на тренировках с собственным весом на открытом воздухе (турники, брусья, шведские стенки). Оно сочетает элементы гимнастики, калистеники и паркура для развития силы, выносливости, координации и создания атлетичного телосложения. Это доступный, бесплатный вид спорта, объединяющий людей  развивающийся как субкультура.",
+      nameEN: "Street workout",
+      nameRU: "Street Workout",
+      order: 5,
+      img: "/img/workout.jpg",
+
+      exercises: [
+        {
+          id: "pullup",
+          name: "Подтягивание",
+          img: "/workouts/pull-ups.jpg",
+          reps: 15,
+          sets: 4,
+        },
+        {
+          id: "dips",
+          name: "Отжимание на брусьях",
+          img: "/workouts/bars-push-ups.png",
+          reps: 20,
+          sets: 4,
+        },
+        {
+          id: "leglift",
+          name: "Подьем ног",
+          img: "/workouts/press.png",
+          reps: 25,
+          sets: 4,
+        },
+      ],
+    },
+    {
+      id: "5tons",
+      description:
+        "Челлендж 5 + 5 тонн - челлендж состоящий из двух упражнений подтягивание и отжимание на брусьях в совокупном объеме 5 тонн в каждом упражнении, за короткий промежуток времени",
+      nameEN: "challenge 5 tons",
+      nameRU: "Челлендж Семенихина",
+      order: 5,
+      timeLimit: 600,
+      img: "/img/challenge5tons.jpg",
+      challenge: true,
+      needWeight: true,
+      exercises: [
+        {
+          id: "pullup",
+          name: "Подтягивание",
+          img: "/workouts/pull-ups.jpg",
+        },
+        {
+          id: "dips",
+          name: "Отжимание на брусьях",
+          img: "/workouts/bars-push-ups.png",
+        },
+      ],
     },
   ],
 };
@@ -144,6 +211,12 @@ export const exercises = [
     id: "pullup",
     name: "Подтягивание",
     img: "/workouts/pull-ups.jpg",
+  },
+  {
+    id: "corner",
+    name: "Уголок",
+    img: "/workouts/corner.png",
+    static: true,
   },
   {
     id: "pushup",
@@ -185,6 +258,12 @@ export const exercises = [
     name: "Выпады",
     img: "/workouts/lunges.jpg",
   },
+  {
+    id: "hangonthebar",
+    name: "Вис на турнике",
+    img: "/workouts/hangonthebar.png",
+  },
+  ,
   {
     id: "press",
     name: "Пресс",
@@ -290,5 +369,37 @@ export const exercises = [
     id: "standincvalfraises",
     name: "Подъемы на носки",
     img: "/workouts/Standing Calf Raises.png",
+  },
+  {
+    id: "elbowplanc",
+    name: "Планка на локтях",
+    img: "/workouts/elbow planck.jpg",
+    static: true,
+  },
+  {
+    id: "planc",
+    name: "Полная планка",
+    img: "/workouts/planck.jpg",
+    static: true,
+  },
+  {
+    id: "benchdips",
+    name: "Обратные отжимания",
+    img: "/workouts/Bench Dips.png",
+  },
+  {
+    id: "dumbbellkickback",
+    name: "Разгибание рук с гантелью",
+    img: "/workouts/Dumbbell Kickback.png",
+  },
+  {
+    id: "cabletriceppushdowns",
+    name: "Разгибание рук в кроссовере",
+    img: "/workouts/Cable Tricep Pushdowns.png",
+  },
+  {
+    id: "crunches",
+    name: "Скручивание на пресс",
+    img: "/workouts/crunches.jpg",
   },
 ];

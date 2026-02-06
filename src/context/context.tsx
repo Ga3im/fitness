@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import type {
+  additionalSettingType,
   contextType,
   MyProps,
   userType,
@@ -19,6 +20,14 @@ export const SettingProvider = ({ children }: MyProps) => {
   const [accounts, setAccounts] = useState<userType[]>([]);
   const [isStartingWorkout, setIsStartingWorkout] = useState<boolean>(false);
   const [workouts, setWorkouts] = useState<workoutType[]>([]);
+  const [favoriteWorkoutId, setFavoriteWorkoutId] = useState<string[]>([]);
+    const [additionalSetting, setAdditionalSetting] =
+    useState<additionalSettingType>({
+      isTimeReps: false,
+      isTimeSets: false,
+      noSets: [],
+    });
+
   const [workout, setWorkout] = useState<workoutType>({
     id: "",
     description: "",
@@ -26,9 +35,9 @@ export const SettingProvider = ({ children }: MyProps) => {
     img: "",
     nameRU: "",
     nameEN: "",
-    workouts: [],
+    exercises: [],
+    custom: true,
   });
-  const [workoutsId, setWorkoutsId] = useState<string[]>([]);
 
   const changeWorkouts = (workouts: workoutType[]) => {
     setWorkouts(workouts);
@@ -41,11 +50,8 @@ export const SettingProvider = ({ children }: MyProps) => {
   };
 
   useEffect(() => {
-    const savedSelectedWorkout = localStorage.getItem("selectedExercise");
     const savedUser = localStorage.getItem("user");
-    if (savedSelectedWorkout) {
-      setSelectedWorkout(JSON.parse(savedSelectedWorkout));
-    }
+
     if (savedUser) {
       setUser(JSON.parse(savedUser));
       setIsAuth(true);
@@ -62,6 +68,16 @@ export const SettingProvider = ({ children }: MyProps) => {
     setUser(newUser);
     localStorage.setItem("user", JSON.stringify(newUser));
   };
+
+  useEffect(() => {
+    const arr: string[] = [];
+    if (isAuth && user) {
+      user.myWorkouts.map((i: workoutType) => {
+        arr.push(i.id);
+      });
+    }
+    setFavoriteWorkoutId(arr);
+  }, [user]);
 
   const changeSelectedWorkout = (newWorkout: workoutType) => {
     setSelectedWorkout(newWorkout);
@@ -91,10 +107,12 @@ export const SettingProvider = ({ children }: MyProps) => {
         changeWorkouts,
         workout,
         changeWorkout,
-        workoutsId,
-        setWorkoutsId,
         isStartingWorkout,
         setIsStartingWorkout,
+        favoriteWorkoutId,
+        setFavoriteWorkoutId,
+        additionalSetting,
+        setAdditionalSetting
       }}
     >
       {children}

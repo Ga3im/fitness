@@ -30,6 +30,7 @@ export const Register = () => {
 
   let userInfo: userType | {} = {
     name: "",
+    img: "",
     login: "",
     password: "",
     myWorkouts: [],

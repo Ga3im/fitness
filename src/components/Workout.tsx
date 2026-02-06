@@ -1,33 +1,16 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import type { WorkoutPropType, workoutType } from "../types/types";
 import { SetContext } from "../context/context";
 import { useNavigate } from "react-router-dom";
 
 export const Workout = ({ i }: WorkoutPropType) => {
-  const {
-    changeSelectedWorkout,
-    user,
-    isAuth,
-    changeUser,
-    workouts,
-    changeWorkouts,
-    workoutsId,
-    setWorkoutsId,
-    isStartingWorkout,
-  } = useContext(SetContext);
+  const { changeSelectedWorkout, user, isAuth, changeUser, favoriteWorkoutId } =
+    useContext(SetContext);
   const navigate = useNavigate();
-
+  
   const workoutClick = (workout: workoutType) => {
-      changeSelectedWorkout(workout);
+    changeSelectedWorkout(workout);
     navigate(`/workout/${workout.id}`);
-    // const newWorkouts: workoutType[] = [];
-    // workouts.map((i: workoutType) => {
-    //   if (i.id === workout.id) {
-    //     i.order = workout.order - 1;
-    //   }
-    //   newWorkouts.push(i);
-    // });
-    // changeWorkouts(newWorkouts);
   };
 
   const addFavoriteWorkout = (
@@ -35,16 +18,19 @@ export const Workout = ({ i }: WorkoutPropType) => {
     workout: workoutType
   ) => {
     e.stopPropagation();
-    if (workoutsId.includes(workout.id)) {
-      user.myWorkouts = user.myWorkouts?.filter(
-        (i: workoutType) => i.id !== workout.id
-      );
-      setWorkoutsId(workoutsId.filter((i: string) => i !== workout.id));
-      changeUser(user);
+    if (user.myWorkouts.length === 0) {
+      changeUser({ ...user, myWorkouts: [...user.myWorkouts, workout] });
     } else {
-      user.myWorkouts = [...user.myWorkouts, workout];
-      setWorkoutsId([...workoutsId, workout.id]);
-      changeUser(user);
+      user.myWorkouts.map((i: workoutType) => {
+        if (i.id === workout.id) {
+          changeUser({
+            ...user,
+            myWorkouts: user.myWorkouts.filter((i) => i.id !== workout.id),
+          });
+        } else {
+          changeUser({ ...user, myWorkouts: [...user.myWorkouts, workout] });
+        }
+      });
     }
   };
 
@@ -54,54 +40,48 @@ export const Workout = ({ i }: WorkoutPropType) => {
       className="rounded-[30px] px-[16px] pb-[15px] shadow-[0px_0px_10px_-7px] hover:cursor-pointer"
       key={i.id}
     >
-      <div className="max-w-[343px] place-self-center">
-        {isAuth ? (
-          workoutsId.includes(i.id) ? (
-            <div
-              title="Удалить из избранных"
-              onClick={(e) => addFavoriteWorkout(e, i)}
-              className="bg-[red] shadow-[0px_0px_20px_0px_white] place-self-end relative top-[45px] right-[15px] hover:scale-[1.3] hover:border-[#000000] hover:border-[1px] transition-[0.3s] w-[27px] h-[27px] rounded-[100%] relative"
-            >
-              <div className="h-[3px] w-[15px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
-            </div>
-          ) : (
-            <div
-              title="Добавить в избранные"
-              onClick={(e) => addFavoriteWorkout(e, i)}
-              className="bg-[green] shadow-[0px_0px_20px_0px_white] place-self-end relative top-[45px] right-[15px] hover:scale-[1.3] hover:border-[#000000] hover:border-[1px] transition-[0.3s] w-[27px] h-[27px] rounded-[100%] relative"
-            >
-              <div className="h-[15px] w-[3px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
-              <div className="h-[3px] w-[15px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
-            </div>
-          )
-        ) : null}
-
+      {isAuth ? (
+        favoriteWorkoutId.includes(i.id) ? (
+          <div
+            title="Удалить из избранных"
+            onClick={(e) => addFavoriteWorkout(e, i)}
+            className="bg-[red] z-1 shadow-[0px_0px_20px_0px_white] place-self-end relative top-[35px] right-[15px] hover:scale-[1.3] hover:border-[#000000] hover:border-[1px] transition-[0.3s] w-[27px] h-[27px] rounded-[100%] relative"
+          >
+            <div className="h-[3px] w-[15px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
+          </div>
+        ) : (
+          <div
+            title="Добавить в избранные"
+            onClick={(e) => addFavoriteWorkout(e, i)}
+            className="bg-[green] shadow-[0px_0px_20px_0px_white] z-1 place-self-end relative top-[35px] right-[15px]  hover:scale-[1.3] top-[10px] hover:border-[#000000] hover:border-[1px] transition-[0.3s] w-[27px] h-[27px] rounded-[100%] relative"
+          >
+            <div className="h-[15px] w-[3px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
+            <div className="h-[3px] w-[15px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
+          </div>
+        )
+      ) : null}
+      <div className="flex justify-center relative bottom-[10px] w-[300px] place-self-center">
         <img
           className={
             isAuth
-              ? "rounded-[30px] mb-[25px] place-self-center"
-              : "rounded-[30px] mt-[20px] mb-[25px] place-self-center"
+              ? "rounded-[30px] place-self-center"
+              : "rounded-[30px] place-self-center"
           }
           src={i.img}
           alt={i.nameEN}
         />
       </div>
 
-      <div className="px-[20px]">
+      <div className="px-[20px] max-w-[300px]">
         <p className="text-[24px] pb-[20px] font-medium">{i.nameRU}</p>
         <div className="flex flex-wrap gap-[6px]">
-          <div className="flex gap-[5px] items-center bg-[#F7F7F7] rounded-[50px] p-[10px] pr-[20px]">
+          <div
+            title="Количество упражнений"
+            className="flex gap-[5px] items-center bg-[#F7F7F7] rounded-[50px] p-[10px] pr-[20px]"
+          >
             <img className="w-[30px] pr-[5px]" src="exercise.png" alt="" />
-            <p>{i.workouts.length}</p>
+            <p>{i.exercises.length}</p>
           </div>
-          {/* {i.gym ? (
-            ""
-          ) : (
-            <div className="pr-[20px] flex gap-[5px] items-center bg-[#F7F7F7] rounded-[50px] box-border p-[10px]">
-              <img className="w-[30px] pr-[5px]" src="home.png" alt="" />
-              <p>Можно дома</p>
-            </div>
-          )} */}
 
           <div
             title="Несколько вариантов сложности"

@@ -4,60 +4,25 @@ import { router } from "./router";
 import { useContext, useEffect, useState } from "react";
 import { Filter } from "../components/Filter";
 import { SetContext } from "../context/context";
-import type { errInfoType, exercisesType } from "../types/types";
+import type { exercisesType } from "../types/types";
 import { exercises } from "../data";
-import { Exercese } from "../components/Exercese";
+import { BottomBtn } from "../components/BottomBtn";
+import { Exercise } from "../components/Exercise";
 
 export const CreateWorkout = () => {
-  const { changeWorkouts, workouts, workout, changeWorkout } =
+  const { changeWorkouts, workouts, workout, changeWorkout, setIsOpenProfile } =
     useContext(SetContext);
-  const [errInfo, setErrInfo] = useState<errInfoType>({
-    workoutName: false,
-    exercise: false,
-    reps: [],
-  });
+  const [isSelectedName, setIsSelectedName] = useState<boolean>(true);
+  const [isSelectedExercise, setIsSelectedExercise] = useState<boolean>(true);
+  const [emptyReps, setEmptyReps] = useState<string[]>([]);
 
   const [displayedExercises, setDisplayedExercisess] = useState<
     exercisesType[]
   >([]);
   const [search, setSearch] = useState<string>("");
   const [filteredExercises, setFilteredExercises] = useState<[]>([]);
-  const [scroll, setScroll] = useState(false);
-  const [lowerPos, setLowerPos] = useState(false);
 
   const navigate = useNavigate();
-  useEffect(() => {
-    const handleScroll = () => {
-      if (
-        window.scrollY + window.innerHeight >=
-        document.documentElement.scrollHeight - 100
-      ) {
-        setLowerPos(true);
-      } else {
-        setLowerPos(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
-  useEffect(() => {
-    const scrollChange = () => {
-      if (window.scrollY > 200) {
-        setScroll(true);
-      } else {
-        setScroll(false);
-      }
-    };
-    window.addEventListener("scroll", scrollChange);
-    return () => {
-      window.removeEventListener("scroll", scrollChange);
-    };
-  }, []);
 
   useEffect(() => {
     const arr = [];
@@ -79,15 +44,6 @@ export const CreateWorkout = () => {
   }, []);
 
   useEffect(() => {
-    if (workout.nameRU !== "") {
-      setErrInfo({ ...errInfo, workoutName: false });
-    }
-    if (workout.workouts.length !== 0) {
-      setErrInfo({ ...errInfo, exercise: false });
-    }
-  }, [workout]);
-
-  useEffect(() => {
     changeWorkout({
       ...workout,
       id: Math.random().toString(32),
@@ -95,18 +51,44 @@ export const CreateWorkout = () => {
     });
   }, []);
 
+  useEffect(() => {
+    if (workout.nameRU !== "") {
+      setIsSelectedName(true);
+    }
+    if (workout.exercises.length !== 0) {
+      setIsSelectedExercise(true);
+    }
+  }, [workout]);
+
   const backBtn = () => {
     navigate(router.profile);
   };
+
+  let previewUrl;
 
   const fileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files instanceof FileList) {
       const file = e.target.files[0];
       if (file) {
-        const previewUrl = URL.createObjectURL(file);
+        previewUrl = URL.createObjectURL(file);
         changeWorkout({ ...workout, img: previewUrl });
       }
     }
+  };
+
+  const deletePhoto = () => {
+    previewUrl = null;
+    changeWorkout({ ...workout, img: "" });
+  };
+
+  const hideExercisesBtn = () => {
+    const arr: exercisesType[] = [];
+
+    for (let i = 0; i < 6; i++) {
+      const element = displayedExercises[i];
+      arr.push(element);
+    }
+    setDisplayedExercisess(arr);
   };
 
   const moreExercisesBtn = () => {
@@ -116,8 +98,7 @@ export const CreateWorkout = () => {
       i < displayedExercises.length + 6;
       i++
     ) {
-      const element = exercises[i];
-      console.log(element);
+      const element: exercisesType = exercises[i];
       if (element !== undefined) {
         arr.push(element);
       }
@@ -127,36 +108,40 @@ export const CreateWorkout = () => {
 
   const createWorkoutBtn = () => {
     if (workout.nameRU === "") {
-      {
-        setErrInfo({ ...errInfo, workoutName: true });
-      }
-    } else {
-      setErrInfo({ ...errInfo, workoutName: false });
+      setIsSelectedName(false);
     }
-    if (workout.workouts.length === 0) {
-      {
-        setErrInfo({ ...errInfo, exercise: true });
-      }
-    } else {
-      setErrInfo({ ...errInfo, exercise: false });
+    if (workout.exercises.length === 0) {
+      setIsSelectedExercise(false);
     }
     const errRepsH: string[] = [];
-    workout.workouts.map((i: exercisesType) => {
+    workout.exercises.map((i: exercisesType) => {
       if (i.reps === 0 || i.reps == null) {
         {
           errRepsH.push(i.id);
         }
       }
     });
-    setErrInfo({ ...errInfo, reps: errRepsH });
+    setEmptyReps(errRepsH);
 
-    changeWorkout({ ...workout });
     if (
-      errInfo.workoutName !== true &&
-      errInfo.exercise !== true &&
-      errInfo.reps.length === 0
+      workout.nameRU !== "" &&
+      workout.exercises.length !== 0 &&
+      emptyReps.length === 0
     ) {
       changeWorkouts([...workouts, workout]);
+      changeWorkout({
+        ...workout,
+        id: "",
+        description: "",
+        order: workouts.length,
+        img: "",
+        nameRU: "",
+        nameEN: "",
+        exercises: [],
+        custom: true,
+      });
+      setEmptyReps([]);
+      setIsOpenProfile(false);
       navigate(router.main);
       localStorage.removeItem("workout");
     }
@@ -164,7 +149,6 @@ export const CreateWorkout = () => {
   return (
     <>
       <Header />
-
       <div className="px-[16px]">
         <div
           onClick={backBtn}
@@ -182,16 +166,18 @@ export const CreateWorkout = () => {
               changeWorkout({ ...workout, nameRU: e.target.value })
             }
             className={
-              errInfo.workoutName
-                ? "border-[2px] border-[red] px-[16px] py-[8px] rounded-[10px]"
-                : "border-[1px] border-[#000000] px-[16px] py-[8px] rounded-[10px]"
+              isSelectedName
+                ? "border-[1px] border-[#000000] px-[16px] py-[8px] rounded-[10px]"
+                : "border-[2px] border-[red] px-[16px] py-[8px] rounded-[10px]"
             }
             type="text"
             placeholder="Введите назвавние тренировки"
           />
         </div>
         <div className="text-center mt-[10px] text-[18px] w-full rounded-[45px] bg-[#BCEC30] hover:bg-[#C6FF00] active:bg-[#A0B000] active:text-[white] px-[16px] py-[8px] mb-[10px]">
-          <label htmlFor="mainWorkoutPhoto">Загрузить фото тренировки</label>
+          <label htmlFor="mainWorkoutPhoto">
+            {previewUrl ? "Обновить фото" : "Загрузить фото тренировки"}
+          </label>
           <input
             onChange={(e) => fileChange(e)}
             id="mainWorkoutPhoto"
@@ -208,7 +194,7 @@ export const CreateWorkout = () => {
               alt=""
             />
             <p
-              onClick={() => changeWorkout({ ...workout, img: "" })}
+              onClick={deletePhoto}
               className="underline text-center cursor-pointer"
             >
               Удалить фото
@@ -227,7 +213,7 @@ export const CreateWorkout = () => {
 
         <div
           className={
-            errInfo.exercise
+            !isSelectedExercise
               ? "pb-[20px] border-2 border-[red] rounded-[10px] p-[10px]"
               : "pb-[20px]"
           }
@@ -241,40 +227,33 @@ export const CreateWorkout = () => {
           />
           <div className="flex pt-[20px] flex-wrap gap-[20px] justify-center">
             {search === ""
-              ? displayedExercises.map((i) => (
-                  <Exercese i={i} errInfo={errInfo} setErrInfo={setErrInfo} />
+              ? displayedExercises.map((i: exercisesType) => (
+                  <Exercise
+                    i={i}
+                    emptyReps={emptyReps}
+                    setEmptyReps={setEmptyReps}
+                  />
                 ))
-              : filteredExercises.map((i: exercisesType) => (
-                  <Exercese i={i} errInfo={errInfo} setErrInfo={setErrInfo} />
-                ))}
+              : filteredExercises.map((i: exercisesType) => <Exercise i={i} />)}
 
-            <div
-              onClick={moreExercisesBtn}
-              className="h-[30px] w-full bg-[#d1d1d1] flex justify-center shadow-[0px_0px_20px_10px_#d1d1d1] rounded-[5px]"
-            >
-              <div className="w-[20px] h-[20px] border-l-2 border-b-2 rotate-[-45deg]"></div>
-            </div>
+            {exercises.length === displayedExercises.length ? (
+              <div
+                onClick={hideExercisesBtn}
+                className="h-[30px] w-full bg-[#d1d1d1] flex justify-center shadow-[0px_0px_20px_10px_#d1d1d1] rounded-[5px]"
+              >
+                <div className="w-[20px] mt-[10px] h-[20px] border-l-2 border-b-2 rotate-[135deg]"></div>
+              </div>
+            ) : (
+              <div
+                onClick={moreExercisesBtn}
+                className="h-[30px] w-full bg-[#d1d1d1] flex justify-center rounded-[5px]"
+              >
+                <div className="w-[20px] h-[20px] border-l-2 border-b-2 rotate-[-45deg]"></div>
+              </div>
+            )}
           </div>
         </div>
-        {scroll && !lowerPos ? (
-          <button
-            onClick={createWorkoutBtn}
-            className={
-              "fixed bottom-0 right-0 mt-[20px] mx-[16px] text-[18px] rounded-[45px] bg-[#BCEC30] hover:bg-[#C6FF00] active:bg-[#A0B000] active:text-[white] px-[16px] py-[8px] mb-[10px]"
-            }
-          >
-            Создать
-          </button>
-        ) : (
-          <button
-            onClick={createWorkoutBtn}
-            className={
-              "w-full mt-[20px] text-[18px] rounded-[45px] bg-[#BCEC30] hover:bg-[#C6FF00] active:bg-[#A0B000] active:text-[white] px-[16px] py-[8px] mb-[10px]"
-            }
-          >
-            Создать
-          </button>
-        )}
+        <BottomBtn onClick={createWorkoutBtn} btnText={"Создать"} />
       </div>
     </>
   );

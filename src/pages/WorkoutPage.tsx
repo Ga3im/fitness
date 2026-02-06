@@ -4,33 +4,58 @@ import { Header } from "../components/Header";
 import { useNavigate } from "react-router-dom";
 import { router } from "./router";
 import type { exercisesType, workoutType } from "../types/types";
+import { BottomBtn } from "../components/BottomBtn";
+import { Stopwatch } from "../components/Stopwatch";
+import { StartTimeBtn } from "../components/StartTimeBtn";
+
+const timeHHMMSS = (time: number): string => {
+  let hour;
+  let HH;
+  if (time >= 3600) {
+    hour = Math.floor(time / 3600);
+    HH = hour.toString().padStart(2, "0");
+  }
+  let min = Math.floor((time / 60) % 60);
+  let sec = time % 60;
+
+  let MM = min.toString().padStart(2, "0");
+  let SS = sec.toString().padStart(2, "0");
+  return time >= 3600 ? `${HH}:${MM}:${SS}` : `${MM}:${SS}`;
+};
 
 export default function WorkoutPage() {
   let {
     isAuth,
     user,
+    changeUser,
     selectedWorkout,
     changeSelectedWorkout,
-    workoutsId,
-    setWorkoutsId,
     isStartingWorkout,
     setIsStartingWorkout,
+    changeWorkouts,
+    workouts,
+    favoriteWorkoutId,
+    additionalSetting,
   } = useContext(SetContext);
-  const repsRef = useRef<React.RefObject<(HTMLInputElement | null)[]>>([]);
+  const repsRef = useRef<(HTMLInputElement | null)[]>([]);
   const navigate = useNavigate();
-  const [doneWorkout, setDoneWorkout] = useState(false);
+  const [doneWorkout, setDoneWorkout] = useState<boolean>(false);
+  const [userWeight, setUserWeight] = useState<number | null>(null);
+  const [isEnteringWeight, setIsEnteringWeight] = useState<boolean>(false);
+  let [time, setTime] = useState<number>(0);
+
   let doneExerciseCount: number = 0;
 
   useEffect(() => {
-    selectedWorkout.workouts.map((i) => {
+    selectedWorkout?.exercises.map((i: exercisesType) => {
       if (i.done) {
         doneExerciseCount++;
       }
-      if (doneExerciseCount === selectedWorkout.workouts.length) {
+      if (doneExerciseCount === selectedWorkout?.exercises.length) {
         setDoneWorkout(true);
       }
     });
-  }, []);
+  }, [selectedWorkout]);
 
   useEffect(() => {
     window.scrollTo({
@@ -46,6 +71,26 @@ export default function WorkoutPage() {
     }
   }
 
+  const handleWheel = (e) => {
+    e.target.blur();
+  };
+
+  const cancelWeightBtn = () => {
+    setIsEnteringWeight(false);
+  };
+
+  const confirmWeightBtn = () => {
+    if (userWeight && selectedWorkout) {
+      let reps = Math.ceil(5000 / userWeight);
+      selectedWorkout?.exercises.map((i) => {
+        i.reps = reps;
+      });
+      changeSelectedWorkout({ ...selectedWorkout, needWeight: false });
+
+      setIsEnteringWeight(false);
+    }
+  };
+
   const backBtn = () => {
     setIsStartingWorkout(false);
     localStorage.removeItem("selectedWorkout");
@@ -53,68 +98,118 @@ export default function WorkoutPage() {
   };
 
   const addFavoriteWorkout = (
-    e: React.MouseEvent<HTMLDivElement | SVGSVGElement, MouseEvent>,
-    workout: workoutType
+    e: React.MouseEvent<HTMLDivElement | SVGSVGElement, MouseEvent>
   ) => {
     e.stopPropagation();
-    if (workoutsId.includes(workout.id)) {
-      user.myWorkouts = user.myWorkouts?.filter(
-        (i: workoutType) => i.id !== workout.id
-      );
-      setWorkoutsId(workoutsId.filter((i: string) => i !== workout.id));
+    if (user.myWorkouts.length === 0) {
+      changeUser({
+        ...user,
+        myWorkouts: [...user.myWorkouts, selectedWorkout],
+      });
     } else {
-      user.myWorkouts = [...user.myWorkouts, workout];
-      setWorkoutsId([...workoutsId, workout.id]);
+      user.myWorkouts.map((i: workoutType) => {
+        if (i.id === selectedWorkout.id) {
+          changeUser({
+            ...user,
+            myWorkouts: user.myWorkouts.filter(
+              (i: exercisesType) => i.id !== selectedWorkout.id
+            ),
+          });
+        } else {
+          changeUser({
+            ...user,
+            myWorkouts: [...user.myWorkouts, selectedWorkout],
+          });
+        }
+      });
     }
   };
 
-  const addRepsBtn = (exercise: exercisesType) => {
+  const addRepsBtn = (exercise: exercisesType, currentReps: string) => {
     if (exercise.doneReps === undefined) {
-      exercise.doneReps = [
-        Number(
-          repsRef.current[selectedWorkout.workouts.indexOf(exercise)].value
-        ),
-      ];
+      exercise.doneReps = Number(currentReps);
+      exercise.table = [currentReps];
     } else {
-      exercise.doneReps.push(
-        Number(
-          repsRef.current[selectedWorkout.workouts.indexOf(exercise)].value
-        )
-      );
+      exercise.doneReps = exercise.doneReps + Number(currentReps);
+      exercise.table.push(currentReps);
     }
-    if (
-      exercise.sets * exercise.reps <=
-      exercise.doneReps?.reduce((acc, cur) => acc + cur, 0)
-    ) {
+
+    if (exercise.sets * exercise.reps <= exercise.doneReps) {
       exercise.done = true;
     }
-
     changeSelectedWorkout({
       ...selectedWorkout,
     });
-    if (repsRef.current !== null) {
-      repsRef.current[selectedWorkout.workouts.indexOf(exercise)].value = "";
+    repsRef.current[selectedWorkout.exercises.indexOf(exercise)].value = "";
+  };
+
+  const editWeightBtn = () => {
+    setIsEnteringWeight(true);
+  };
+
+  const startWorkout = () => {
+    if (selectedWorkout && selectedWorkout.needWeight) {
+      setIsEnteringWeight(true);
+    } else {
+      changeSelectedWorkout({
+        ...selectedWorkout,
+        exercises: selectedWorkout.exercises,
+      });
+
+      setIsStartingWorkout(!isStartingWorkout);
     }
   };
 
-const startOver = ()=>{
-  console.log('Выйти')
-}
-
-  const startWorkout = () => {
-    changeSelectedWorkout({
-      ...selectedWorkout,
-      workouts: selectedWorkout.workouts,
-    });
-
-    setIsStartingWorkout(!isStartingWorkout);
+  const finishWorkout = () => {
+    setIsStartingWorkout(false);
+    setTime(0);
   };
 
+  const deleteWorkout = () => {
+    changeWorkouts(
+      workouts.filter((i: workoutType) => i.id !== selectedWorkout?.id)
+    );
+    navigate(router.main);
+  };
 
   return (
     <>
+      {isEnteringWeight && (
+        <div className=" fixed top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] z-3 bg-[white] rounded-[10px] p-[20px] shadow-[0px_0px_25px_-5px]">
+          <div className="w-[300px] flex flex-col gap-[20px]">
+            <p className="text-[20px]">Введите массу вашего тела</p>
+            <div className="border-2 border-[#9c9c9c] rounded-[10px] px-[10px] py-[5px] group focus-within:border-[#000000]">
+              <input
+                className="focus:outline-none focus:group-focus:border-2 focus:group-focus:border-[red]  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:margin-[0] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:margin-[0]"
+                onWheel={handleWheel}
+                onChange={(e) => setUserWeight(Number(e.target.value))}
+                type="number"
+                placeholder="Вес в кг"
+                name=""
+                id=""
+              />
+            </div>
+            <div className="flex justify-between">
+              <button
+                onClick={cancelWeightBtn}
+                className="mt-[10px] text-[16px] rounded-[45px] bg-[white] border-1 px-[16px] py-[8px] hover:bg-[#C6FF00] hover:cursor-pointer"
+              >
+                Отмена
+              </button>
+
+              <button
+                onClick={confirmWeightBtn}
+                className="mt-[10px] text-[16px] rounded-[45px] border-1 border-[#BCEC30] bg-[#BCEC30] px-[16px] py-[8px] hover:bg-[#C6FF00] hover:cursor-pointer"
+              >
+                Далее
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <Header />
-      <div className="px-[16px] pb-[50px]">
+
+      <div className="px-[16px] pb-[20px]">
         <div
           onClick={backBtn}
           className="text-[24px] opacity-[0.7] pb-[10px] hover:underline cursor-pointer"
@@ -122,71 +217,100 @@ const startOver = ()=>{
           &laquo; Назад
         </div>
         <h1 className="text-[32px] pl-[25px] pb-[20px] font-600">
-          {selectedWorkout.nameRU}
+          {selectedWorkout?.nameRU}
         </h1>
-        {isAuth ? (
-          workoutsId.includes(selectedWorkout.id) ? (
-            <div
-              title="Удалить из избранных"
-              onClick={(e) => addFavoriteWorkout(e, selectedWorkout)}
-              className="bg-[red] shadow-[0px_0px_20px_0px_white] place-self-end relative top-[45px] right-[15px] hover:scale-[1.3] hover:border-[#000000] hover:border-[1px] transition-[0.3s] w-[27px] h-[27px] rounded-[100%] relative"
-            >
-              <div className="h-[3px] w-[15px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
-            </div>
-          ) : (
-            <div
-              title="Добавить в избранные"
-              onClick={(e) => addFavoriteWorkout(e, selectedWorkout)}
-              className="bg-[green] shadow-[0px_0px_20px_0px_white] place-self-end relative top-[45px] right-[15px] hover:scale-[1.3] hover:border-[#000000] hover:border-[1px] transition-[0.3s] w-[27px] h-[27px] rounded-[100%] relative"
-            >
-              <div className="h-[15px] w-[3px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
-              <div className="h-[3px] w-[15px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
-            </div>
-          )
-        ) : null}
-        <img
-          className="rounded-[30px] flex place-self-center mb-[40px]"
-          src={selectedWorkout.img}
-          alt={selectedWorkout.nameEN}
-        />
-
-        {selectedWorkout.description && (
-          <div className="relative p-[30px] mb-[10px] bg-white rounded-[30px] w-full shadow-[0px_0px_10px_-7px]">
-            <p className="text-justify">
-              <span className="text-[18px] font-[600]"></span>
-              {selectedWorkout.description}
-            </p>
+        <div className="flex flex-col md:flex-row md:gap-[20px] place-items-center  md:items-center justify-center">
+          <div className="relative w-[300px]">
+            {isAuth && selectedWorkout ? (
+              favoriteWorkoutId.includes(selectedWorkout.id) ? (
+                <div
+                  title="Удалить из избранных"
+                  onClick={(e) => addFavoriteWorkout(e)}
+                  className="bg-[red] z-1 shadow-[0px_0px_20px_0px_white] place-self-end relative top-[45px] right-[15px] hover:scale-[1.3] hover:border-[#000000] hover:border-[1px] transition-[0.3s] w-[27px] h-[27px] rounded-[100%] relative"
+                >
+                  <div className="h-[3px] w-[15px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
+                </div>
+              ) : (
+                <div
+                  title="Добавить в избранные"
+                  onClick={(e) => addFavoriteWorkout(e)}
+                  className="bg-[green] z-1 shadow-[0px_0px_20px_0px_white] place-self-end relative top-[45px] right-[15px]  hover:scale-[1.3] top-[10px] hover:border-[#000000] hover:border-[1px] transition-[0.3s] w-[27px] h-[27px] rounded-[100%] relative"
+                >
+                  <div className="h-[15px] w-[3px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
+                  <div className="h-[3px] w-[15px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
+                </div>
+              )
+            ) : null}
+            <img
+              className="rounded-[30px] flex place-self-center mb-[40px]"
+              src={selectedWorkout?.img}
+              alt={selectedWorkout?.nameEN}
+            />
           </div>
-        )}
+          {selectedWorkout?.description && (
+            <div className="relative p-[30px] mb-[10px] bg-white rounded-[30px] w-full shadow-[0px_0px_10px_-7px]">
+              <p className="text-justify">
+                <span className="text-[18px] font-[600]"></span>
+                {selectedWorkout.description}
+              </p>
+            </div>
+          )}
+        </div>
         <p className="text-[24px] pb-[20px] pl-[10px]">Упражнения:</p>
 
         <div className="flex flex-wrap gap-[10px] justify-center p-[30px] mb-[10px] bg-white rounded-[30px] w-full shadow-[0px_0px_10px_-7px]">
-          {selectedWorkout.workouts.map(
+          {selectedWorkout?.exercises.map(
             (exercise: exercisesType, index: number) => (
               <div>
                 <div className="w-[300px] p-[20px] border-[black] border-1 rounded-[20px] shadow-[0px_0px_15px_-10px]">
-                  <img className="cursor-pointer " src={exercise.img} alt="" />
+                  <img
+                    className="cursor-pointer w-full"
+                    src={exercise.img}
+                    alt=""
+                  />
                   <p className="text-[24px]">{exercise.name}</p>
                   <div>
                     {isStartingWorkout && (
                       <>
-                        {exercise.sets !== exercise.doneReps?.length && (
+                        {additionalSetting.noSets.includes(exercise.id) ? ( // подходы и повторения
                           <div className="pb-[10px]">
                             <span>Подходы:</span>
                             <span> {exercise.sets}</span>
                             <br />
-                            <span>Повторения:</span>
-                            <span> {exercise.reps}</span>
                           </div>
+                        ) : (
+                          exercise.sets * exercise.reps !==
+                            exercise.doneReps?.length && (
+                            <div className="pb-[10px]">
+                              {exercise.sets && (
+                                <>
+                                  <span>Подходы:</span>
+                                  <span> {exercise.sets}</span>
+                                  <br />
+                                </>
+                              )}
+                              <span>
+                                {exercise.static ? "Время:" : "Повторения:"}
+                              </span>
+                              <span>
+                                {" "}
+                                {exercise.static
+                                  ? timeHHMMSS(exercise.reps) + " мин"
+                                  : exercise.reps}
+                              </span>
+                            </div>
+                          )
                         )}
 
-                        {exercise.doneReps !== undefined && (
+                        {exercise.doneReps !== undefined && ( // таблица
                           <div>
                             <div className="flex justify-around">
                               <span>Подходы </span>
-                              <span>Повторения</span>
+                              <span>
+                                {exercise.static ? "Время" : "Повторения"}{" "}
+                              </span>
                             </div>
-                            {exercise.doneReps.map((i, index) => (
+                            {exercise.table?.map((i, index) => (
                               <div className="flex border-t-1 border-l-1 border-r-1 last:border-b-1">
                                 <p className="border-r-1 w-[50%] text-center">
                                   {index + 1}
@@ -200,50 +324,53 @@ const startOver = ()=>{
                                 Всего:
                               </span>
                               <span className="w-[50%] text-center">
-                                {exercise.doneReps?.reduce(
-                                  (acc, cur) => acc + cur,
-                                  0
-                                )}
+                                {exercise.static
+                                  ? timeHHMMSS(exercise.doneReps)
+                                  : exercise.doneReps}
                               </span>
                             </div>
 
                             <progress
                               className="w-full pt-[10px] [&::-webkit-progress-bar]:rounded-[50px] [&::-webkit-progress-bar]:h-[6px] [&::-webkit-progress-bar]:bg-[#F7F7F7] [&::-webkit-progress-value]:bg-[#00C1FF] [&::-webkit-progress-value]:rounded-[50px] "
-                              value={exercise.doneReps?.reduce(
-                                (acc, cur) => acc + cur,
-                                0
-                              )}
+                              value={exercise.doneReps}
                               max={exercise.reps * exercise.sets}
                             ></progress>
                           </div>
                         )}
 
-                        {exercise.reps * exercise.sets <=
-                        exercise.doneReps?.reduce(
-                          (acc, cur) => acc + cur,
-                          0
-                        ) ? (
+                        {exercise.reps * exercise.sets <= exercise.doneReps ? (
                           <p className="text-[24px] text-shadow-[0px_0px_10px] text-center mt-[10px] text-[#00bd44]">
                             Сделано
                           </p>
+                        ) : exercise.static ? (
+                          <StartTimeBtn
+                            addRepsBtn={addRepsBtn}
+                            exercise={exercise}
+                            time={exercise.reps}
+                          />
                         ) : (
-                          <>
-                            <div className="flex mt-[10px]">
-                              <input
-                                ref={(el) => (repsRef.current[index] = el)}
-                                min={0}
-                                className="w-full textfield rounded-tl-[5px] rounded-bl-[5px] py-[5px] px-[10px] border-t-1 border-l-1 border-b-1 focus: outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                type="number"
-                                placeholder="Количество повторений"
-                              />
-                              <button
-                                onClick={() => addRepsBtn(exercise)}
-                                className="border-t-1 border-b-1 border-r-1 hover:bg-[#C6FF00] cursor-pointer bg-[#BCEC30] w-[30px] rounded-tr-[5px] rounded-br-[5px] relative"
-                              >
-                                <div className="w-[10px] h-[10px] border-l-2 border-b-2 rotate-[225deg] absolute transform  top-[50%] left-[40%] translate-x-[-50%] translate-y-[-50%]"></div>
-                              </button>
-                            </div>
-                          </>
+                          <div className="flex mt-[10px]">
+                            <input
+                              ref={(el) => (repsRef.current[index] = el)}
+                              min={0}
+                              className="w-full textfield rounded-tl-[5px] rounded-bl-[5px] py-[5px] px-[10px] border-t-1 border-l-1 border-b-1 focus: outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                              type="number"
+                              placeholder="Количество повторений"
+                            />
+                            <button
+                              onClick={() =>
+                                addRepsBtn(
+                                  exercise,
+                                  repsRef.current[
+                                    selectedWorkout.exercises.indexOf(exercise)
+                                  ]?.value
+                                )
+                              }
+                              className="border-t-1 border-b-1 border-r-1 hover:bg-[#C6FF00] cursor-pointer bg-[#BCEC30] w-[30px] rounded-tr-[5px] rounded-br-[5px] relative"
+                            >
+                              <div className="w-[10px] h-[10px] border-l-2 border-b-2 rotate-[225deg] absolute transform  top-[50%] left-[40%] translate-x-[-50%] translate-y-[-50%]"></div>
+                            </button>
+                          </div>
                         )}
                       </>
                     )}
@@ -255,12 +382,26 @@ const startOver = ()=>{
         </div>
         {doneWorkout ? (
           <div>
-            <button
-              onClick={startOver}
-              className="mt-[28px] text-[16px] w-full rounded-[45px] bg-[#fff] border-1 px-[16px] py-[8px] hover:bg-[#C6FF00] hover:cursor-pointer"
-            >
-              Начать заново
-            </button>
+            <p className="text-[24px] text-shadow-[0px_0px_10px] text-center mt-[10px] text-[#00bd44]">
+              Тренировка закончена
+            </p>
+            <div className="flex justify-center items-center">
+              <svg viewBox="0 0 32 32" width="20px" height="20px">
+                <path d="M 16 4 C 9.382813 4 4 9.382813 4 16 C 4 22.617188 9.382813 28 16 28 C 22.617188 28 28 22.617188 28 16 C 28 9.382813 22.617188 4 16 4 Z M 16 6 C 21.535156 6 26 10.464844 26 16 C 26 21.535156 21.535156 26 16 26 C 10.464844 26 6 21.535156 6 16 C 6 10.464844 10.464844 6 16 6 Z M 15 8 L 15 17 L 22 17 L 22 15 L 17 15 L 17 8 Z" />
+              </svg>
+
+              <span className="font-medium pl-[5px]">{timeHHMMSS(time)}</span>
+
+              {selectedWorkout?.timeLimit && (
+                <p>
+                  /{" "}
+                  <span className="font-medium">
+                    {timeHHMMSS(selectedWorkout.timeLimit)}
+                  </span>{" "}
+                  мин
+                </p>
+              )}
+            </div>
             <button
               onClick={backBtn}
               className="mt-[10px] text-[16px] w-full rounded-[45px] bg-[#BCEC30] px-[16px] py-[8px] hover:bg-[#C6FF00] hover:cursor-pointer"
@@ -268,17 +409,51 @@ const startOver = ()=>{
               Вернуться на главное
             </button>
           </div>
+        ) : isStartingWorkout ? (
+          <>
+            <div className="text-center text-[20px]">
+              Время тренировки: <Stopwatch time={time} setTime={setTime} />{" "}
+            </div>
+
+            <button
+              onClick={finishWorkout}
+              className={
+                "mt-[28px] text-[#fff] text-[16px] w-full rounded-[45px] bg-[#ec3030] px-[16px] py-[8px] hover:bg-[#C6FF00] hover:cursor-pointer"
+              }
+            >
+              Закончить тренировку
+            </button>
+          </>
         ) : (
-          <button
-            onClick={startWorkout}
-            className={
-              isStartingWorkout
-                ? "mt-[28px] text-[#fff] text-[16px] w-full rounded-[45px] bg-[#ec3030] px-[16px] py-[8px] hover:bg-[#C6FF00] hover:cursor-pointer"
-                : "mt-[28px] text-[16px] w-full rounded-[45px] bg-[#BCEC30] px-[16px] py-[8px] hover:bg-[#C6FF00] hover:cursor-pointer"
-            }
+          <>
+            {selectedWorkout?.timeLimit && (
+              <>
+                <div className="flex justify-center text-[20px]">
+                  Время на тренировку:
+                  <span className="pl-[5px]">
+                    {timeHHMMSS(selectedWorkout.timeLimit)} мин
+                  </span>
+                </div>
+                {userWeight && (
+                  <div
+                    className="text-center mt-[10px] text-[18px]"
+                    onClick={editWeightBtn}
+                  >
+                    Ваш вес: {userWeight} кг
+                  </div>
+                )}
+              </>
+            )}
+            <BottomBtn onClick={startWorkout} btnText={"Начать тренировку"} />
+          </>
+        )}
+        {selectedWorkout?.custom && !isStartingWorkout && (
+          <p
+            onClick={deleteWorkout}
+            className="mt-[30px] text-center cursor-pointer hover:underline text-[red]"
           >
-            {isStartingWorkout ? "Закончить тренировку" : " Начать тренировку"}
-          </button>
+            Удалить тренировку
+          </p>
         )}
       </div>
     </>

@@ -6,6 +6,7 @@ import { Outlet } from "react-router-dom";
 import { Filter } from "../components/Filter";
 import type { workoutType } from "../types/types";
 import { Workout } from "../components/Workout";
+import { BottomBtn } from "../components/BottomBtn";
 
 export const sortArray = (a, b) => {
   if (a.order > b.order) {
@@ -17,13 +18,8 @@ export const sortArray = (a, b) => {
 
 export default function Main() {
   const {
-    user,
-    isAuth,
-    setIsOpenProfile,
     workouts,
     changeWorkouts,
-    workoutsId,
-    setWorkoutsId,
   } = useContext(SetContext);
   const [search, setSearch] = useState<string>("");
   const [filteredCourses, setFilteredCourses] = useState<workoutType[] | []>(
@@ -36,15 +32,6 @@ export default function Main() {
       changeWorkouts(JSON.parse(savedCourses).sort(sortArray));
     } else {
       changeWorkouts(data.workouts.sort(sortArray));
-    }
-  }, []);
-
-  useEffect(() => {
-    setIsOpenProfile(false);
-    if (isAuth) {
-      user.myWorkouts.map((i: workoutType) => {
-        setWorkoutsId([...workoutsId, i.id]);
-      });
     }
   }, []);
 
@@ -83,14 +70,9 @@ export default function Main() {
         <div className="pt-[20px] flex gap-[24px] flex-wrap justify-center">
           {search === ""
             ? workouts.map((i: workoutType) => <Workout i={i} />)
-            : filteredCourses.map((i: workoutType) => <p></p>)}
+            : filteredCourses.map((i: workoutType) => <Workout i={i} />)}
         </div>
-        <button
-          onClick={handleToTopBtn}
-          className="flex place-self-end mt-[30px] md:place-self-center text-[18px] rounded-[45px] bg-[#BCEC30] px-[16px] py-[8px] mb-[30px] "
-        >
-          Наверх &#8593;
-        </button>
+        <BottomBtn onClick={handleToTopBtn} btnText={<p>Наверх &#8593;</p>} />
       </div>
     </>
   );
