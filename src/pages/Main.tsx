@@ -17,19 +17,16 @@ export const sortArray = (a, b) => {
 };
 
 export default function Main() {
-  const {
-    workouts,
-    changeWorkouts,
-  } = useContext(SetContext);
+  const { workouts, changeWorkouts } = useContext(SetContext);
   const [search, setSearch] = useState<string>("");
   const [filteredCourses, setFilteredCourses] = useState<workoutType[] | []>(
     []
   );
 
   useEffect(() => {
-    const savedCourses = localStorage.getItem("workouts");
-    if (savedCourses) {
-      changeWorkouts(JSON.parse(savedCourses).sort(sortArray));
+    const savedWorkouts = localStorage.getItem("workouts");
+    if (savedWorkouts) {
+      changeWorkouts(JSON.parse(savedWorkouts).sort(sortArray));
     } else {
       changeWorkouts(data.workouts.sort(sortArray));
     }

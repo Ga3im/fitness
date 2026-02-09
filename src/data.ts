@@ -262,16 +262,17 @@ export const exercises = [
     id: "hangonthebar",
     name: "Вис на турнике",
     img: "/workouts/hangonthebar.png",
+    static: true,
   },
   ,
   {
     id: "press",
-    name: "Пресс",
+    name: "Подъем туловища",
     img: "/workouts/presslie.png",
   },
   {
     id: "hyperextension",
-    name: "Гиперэкстен-зия",
+    name: "Гиперэкстензия",
     img: "/workouts/hyperextension.png",
   },
   {

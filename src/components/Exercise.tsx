@@ -3,20 +3,25 @@ import type { ExercisePropType, exercisesType } from "../types/types";
 import { SetContext } from "../context/context";
 import { InputTime } from "./InputTime";
 
-export const Exercise = ({ i, emptyReps, setEmptyReps }: ExercisePropType) => {
+export const Exercise = ({
+  i,
+  emptyReps,
+  setEmptyReps,
+  workout,
+  setWorkout,
+}: ExercisePropType) => {
   const [isAdditionalSetting, setIsAdditionalSetting] =
     useState<boolean>(false);
   const [isSetting, setIsSetting] = useState<boolean>(false);
   const [exercisesId, setExercisesId] = useState<string[]>([]);
-  const { workout, changeWorkout, additionalSetting, setAdditionalSetting } =
-    useContext(SetContext);
+  const { additionalSetting, setAdditionalSetting } = useContext(SetContext);
 
   const exerciseClick = (exercise: exercisesType) => {
     if (exercisesId.includes(exercise.id)) {
       workout.exercises.map((i: exercisesType) => {
         if (i.id === exercise.id) {
           delete exercise.reps;
-          changeWorkout({
+          setWorkout({
             ...workout,
             exercises: workout.exercises.filter(
               (item: exercisesType) => item.id !== exercise.id
@@ -28,7 +33,7 @@ export const Exercise = ({ i, emptyReps, setEmptyReps }: ExercisePropType) => {
       setIsSetting(false);
     } else {
       exercise.sets = 1;
-      changeWorkout({
+      setWorkout({
         ...workout,
         exercises: [...workout.exercises, exercise],
       });
@@ -42,9 +47,21 @@ export const Exercise = ({ i, emptyReps, setEmptyReps }: ExercisePropType) => {
     (e.target as HTMLElement).blur();
   };
 
-  const changeReps = (val: string, exercise: exercisesType) => {
-    if (Number(val) > 0) {
-      workout.exercises[workout.exercises.indexOf(exercise)].reps = Number(val);
+  const focusInput = (exercise) => {
+    if (!exercisesId.includes(exercise.id)) {
+      exercise.sets = 1;
+      setWorkout({
+        ...workout,
+        exercises: [...workout.exercises, exercise],
+      });
+
+      setExercisesId([...exercisesId, exercise.id]);
+    }
+  };
+
+  const changeReps = (val: number, exercise: exercisesType) => {
+    if (val > 0) {
+      workout.exercises[workout.exercises.indexOf(exercise)].reps = val;
       setEmptyReps(emptyReps.filter((i: string) => i !== exercise.id));
     }
   };
@@ -82,22 +99,28 @@ export const Exercise = ({ i, emptyReps, setEmptyReps }: ExercisePropType) => {
         key={i.id}
         className={
           exercisesId.includes(i.id)
-            ? `w-[300px] p-[20px] border-[#00ff14] border-1 rounded-[20px] shadow-[0px_0px_10px_0px_#00ff14]`
-            : `w-[300px] p-[20px] border-1 rounded-[20px] shadow-[0px_0px_10px_0px]`
+            ? `w-[300px] h-[100%] p-[20px] border-[#00ff14] border-1 rounded-[20px] shadow-[0px_0px_10px_0px_#00ff14]`
+            : `w-[300px] h-[100%] p-[20px] border-1 rounded-[20px] shadow-[0px_0px_10px_0px]`
         }
       >
-        <img
-          onClick={() => exerciseClick(i)}
-          className="mb-[10px]"
-          src={i.img}
-        />
+        <div className="h-[240px] content-center">
+          <img
+            onClick={() => exerciseClick(i)}
+            className="mb-[10px]"
+            src={i.img}
+          />
+        </div>
         <p onClick={() => exerciseClick(i)} className="text-[24px] pb-[20px]">
           {i.name}
         </p>
 
         <div
           onClick={() => setIsSetting(!isSetting)}
-          className="h-[30px] w-full bg-[#f7f7f7] flex justify-center items-end shadow-[0px_0px_14px_-10px] rounded-[5px]"
+          className={
+            emptyReps.includes(i.id)
+              ? "border-[red] border-2 h-[30px] w-full bg-[#f7f7f7] flex justify-center items-end shadow-[0px_0px_14px_-10px] rounded-[5px]"
+              : "h-[30px] w-full bg-[#f7f7f7] flex justify-center items-end shadow-[0px_0px_14px_-10px] rounded-[5px]"
+          }
         >
           <div
             className={
@@ -112,6 +135,7 @@ export const Exercise = ({ i, emptyReps, setEmptyReps }: ExercisePropType) => {
             <div className="flex flex-col gap-[5px] pb-[10px]">
               <p className="text-[20px] pt-[10px]">Подходы:</p>
               <input
+                onFocus={() => focusInput(i)}
                 onWheel={(e) => handleWheel(e)}
                 onChange={(e) => changeSets(e, i)}
                 className="border-[1px] border-[#000000] px-[16px] py-[8px] rounded-[10px]"
@@ -124,14 +148,19 @@ export const Exercise = ({ i, emptyReps, setEmptyReps }: ExercisePropType) => {
             {!additionalSetting.noSets.includes(i.id) && i.static ? (
               <div className="flex flex-col gap-[5px] pb-[10px]">
                 <p className="text-[20px]">Время:</p>
-                <InputTime i={i} changeReps={changeReps} />
+                <InputTime
+                  i={i}
+                  changeReps={changeReps}
+                  focusInput={focusInput}
+                />
               </div>
             ) : (
               <div className="flex flex-col gap-[5px] pb-[10px]">
                 <p className="text-[20px]">Повторения:</p>
                 <input
+                  onFocus={() => focusInput(i)}
                   onWheel={handleWheel}
-                  onChange={(e) => changeReps(e.target.value, i)}
+                  onChange={(e) => changeReps(Number(e.target.value), i)}
                   className={
                     emptyReps.includes(i.id)
                       ? "border-[2px] border-[red] px-[16px] py-[8px] rounded-[10px] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:margin-[0] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:margin-[0]"

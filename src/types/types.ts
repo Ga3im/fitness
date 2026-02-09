@@ -75,7 +75,7 @@ export type additionalSettingType = {
 };
 
 export type contextType = {
-  selectedWorkout: workoutType | null;
+  startedWorkout: workoutType | null;
   isOpenProfile: boolean;
   setIsOpenProfile: Dispatch<SetStateAction<boolean>>;
   isAuth: boolean;
@@ -89,16 +89,18 @@ export type contextType = {
   setIsLoading: Dispatch<SetStateAction<boolean>>;
   changeAccounts: (newAccount: userType) => void;
   setAccounts: Dispatch<SetStateAction<userType[]>>;
-  changeSelectedWorkout: (newWorkout: workoutType) => void;
+  changeStartededWorkout: (newWorkout: workoutType) => void;
   workouts: workoutType[];
   setWorkouts: Dispatch<SetStateAction<workoutType[]>>;
   changeWorkouts: (workouts: workoutType[]) => void;
-  workout: workoutType;
-  changeWorkout: (workouts: workoutType) => void;
-  isStartingWorkout: boolean;
-  setIsStartingWorkout: Dispatch<SetStateAction<boolean>>;
+  isStartingWorkout: workoutType | null;
+  setIsStartingWorkout: Dispatch<SetStateAction<workoutType | null>>;
   favoriteWorkoutId: string[];
   setFavoriteWorkoutId: Dispatch<SetStateAction<string[]>>;
   additionalSetting: additionalSettingType;
   setAdditionalSetting: Dispatch<SetStateAction<additionalSettingType>>;
+  time: number;
+  setTime: Dispatch<SetStateAction<number>>;
+  viewWorkout: workoutType | null;
+  changeViewWorkout: (workout: workoutType) => void;
 };

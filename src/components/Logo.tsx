@@ -15,7 +15,7 @@ export const Logo = () => {
   return (
     <>
       <div onClick={handleLogoClick} className="flex gap-[10px] items-center">
-        <img className="w-[150px]" src="logo.png" alt="" />
+        <img className="w-[150px]" src="/logo.png" alt="" />
       </div>
     </>
   );

@@ -4,23 +4,32 @@ import { router } from "./router";
 import { useContext, useEffect, useState } from "react";
 import { Filter } from "../components/Filter";
 import { SetContext } from "../context/context";
-import type { exercisesType } from "../types/types";
+import type { exercisesType, workoutType } from "../types/types";
 import { exercises } from "../data";
 import { BottomBtn } from "../components/BottomBtn";
 import { Exercise } from "../components/Exercise";
 
 export const CreateWorkout = () => {
-  const { changeWorkouts, workouts, workout, changeWorkout, setIsOpenProfile } =
+  const { changeWorkouts, workouts, setIsOpenProfile } =
     useContext(SetContext);
   const [isSelectedName, setIsSelectedName] = useState<boolean>(true);
   const [isSelectedExercise, setIsSelectedExercise] = useState<boolean>(true);
   const [emptyReps, setEmptyReps] = useState<string[]>([]);
-
   const [displayedExercises, setDisplayedExercisess] = useState<
     exercisesType[]
   >([]);
   const [search, setSearch] = useState<string>("");
   const [filteredExercises, setFilteredExercises] = useState<[]>([]);
+  const [workout, setWorkout] = useState<workoutType>({
+    id: "",
+    description: "",
+    order: workouts.length,
+    img: "",
+    nameRU: "",
+    nameEN: "",
+    exercises: [],
+    custom: true,
+  });
 
   const navigate = useNavigate();
 
@@ -44,7 +53,7 @@ export const CreateWorkout = () => {
   }, []);
 
   useEffect(() => {
-    changeWorkout({
+    setWorkout({
       ...workout,
       id: Math.random().toString(32),
       img: "/img/custom.jpg",
@@ -129,17 +138,6 @@ export const CreateWorkout = () => {
       emptyReps.length === 0
     ) {
       changeWorkouts([...workouts, workout]);
-      changeWorkout({
-        ...workout,
-        id: "",
-        description: "",
-        order: workouts.length,
-        img: "",
-        nameRU: "",
-        nameEN: "",
-        exercises: [],
-        custom: true,
-      });
       setEmptyReps([]);
       setIsOpenProfile(false);
       navigate(router.main);
@@ -162,9 +160,7 @@ export const CreateWorkout = () => {
         <div className="flex flex-col gap-[10px] pb-[20px]">
           <p className="text-[26px]">Название тренировки:</p>
           <input
-            onChange={(e) =>
-              changeWorkout({ ...workout, nameRU: e.target.value })
-            }
+            onChange={(e) => setWorkout({ ...workout, nameRU: e.target.value })}
             className={
               isSelectedName
                 ? "border-[1px] border-[#000000] px-[16px] py-[8px] rounded-[10px]"
@@ -203,7 +199,7 @@ export const CreateWorkout = () => {
         )}
         <textarea
           onChange={(e) =>
-            changeWorkout({ ...workout, descreption: e.target.value })
+            setWorkout({ ...workout, description: e.target.value })
           }
           className="resize-none w-full mt-[10px] px-[10px] py-[5px] border-1 rounded-[10px]"
           name=""
@@ -229,6 +225,8 @@ export const CreateWorkout = () => {
             {search === ""
               ? displayedExercises.map((i: exercisesType) => (
                   <Exercise
+                    workout={workout}
+                    setWorkout={setWorkout}
                     i={i}
                     emptyReps={emptyReps}
                     setEmptyReps={setEmptyReps}

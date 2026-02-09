@@ -1,15 +1,21 @@
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import type { WorkoutPropType, workoutType } from "../types/types";
 import { SetContext } from "../context/context";
 import { useNavigate } from "react-router-dom";
 
 export const Workout = ({ i }: WorkoutPropType) => {
-  const { changeSelectedWorkout, user, isAuth, changeUser, favoriteWorkoutId } =
-    useContext(SetContext);
+  const {
+    user,
+    isAuth,
+    changeUser,
+    favoriteWorkoutId,
+    changeViewWorkout,
+    startedWorkout,
+  } = useContext(SetContext);
   const navigate = useNavigate();
-  
+
   const workoutClick = (workout: workoutType) => {
-    changeSelectedWorkout(workout);
+    changeViewWorkout(workout);
     navigate(`/workout/${workout.id}`);
   };
 
@@ -40,27 +46,29 @@ export const Workout = ({ i }: WorkoutPropType) => {
       className="rounded-[30px] px-[16px] pb-[15px] shadow-[0px_0px_10px_-7px] hover:cursor-pointer"
       key={i.id}
     >
-      {isAuth ? (
-        favoriteWorkoutId.includes(i.id) ? (
-          <div
-            title="Удалить из избранных"
-            onClick={(e) => addFavoriteWorkout(e, i)}
-            className="bg-[red] z-1 shadow-[0px_0px_20px_0px_white] place-self-end relative top-[35px] right-[15px] hover:scale-[1.3] hover:border-[#000000] hover:border-[1px] transition-[0.3s] w-[27px] h-[27px] rounded-[100%] relative"
-          >
-            <div className="h-[3px] w-[15px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
-          </div>
-        ) : (
-          <div
-            title="Добавить в избранные"
-            onClick={(e) => addFavoriteWorkout(e, i)}
-            className="bg-[green] shadow-[0px_0px_20px_0px_white] z-1 place-self-end relative top-[35px] right-[15px]  hover:scale-[1.3] top-[10px] hover:border-[#000000] hover:border-[1px] transition-[0.3s] w-[27px] h-[27px] rounded-[100%] relative"
-          >
-            <div className="h-[15px] w-[3px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
-            <div className="h-[3px] w-[15px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
-          </div>
-        )
-      ) : null}
-      <div className="flex justify-center relative bottom-[10px] w-[300px] place-self-center">
+      <div className="place-self-end">
+        {isAuth ? (
+          favoriteWorkoutId.includes(i.id) ? (
+            <div
+              title="Удалить из избранных"
+              onClick={(e) => addFavoriteWorkout(e, i)}
+              className="bg-[red] z-1 shadow-[0px_0px_20px_0px_white] place-self-end relative top-[30px] right-[10px] hover:scale-[1.3] hover:border-[#000000] hover:border-[1px] transition-[0.3s] w-[27px] h-[27px] rounded-[100%] relative"
+            >
+              <div className="h-[3px] w-[15px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
+            </div>
+          ) : (
+            <div
+              title="Добавить в избранные"
+              onClick={(e) => addFavoriteWorkout(e, i)}
+              className="place-self-end relative top-[30px] right-[10px] bg-[green] shadow-[0px_0px_20px_0px_white] z-1 hover:scale-[1.3] hover:border-[#000000] hover:border-[1px] transition-[0.3s] w-[27px] h-[27px] rounded-[100%] relative"
+            >
+              <div className="h-[15px] w-[3px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
+              <div className="h-[3px] w-[15px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
+            </div>
+          )
+        ) : null}
+      </div>
+      <div className="flex flex-wrap content-center justify-center w-[300px] flex h-[340px]">
         <img
           className={
             isAuth
@@ -127,8 +135,20 @@ export const Workout = ({ i }: WorkoutPropType) => {
             </svg>
             <p>Сложность</p>
           </div>
+          {startedWorkout && startedWorkout.timeLimit && (
+            <div className="flex gap-[5px] items-center bg-[#F7F7F7] rounded-[50px] p-[10px] pr-[20px]">
+              <svg viewBox="0 0 32 32" width="20px" height="20px">
+                <path d="M 16 4 C 9.382813 4 4 9.382813 4 16 C 4 22.617188 9.382813 28 16 28 C 22.617188 28 28 22.617188 28 16 C 28 9.382813 22.617188 4 16 4 Z M 16 6 C 21.535156 6 26 10.464844 26 16 C 26 21.535156 21.535156 26 16 26 C 10.464844 26 6 21.535156 6 16 C 6 10.464844 10.464844 6 16 6 Z M 15 8 L 15 17 L 22 17 L 22 15 L 17 15 L 17 8 Z" />
+              </svg>
+            </div>
+          )}
         </div>
       </div>
+      {startedWorkout !== null && startedWorkout.id === i.id && (
+        <button className="flex place-self-center place-content-center w-full mt-[20px] text-[18px] rounded-[45px] bg-[#BCEC30] hover:bg-[#C6FF00] active:bg-[#A0B000] active:text-[white] px-[16px] py-[8px] mb-[10px]">
+          Продолжить
+        </button>
+      )}
     </div>
   );
 };

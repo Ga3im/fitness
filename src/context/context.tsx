@@ -9,49 +9,47 @@ import type {
 
 export const SetContext = createContext<contextType | null>(null);
 export const SettingProvider = ({ children }: MyProps) => {
-  let [selectedWorkout, setSelectedWorkout] = useState<workoutType | null>(
-    null
-  );
+  let [startedWorkout, setStartedWorkout] = useState<workoutType | null>(null);
   const [isOpenProfile, setIsOpenProfile] = useState<boolean>(false);
   const [isAuth, setIsAuth] = useState<boolean>(false);
   const [user, setUser] = useState<userType | null>(null);
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [accounts, setAccounts] = useState<userType[]>([]);
-  const [isStartingWorkout, setIsStartingWorkout] = useState<boolean>(false);
+  const [isStartingWorkout, setIsStartingWorkout] =
+    useState<workoutType | null>(null);
   const [workouts, setWorkouts] = useState<workoutType[]>([]);
+  let [time, setTime] = useState<number>(0);
+  const [viewWorkout, setViewWorkout] = useState<workoutType | null>(null);
+  let interval: number;
+
   const [favoriteWorkoutId, setFavoriteWorkoutId] = useState<string[]>([]);
-    const [additionalSetting, setAdditionalSetting] =
+  const [additionalSetting, setAdditionalSetting] =
     useState<additionalSettingType>({
       isTimeReps: false,
       isTimeSets: false,
       noSets: [],
     });
 
-  const [workout, setWorkout] = useState<workoutType>({
-    id: "",
-    description: "",
-    order: workouts.length,
-    img: "",
-    nameRU: "",
-    nameEN: "",
-    exercises: [],
-    custom: true,
-  });
-
   const changeWorkouts = (workouts: workoutType[]) => {
     setWorkouts(workouts);
     localStorage.setItem("workouts", JSON.stringify(workouts));
   };
 
-  const changeWorkout = (workout: workoutType) => {
-    setWorkout(workout);
-    localStorage.setItem("workout", JSON.stringify(workout));
+  const changeViewWorkout = (workout: workoutType) => {
+    setViewWorkout(workout);
+    localStorage.setItem("viewWorkout", JSON.stringify(workout));
   };
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("user");
+    const savedStartedWorkout = localStorage.getItem("startedWorkout");
+    if (savedStartedWorkout) {
+      changeStartededWorkout(JSON.parse(savedStartedWorkout));
+    }
+  }, []);
 
+  useEffect(() => {
+    const savedUser = localStorage.getItem("user");
     if (savedUser) {
       setUser(JSON.parse(savedUser));
       setIsAuth(true);
@@ -79,15 +77,25 @@ export const SettingProvider = ({ children }: MyProps) => {
     setFavoriteWorkoutId(arr);
   }, [user]);
 
-  const changeSelectedWorkout = (newWorkout: workoutType) => {
-    setSelectedWorkout(newWorkout);
-    localStorage.setItem("selectedWorkout", JSON.stringify(newWorkout));
+  useEffect(() => {
+    interval = setInterval(() => {
+      setTime(time++);
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
+  const changeStartededWorkout = (newWorkout: workoutType) => {
+    setStartedWorkout(newWorkout);
+    localStorage.setItem("startedWorkout", JSON.stringify(newWorkout));
   };
 
   return (
     <SetContext.Provider
       value={{
-        selectedWorkout,
+        startedWorkout,
         isOpenProfile,
         setIsOpenProfile,
         isAuth,
@@ -101,18 +109,20 @@ export const SettingProvider = ({ children }: MyProps) => {
         isLoading,
         setIsLoading,
         changeAccounts,
-        changeSelectedWorkout,
+        changeStartededWorkout,
         workouts,
         setWorkouts,
         changeWorkouts,
-        workout,
-        changeWorkout,
         isStartingWorkout,
         setIsStartingWorkout,
         favoriteWorkoutId,
         setFavoriteWorkoutId,
         additionalSetting,
-        setAdditionalSetting
+        setAdditionalSetting,
+        time,
+        setTime,
+        viewWorkout,
+        changeViewWorkout,
       }}
     >
       {children}

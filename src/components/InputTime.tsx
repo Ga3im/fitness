@@ -1,20 +1,25 @@
-import { useRef, useState } from "react";
-import type { timeType } from "../types/types";
+import { useEffect, useRef, useState } from "react";
 import { useOutsideClick } from "../hooks/modalClose";
 
-export const InputTime = ({ i, changeReps }) => {
+export const InputTime = ({ i, changeReps, focusInput }) => {
   const [isOpenMinList, setIsOpenMinList] = useState<boolean>(false);
   const [isOpenSecList, setIsOpenSecList] = useState<boolean>(false);
   const [isInputNumber, setIsInputNumber] = useState<boolean>(false);
-  const [time, setTime] = useState<timeType>({
-    seconds: 0,
+  const [time, setTime] = useState({
     minutes: 0,
+    seconds: 0,
   });
+
   const parentRef = useRef(null);
   const modalMinRef = useRef(null);
   const modalSecRef = useRef(null);
   const inputMinRef = useRef(null);
   const inputSecRef = useRef(null);
+
+  useEffect(() => {
+    let seconds = time.minutes * 60 + time.seconds;
+    changeReps(seconds, i);
+  }, [isOpenMinList, isOpenSecList]);
 
   const selectInput = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (parentRef.current === e.target) {
@@ -23,7 +28,8 @@ export const InputTime = ({ i, changeReps }) => {
   };
 
   const changeInputNumber = (e: string) => {
-    changeReps(e, i);
+    focusInput(i);
+    changeReps(Number(e), i);
   };
 
   const handleWheel = (e: React.WheelEvent<HTMLInputElement>) => {
@@ -31,11 +37,13 @@ export const InputTime = ({ i, changeReps }) => {
   };
 
   const openMinList = () => {
+    focusInput(i);
     setIsOpenMinList(!isOpenMinList);
     setIsOpenSecList(false);
   };
 
   const openSecList = () => {
+    focusInput(i);
     setIsOpenSecList(!isOpenSecList);
     setIsOpenMinList(false);
   };
@@ -53,6 +61,7 @@ export const InputTime = ({ i, changeReps }) => {
   ) => {
     e.stopPropagation();
     setTime({ ...time, minutes: min });
+    setIsOpenMinList(false);
   };
 
   const selectSeconds = (
@@ -61,7 +70,7 @@ export const InputTime = ({ i, changeReps }) => {
   ) => {
     e.stopPropagation();
     setTime({ ...time, seconds: sec });
-    changeReps(sec, i);
+    setIsOpenSecList(false);
   };
 
   const closeModal = () => {
@@ -85,6 +94,7 @@ export const InputTime = ({ i, changeReps }) => {
       >
         {isInputNumber ? (
           <input
+            onFocus={focusInput(i)}
             onChange={(e) => changeInputNumber(e.target.value)}
             onWheel={handleWheel}
             type="number"

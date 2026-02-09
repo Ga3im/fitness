@@ -7,55 +7,78 @@ import type { exercisesType, workoutType } from "../types/types";
 import { BottomBtn } from "../components/BottomBtn";
 import { Stopwatch } from "../components/Stopwatch";
 import { StartTimeBtn } from "../components/StartTimeBtn";
-
-const timeHHMMSS = (time: number): string => {
-  let hour;
-  let HH;
-  if (time >= 3600) {
-    hour = Math.floor(time / 3600);
-    HH = hour.toString().padStart(2, "0");
-  }
-  let min = Math.floor((time / 60) % 60);
-  let sec = time % 60;
-
-  let MM = min.toString().padStart(2, "0");
-  let SS = sec.toString().padStart(2, "0");
-  return time >= 3600 ? `${HH}:${MM}:${SS}` : `${MM}:${SS}`;
-};
+import { timeHHMMSS } from "../utils/functions";
 
 export default function WorkoutPage() {
   let {
     isAuth,
     user,
     changeUser,
-    selectedWorkout,
-    changeSelectedWorkout,
-    isStartingWorkout,
-    setIsStartingWorkout,
+    startedWorkout,
+    changeStartededWorkout,
     changeWorkouts,
     workouts,
     favoriteWorkoutId,
     additionalSetting,
+    time,
+    setTime,
+    viewWorkout,
+    changeViewWorkout,
   } = useContext(SetContext);
   const repsRef = useRef<(HTMLInputElement | null)[]>([]);
   const navigate = useNavigate();
   const [doneWorkout, setDoneWorkout] = useState<boolean>(false);
   const [userWeight, setUserWeight] = useState<number | null>(null);
   const [isEnteringWeight, setIsEnteringWeight] = useState<boolean>(false);
-  let [time, setTime] = useState<number>(0);
+  const [isConfirm, setIsConfirm] = useState<boolean>(false);
 
   let doneExerciseCount: number = 0;
+  let wakeLock: WakeLockSentinel | null = null;
+
+  const requestWakeLock = async () => {
+    try {
+      // Запрос блокировки экрана
+      wakeLock = await navigator.wakeLock.request("screen");
+      console.log("Экран не выключится");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const releaseWakeLock = async () => {
+    try {
+      await wakeLock?.release();
+      console.log("Cнятие блокировки");
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
-    selectedWorkout?.exercises.map((i: exercisesType) => {
+    return () => {
+      releaseWakeLock();
+    };
+  }, []);
+
+  useEffect(() => {
+    const savedViewWorkout = localStorage.getItem("viewWorkout");
+    if (savedViewWorkout) {
+      changeViewWorkout(JSON.parse(savedViewWorkout));
+    }
+  }, []);
+  let displayWorkout = viewWorkout; // объект с тренировками для отображения на странице
+
+  // событие на завершение тренировки
+  useEffect(() => {
+    startedWorkout?.exercises.map((i: exercisesType) => {
       if (i.done) {
         doneExerciseCount++;
       }
-      if (doneExerciseCount === selectedWorkout?.exercises.length) {
+      if (doneExerciseCount === startedWorkout?.exercises.length) {
         setDoneWorkout(true);
       }
     });
-  }, [selectedWorkout]);
+  }, [startedWorkout]);
 
   useEffect(() => {
     window.scrollTo({
@@ -64,15 +87,8 @@ export default function WorkoutPage() {
     });
   }, []);
 
-  if (selectedWorkout === null) {
-    let savedSelectedWorkout = localStorage.getItem("selectedWorkout");
-    if (savedSelectedWorkout) {
-      selectedWorkout = JSON.parse(savedSelectedWorkout);
-    }
-  }
-
-  const handleWheel = (e) => {
-    e.target.blur();
+  const handleWheel = (e: React.WheelEvent<HTMLInputElement>) => {
+    (e.target as HTMLElement).blur();
   };
 
   const cancelWeightBtn = () => {
@@ -80,20 +96,20 @@ export default function WorkoutPage() {
   };
 
   const confirmWeightBtn = () => {
-    if (userWeight && selectedWorkout) {
+    if (userWeight && startedWorkout) {
       let reps = Math.ceil(5000 / userWeight);
-      selectedWorkout?.exercises.map((i) => {
+      startedWorkout?.exercises.map((i: exercisesType) => {
         i.reps = reps;
       });
-      changeSelectedWorkout({ ...selectedWorkout, needWeight: false });
+      changeStartededWorkout({ ...startedWorkout, needWeight: false });
 
       setIsEnteringWeight(false);
     }
   };
 
   const backBtn = () => {
-    setIsStartingWorkout(false);
-    localStorage.removeItem("selectedWorkout");
+    releaseWakeLock();
+    localStorage.removeItem("viewWorkout");
     navigate(router.main);
   };
 
@@ -104,21 +120,21 @@ export default function WorkoutPage() {
     if (user.myWorkouts.length === 0) {
       changeUser({
         ...user,
-        myWorkouts: [...user.myWorkouts, selectedWorkout],
+        myWorkouts: [...user.myWorkouts, startedWorkout],
       });
     } else {
       user.myWorkouts.map((i: workoutType) => {
-        if (i.id === selectedWorkout.id) {
+        if (i.id === startedWorkout.id) {
           changeUser({
             ...user,
             myWorkouts: user.myWorkouts.filter(
-              (i: exercisesType) => i.id !== selectedWorkout.id
+              (i: exercisesType) => i.id !== startedWorkout.id
             ),
           });
         } else {
           changeUser({
             ...user,
-            myWorkouts: [...user.myWorkouts, selectedWorkout],
+            myWorkouts: [...user.myWorkouts, startedWorkout],
           });
         }
       });
@@ -137,10 +153,11 @@ export default function WorkoutPage() {
     if (exercise.sets * exercise.reps <= exercise.doneReps) {
       exercise.done = true;
     }
-    changeSelectedWorkout({
-      ...selectedWorkout,
+    changeStartededWorkout({
+      ...startedWorkout,
     });
-    repsRef.current[selectedWorkout.exercises.indexOf(exercise)].value = "";
+    !exercise.static &&
+      (repsRef.current[displayWorkout.exercises.indexOf(exercise)].value = "");
   };
 
   const editWeightBtn = () => {
@@ -148,30 +165,38 @@ export default function WorkoutPage() {
   };
 
   const startWorkout = () => {
-    if (selectedWorkout && selectedWorkout.needWeight) {
+    requestWakeLock();
+    if (displayWorkout && displayWorkout.needWeight) {
       setIsEnteringWeight(true);
     } else {
-      changeSelectedWorkout({
-        ...selectedWorkout,
-        exercises: selectedWorkout.exercises,
+      changeStartededWorkout({
+        ...displayWorkout,
+        exercises: displayWorkout.exercises,
       });
-
-      setIsStartingWorkout(!isStartingWorkout);
     }
   };
 
+  const returnToMain = () => {
+    localStorage.removeItem("viewWorkout");
+    localStorage.removeItem("startedWorkout");
+    changeStartededWorkout(null);
+    navigate(router.main);
+  };
+
   const finishWorkout = () => {
-    setIsStartingWorkout(false);
+    setIsConfirm(false);
+    releaseWakeLock();
+    changeStartededWorkout(null);
     setTime(0);
   };
 
   const deleteWorkout = () => {
+    changeStartededWorkout(null);
     changeWorkouts(
-      workouts.filter((i: workoutType) => i.id !== selectedWorkout?.id)
+      workouts.filter((i: workoutType) => i.id !== displayWorkout?.id)
     );
     navigate(router.main);
   };
-
   return (
     <>
       {isEnteringWeight && (
@@ -207,8 +232,29 @@ export default function WorkoutPage() {
           </div>
         </div>
       )}
-      <Header />
+      {isConfirm && (
+        <div className=" fixed top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] z-3 bg-[white] rounded-[10px] p-[20px] shadow-[0px_0px_25px_-5px]">
+          <div className="w-[300px] flex flex-col gap-[20px]">
+            <p className="text-[20px]">Вы хотите завершить тренировку?</p>
+            <div className="flex justify-between">
+              <button
+                onClick={() => setIsConfirm(false)}
+                className="mt-[10px] text-[16px] rounded-[45px] bg-[white] border-1 px-[16px] py-[8px] hover:bg-[#C6FF00] hover:cursor-pointer"
+              >
+                Нет
+              </button>
 
+              <button
+                onClick={finishWorkout}
+                className="mt-[10px] text-[16px] rounded-[45px] border-1 border-[#BCEC30] bg-[#BCEC30] px-[16px] py-[8px] hover:bg-[#C6FF00] hover:cursor-pointer"
+              >
+                Да
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      <Header />
       <div className="px-[16px] pb-[20px]">
         <div
           onClick={backBtn}
@@ -217,12 +263,12 @@ export default function WorkoutPage() {
           &laquo; Назад
         </div>
         <h1 className="text-[32px] pl-[25px] pb-[20px] font-600">
-          {selectedWorkout?.nameRU}
+          {displayWorkout?.nameRU}
         </h1>
         <div className="flex flex-col md:flex-row md:gap-[20px] place-items-center  md:items-center justify-center">
           <div className="relative w-[300px]">
-            {isAuth && selectedWorkout ? (
-              favoriteWorkoutId.includes(selectedWorkout.id) ? (
+            {isAuth && displayWorkout ? (
+              favoriteWorkoutId.includes(displayWorkout.id) ? (
                 <div
                   title="Удалить из избранных"
                   onClick={(e) => addFavoriteWorkout(e)}
@@ -243,15 +289,15 @@ export default function WorkoutPage() {
             ) : null}
             <img
               className="rounded-[30px] flex place-self-center mb-[40px]"
-              src={selectedWorkout?.img}
-              alt={selectedWorkout?.nameEN}
+              src={displayWorkout?.img}
+              alt={displayWorkout?.nameEN}
             />
           </div>
-          {selectedWorkout?.description && (
+          {displayWorkout?.description && (
             <div className="relative p-[30px] mb-[10px] bg-white rounded-[30px] w-full shadow-[0px_0px_10px_-7px]">
               <p className="text-justify">
                 <span className="text-[18px] font-[600]"></span>
-                {selectedWorkout.description}
+                {displayWorkout.description}
               </p>
             </div>
           )}
@@ -259,18 +305,20 @@ export default function WorkoutPage() {
         <p className="text-[24px] pb-[20px] pl-[10px]">Упражнения:</p>
 
         <div className="flex flex-wrap gap-[10px] justify-center p-[30px] mb-[10px] bg-white rounded-[30px] w-full shadow-[0px_0px_10px_-7px]">
-          {selectedWorkout?.exercises.map(
+          {displayWorkout?.exercises.map(
             (exercise: exercisesType, index: number) => (
               <div>
                 <div className="w-[300px] p-[20px] border-[black] border-1 rounded-[20px] shadow-[0px_0px_15px_-10px]">
-                  <img
-                    className="cursor-pointer w-full"
-                    src={exercise.img}
-                    alt=""
-                  />
-                  <p className="text-[24px]">{exercise.name}</p>
+                  <div className="h-[250px] flex items-center">
+                    <img
+                      className="cursor-pointer w-full"
+                      src={exercise.img}
+                      alt=""
+                    />
+                  </div>
+                  <p className="text-[24px] h-auto">{exercise.name}</p>
                   <div>
-                    {isStartingWorkout && (
+                    {
                       <>
                         {additionalSetting.noSets.includes(exercise.id) ? ( // подходы и повторения
                           <div className="pb-[10px]">
@@ -343,37 +391,49 @@ export default function WorkoutPage() {
                             Сделано
                           </p>
                         ) : exercise.static ? (
-                          <StartTimeBtn
-                            addRepsBtn={addRepsBtn}
-                            exercise={exercise}
-                            time={exercise.reps}
-                          />
+                          <>
+                            {startedWorkout !== null &&
+                              startedWorkout.id === displayWorkout.id && (
+                                <StartTimeBtn
+                                  addRepsBtn={addRepsBtn}
+                                  exercise={exercise}
+                                  time={exercise.reps}
+                                />
+                              )}
+                          </>
                         ) : (
-                          <div className="flex mt-[10px]">
-                            <input
-                              ref={(el) => (repsRef.current[index] = el)}
-                              min={0}
-                              className="w-full textfield rounded-tl-[5px] rounded-bl-[5px] py-[5px] px-[10px] border-t-1 border-l-1 border-b-1 focus: outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                              type="number"
-                              placeholder="Количество повторений"
-                            />
-                            <button
-                              onClick={() =>
-                                addRepsBtn(
-                                  exercise,
-                                  repsRef.current[
-                                    selectedWorkout.exercises.indexOf(exercise)
-                                  ]?.value
-                                )
-                              }
-                              className="border-t-1 border-b-1 border-r-1 hover:bg-[#C6FF00] cursor-pointer bg-[#BCEC30] w-[30px] rounded-tr-[5px] rounded-br-[5px] relative"
-                            >
-                              <div className="w-[10px] h-[10px] border-l-2 border-b-2 rotate-[225deg] absolute transform  top-[50%] left-[40%] translate-x-[-50%] translate-y-[-50%]"></div>
-                            </button>
-                          </div>
+                          <>
+                            {startedWorkout !== null &&
+                              startedWorkout.id === displayWorkout.id && (
+                                <div className="flex mt-[10px]">
+                                  <input
+                                    ref={(el) => (repsRef.current[index] = el)}
+                                    min={0}
+                                    className="w-full textfield rounded-tl-[5px] rounded-bl-[5px] py-[5px] px-[10px] border-t-1 border-l-1 border-b-1 focus: outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    type="number"
+                                    placeholder="Количество повторений"
+                                  />
+                                  <button
+                                    onClick={() =>
+                                      addRepsBtn(
+                                        exercise,
+                                        repsRef.current[
+                                          displayWorkout.exercises.indexOf(
+                                            exercise
+                                          )
+                                        ]?.value
+                                      )
+                                    }
+                                    className="border-t-1 border-b-1 border-r-1 hover:bg-[#C6FF00] cursor-pointer bg-[#BCEC30] w-[30px] rounded-tr-[5px] rounded-br-[5px] relative"
+                                  >
+                                    <div className="w-[10px] h-[10px] border-l-2 border-b-2 rotate-[225deg] absolute transform  top-[50%] left-[40%] translate-x-[-50%] translate-y-[-50%]"></div>
+                                  </button>
+                                </div>
+                              )}
+                          </>
                         )}
                       </>
-                    )}
+                    }
                   </div>
                 </div>
               </div>
@@ -392,31 +452,32 @@ export default function WorkoutPage() {
 
               <span className="font-medium pl-[5px]">{timeHHMMSS(time)}</span>
 
-              {selectedWorkout?.timeLimit && (
+              {displayWorkout?.timeLimit && (
                 <p>
                   /{" "}
                   <span className="font-medium">
-                    {timeHHMMSS(selectedWorkout.timeLimit)}
+                    {timeHHMMSS(displayWorkout.timeLimit)}
                   </span>{" "}
                   мин
                 </p>
               )}
             </div>
             <button
-              onClick={backBtn}
+              onClick={returnToMain}
               className="mt-[10px] text-[16px] w-full rounded-[45px] bg-[#BCEC30] px-[16px] py-[8px] hover:bg-[#C6FF00] hover:cursor-pointer"
             >
               Вернуться на главное
             </button>
           </div>
-        ) : isStartingWorkout ? (
+        ) : startedWorkout !== null &&
+          startedWorkout.id === displayWorkout.id ? (
           <>
             <div className="text-center text-[20px]">
               Время тренировки: <Stopwatch time={time} setTime={setTime} />{" "}
             </div>
 
             <button
-              onClick={finishWorkout}
+              onClick={() => setIsConfirm(true)}
               className={
                 "mt-[28px] text-[#fff] text-[16px] w-full rounded-[45px] bg-[#ec3030] px-[16px] py-[8px] hover:bg-[#C6FF00] hover:cursor-pointer"
               }
@@ -426,12 +487,12 @@ export default function WorkoutPage() {
           </>
         ) : (
           <>
-            {selectedWorkout?.timeLimit && (
+            {displayWorkout?.timeLimit && (
               <>
                 <div className="flex justify-center text-[20px]">
                   Время на тренировку:
                   <span className="pl-[5px]">
-                    {timeHHMMSS(selectedWorkout.timeLimit)} мин
+                    {timeHHMMSS(displayWorkout.timeLimit)} мин
                   </span>
                 </div>
                 {userWeight && (
@@ -444,16 +505,19 @@ export default function WorkoutPage() {
                 )}
               </>
             )}
-            <BottomBtn onClick={startWorkout} btnText={"Начать тренировку"} />
+            {startedWorkout !== null &&
+            startedWorkout.id !== displayWorkout.id ? null : (
+              <BottomBtn onClick={startWorkout} btnText={"Начать тренировку"} />
+            )}
+            {displayWorkout && displayWorkout.custom && (
+              <p
+                onClick={deleteWorkout}
+                className="mt-[30px] text-center cursor-pointer hover:underline text-[red]"
+              >
+                Удалить тренировку
+              </p>
+            )}
           </>
-        )}
-        {selectedWorkout?.custom && !isStartingWorkout && (
-          <p
-            onClick={deleteWorkout}
-            className="mt-[30px] text-center cursor-pointer hover:underline text-[red]"
-          >
-            Удалить тренировку
-          </p>
         )}
       </div>
     </>
