@@ -1,19 +1,13 @@
-import { useContext, useRef } from "react";
-import { SetContext, type userType } from "../context/context";
+import {  useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { router } from "./router";
 import { Logo } from "../components/Logo";
+import { useMyContext } from "../hooks/checkContext";
+import type { userType } from "../types/types";
 
 export const Login = () => {
-  const {
-    setIsOpenProfile,
-    changeUser,
-    error,
-    setError,
-    isLoading,
-    setIsLoading,
-    setIsAuth,
-  } = useContext(SetContext);
+  const { changeUser, error, setError, isLoading, setIsLoading, setIsAuth } =
+    useMyContext();
   const loginRef = useRef<HTMLInputElement | null>(null);
   const passwordRef = useRef<HTMLInputElement | null>(null);
 

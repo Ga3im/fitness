@@ -1,10 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { router } from "../pages/router";
-import { useContext } from "react";
-import { SetContext } from "../context/context";
+import { useMyContext } from "../hooks/checkContext";
 
 export const Logo = () => {
-  const { setIsOpenProfile } = useContext(SetContext);
+  const { setIsOpenProfile } = useMyContext();
 
   const navigate = useNavigate();
   const handleLogoClick = () => {

@@ -1,25 +1,31 @@
 import { useNavigate } from "react-router-dom";
 import { Header } from "../components/Header";
 import { router } from "./router";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Filter } from "../components/Filter";
-import { SetContext } from "../context/context";
 import type { exercisesType, workoutType } from "../types/types";
 import { exercises } from "../data";
 import { BottomBtn } from "../components/BottomBtn";
 import { Exercise } from "../components/Exercise";
+import { useMyContext } from "../hooks/checkContext";
 
 export const CreateWorkout = () => {
-  const { changeWorkouts, workouts, setIsOpenProfile } =
-    useContext(SetContext);
+  const {
+    changeWorkouts,
+    workouts,
+    setIsOpenProfile,
+    emptyReps,
+    setEmptyReps,
+  } = useMyContext();
   const [isSelectedName, setIsSelectedName] = useState<boolean>(true);
   const [isSelectedExercise, setIsSelectedExercise] = useState<boolean>(true);
-  const [emptyReps, setEmptyReps] = useState<string[]>([]);
   const [displayedExercises, setDisplayedExercisess] = useState<
     exercisesType[]
   >([]);
   const [search, setSearch] = useState<string>("");
-  const [filteredExercises, setFilteredExercises] = useState<[]>([]);
+  const [filteredExercises, setFilteredExercises] = useState<
+    exercisesType[] | []
+  >([]);
   const [workout, setWorkout] = useState<workoutType>({
     id: "",
     description: "",
@@ -34,10 +40,13 @@ export const CreateWorkout = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const arr = [];
-    exercises.map((i) => {
-      if (i.name.toLowerCase().includes(search.toLowerCase())) {
-        arr.push(i);
+    const arr: exercisesType[] = [];
+
+    exercises.map((i: exercisesType | undefined) => {
+      if (i !== undefined) {
+        if (i.name.toLowerCase()?.includes(search.toLowerCase())) {
+          arr.push(i);
+        }
       }
     });
     setFilteredExercises(arr);
@@ -46,8 +55,10 @@ export const CreateWorkout = () => {
   useEffect(() => {
     const arr: exercisesType[] = [];
     for (let index = 0; index <= 5; index++) {
-      const element: exercisesType = exercises[index];
-      arr.push(element);
+      const element: exercisesType | undefined = exercises[index];
+      if (element !== undefined) {
+        arr.push(element);
+      }
     }
     setDisplayedExercisess(arr);
   }, []);
@@ -80,14 +91,14 @@ export const CreateWorkout = () => {
       const file = e.target.files[0];
       if (file) {
         previewUrl = URL.createObjectURL(file);
-        changeWorkout({ ...workout, img: previewUrl });
+        setWorkout({ ...workout, img: previewUrl });
       }
     }
   };
 
   const deletePhoto = () => {
     previewUrl = null;
-    changeWorkout({ ...workout, img: "" });
+    setWorkout({ ...workout, img: "" });
   };
 
   const hideExercisesBtn = () => {
@@ -104,10 +115,10 @@ export const CreateWorkout = () => {
     const arr: exercisesType[] = [];
     for (
       let i = displayedExercises.length;
-      i < displayedExercises.length + 6;
+      i < displayedExercises.length + 10;
       i++
     ) {
-      const element: exercisesType = exercises[i];
+      const element: exercisesType | undefined = exercises[i];
       if (element !== undefined) {
         arr.push(element);
       }
@@ -232,7 +243,15 @@ export const CreateWorkout = () => {
                     setEmptyReps={setEmptyReps}
                   />
                 ))
-              : filteredExercises.map((i: exercisesType) => <Exercise i={i} />)}
+              : filteredExercises.map((i: exercisesType) => (
+                  <Exercise
+                    workout={workout}
+                    setWorkout={setWorkout}
+                    i={i}
+                    emptyReps={emptyReps}
+                    setEmptyReps={setEmptyReps}
+                  />
+                ))}
 
             {exercises.length === displayedExercises.length ? (
               <div

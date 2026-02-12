@@ -28,7 +28,7 @@ export const StartTimeBtn = ({
   let [secondsToStart, setSecondsToStart] = useState<number>(5);
   let timerInterval: number;
   let exerciseTimer: number;
-  const [play, { stop, isPlaying }] = useSound(boopSfx, {
+  const [play, { stop }] = useSound(boopSfx, {
     volume: 0.5, // Optional: set volume
     playbackRate: 1, // Optional: set playback speed
     interrupt: true, // Optional: stop previous sound when new one plays
@@ -63,7 +63,7 @@ export const StartTimeBtn = ({
         if (timer < 0) {
           clearInterval(exerciseTimer);
           stop();
-          addRepsBtn(exercise, exercise.reps);
+          addRepsBtn(exercise, Number(exercise.reps));
           if (!exercise.done) {
             setTimer(time);
           }

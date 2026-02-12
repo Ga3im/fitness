@@ -1,5 +1,4 @@
-import { useContext, useEffect, useState } from "react";
-import { SetContext } from "../context/context";
+import { useEffect, useState } from "react";
 import { Header } from "../components/Header";
 import { useNavigate } from "react-router-dom";
 import { router } from "./router";
@@ -7,10 +6,11 @@ import { Filter } from "../components/Filter";
 import type { workoutType } from "../types/types";
 import { Workout } from "../components/Workout";
 import { BottomBtn } from "../components/BottomBtn";
+import { useMyContext } from "../hooks/checkContext";
 
 export default function Profile() {
   const { user, changeUser, setIsOpenProfile, isAuth, setIsAuth } =
-    useContext(SetContext);
+    useMyContext();
   const [isOpenSetting, setIsOpenSetting] = useState<boolean>(false);
   const [search, setSearch] = useState<string>("");
   const [filteredMyCourses, setFilteredMyCourses] = useState<
@@ -19,7 +19,7 @@ export default function Profile() {
 
   useEffect(() => {
     const arr: workoutType[] = [];
-    isAuth
+    isAuth && user
       ? user.myWorkouts.map((i: workoutType) => {
           if (i.nameRU.toLowerCase().includes(search.toLowerCase())) {
             arr.push(i);
@@ -39,20 +39,26 @@ export default function Profile() {
     setIsOpenSetting(!isOpenSetting);
   };
 
-  let previewUrl;
+  let previewUrl: string;
 
   const fileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files instanceof FileList) {
       const file = e.target.files[0];
       if (file) {
         previewUrl = URL.createObjectURL(file);
-        changeUser({ ...user, img: previewUrl });
+        if (user) {
+          changeUser({ ...user, img: previewUrl });
+        }
       }
     }
+    setIsOpenSetting(false);
   };
 
   const deleteProfilePhoto = () => {
-    changeUser({ ...user, img: "" });
+    setIsOpenSetting(false);
+    if (user) {
+      changeUser({ ...user, img: "" });
+    }
   };
 
   const handleCreateWorkout = () => {
@@ -78,7 +84,7 @@ export default function Profile() {
   return (
     <>
       <Header />
-      {isAuth ? (
+      {isAuth && user? (
         <div className="px-[16px] pb-[24px]">
           <p className="text-[24px] font-medium pb-[24px]">Профиль</p>
           <div className="relative md:flex md:gap-[33px] md:items-center shadow-[0px_0px_10px_-7px] p-[30px] rounded-[30px]">
@@ -157,11 +163,11 @@ export default function Profile() {
             <div>
               <div className="pt-[30px] pb-[20px]">
                 <span>Имя:</span>
-                <span> {user ? user.name : ""}</span>
+                <span> {user.name}</span>
               </div>
               <div className="pb-[20px]">
                 <span>Логин:</span>
-                <span> {user ? user.login : ""}</span>
+                <span> {user.login}</span>
               </div>
 
               <button
@@ -187,7 +193,7 @@ export default function Profile() {
               <Filter
                 search={search}
                 setSearch={setSearch}
-                array={isAuth ? user.myWorkouts : ""}
+                array={user.myWorkouts}
                 setFilteredArray={setFilteredMyCourses}
               />
             )}

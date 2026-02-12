@@ -6,15 +6,10 @@ export type MyProps = {
 
 export type userType = {
   name: string;
-  img: string;
+  img?: string;
   login: string;
   password: string;
   myWorkouts: workoutType[];
-};
-
-export type timeType = {
-  seconds: number;
-  minutes: number;
 };
 
 export type exercisesType = {
@@ -26,14 +21,7 @@ export type exercisesType = {
   doneReps?: number;
   done?: boolean;
   static?: boolean;
-  table?: string[];
-};
-
-export type filterProp = {
-  search: string;
-  setSearch: Dispatch<SetStateAction<string>>;
-  array: workoutType[];
-  setFilteredArray: (arr: workoutType[]) => void;
+  table?: number[];
 };
 
 export type workoutType = {
@@ -50,6 +38,11 @@ export type workoutType = {
   needWeight?: boolean;
 };
 
+export type addTimeType = {
+  minutes: number;
+  seconds: number;
+};
+
 export type WorkoutPropType = {
   i: workoutType;
 };
@@ -58,6 +51,8 @@ export type ExercisePropType = {
   i: exercisesType;
   emptyReps: string[];
   setEmptyReps: Dispatch<SetStateAction<string[]>>;
+  workout: workoutType;
+  setWorkout: Dispatch<SetStateAction<workoutType>>;
 };
 
 export type StopwatchropType = {
@@ -66,8 +61,39 @@ export type StopwatchropType = {
 };
 
 export type StartTimeBtnProp = {
+  addRepsBtn: (
+    exercise: exercisesType,
+    currentReps: number 
+  ) => void;
+  exercise: exercisesType;
   time: number;
 };
+export type InputTimeProps = {
+  i: exercisesType;
+  changeReps: (seconds: number, i: exercisesType) => void;
+  focusInput: (exercise: exercisesType) => void;
+};
+
+export type FilterProp = {
+  search: string;
+  setSearch: Dispatch<SetStateAction<string>>;
+  array: workoutType[] | exercisesType[];
+  setFilteredArray: Dispatch<
+    SetStateAction<workoutType[] | [] | exercisesType[]>
+  >;
+};
+
+export type BottomBtnProp = {
+  onClick: () => void;
+  btnText: React.ReactElement | string;
+};
+
+export type ConfirmProp = {
+  text: string;
+  noBtn: () => void;
+  yesBtn: () => void;
+};
+
 export type additionalSettingType = {
   isTimeReps: boolean;
   isTimeSets: boolean;
@@ -103,4 +129,6 @@ export type contextType = {
   setTime: Dispatch<SetStateAction<number>>;
   viewWorkout: workoutType | null;
   changeViewWorkout: (workout: workoutType) => void;
+  emptyReps: string[];
+  setEmptyReps: Dispatch<SetStateAction<string[]>>;
 };

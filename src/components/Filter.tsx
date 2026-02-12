@@ -1,11 +1,11 @@
-import type { workoutType } from "../pages/Main";
+import type { FilterProp, workoutType } from "../types/types";
 
 export const Filter = ({
   search,
   setSearch,
   array,
   setFilteredArray,
-}) => {
+}: FilterProp) => {
   const handleSearchBtn = () => {
     const arr: workoutType[] = [];
     array.map((i: any) => {

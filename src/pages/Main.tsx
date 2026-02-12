@@ -1,5 +1,4 @@
-import { useContext, useEffect, useState } from "react";
-import { SetContext } from "../context/context";
+import { useEffect, useState } from "react";
 import { data } from "../data";
 import { Header } from "../components/Header";
 import { Outlet } from "react-router-dom";
@@ -7,9 +6,10 @@ import { Filter } from "../components/Filter";
 import type { workoutType } from "../types/types";
 import { Workout } from "../components/Workout";
 import { BottomBtn } from "../components/BottomBtn";
+import { useMyContext } from "../hooks/checkContext";
 
-export const sortArray = (a, b) => {
-  if (a.order > b.order) {
+export const sortArray = (a: number, b: number): number => {
+  if (a > b) {
     return 1;
   } else {
     return -1;
@@ -17,7 +17,7 @@ export const sortArray = (a, b) => {
 };
 
 export default function Main() {
-  const { workouts, changeWorkouts } = useContext(SetContext);
+  const { workouts, changeWorkouts } = useMyContext();
   const [search, setSearch] = useState<string>("");
   const [filteredCourses, setFilteredCourses] = useState<workoutType[] | []>(
     []
@@ -26,9 +26,11 @@ export default function Main() {
   useEffect(() => {
     const savedWorkouts = localStorage.getItem("workouts");
     if (savedWorkouts) {
-      changeWorkouts(JSON.parse(savedWorkouts).sort(sortArray));
+      changeWorkouts(
+        JSON.parse(savedWorkouts).sort((a, b) => sortArray(a.order, b.order))
+      );
     } else {
-      changeWorkouts(data.workouts.sort(sortArray));
+      changeWorkouts(data.workouts.sort((a, b) => sortArray(a.order, b.order)));
     }
   }, []);
 

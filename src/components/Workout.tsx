@@ -1,7 +1,6 @@
-import { useContext } from "react";
 import type { WorkoutPropType, workoutType } from "../types/types";
-import { SetContext } from "../context/context";
 import { useNavigate } from "react-router-dom";
+import { useMyContext } from "../hooks/checkContext";
 
 export const Workout = ({ i }: WorkoutPropType) => {
   const {
@@ -11,7 +10,7 @@ export const Workout = ({ i }: WorkoutPropType) => {
     favoriteWorkoutId,
     changeViewWorkout,
     startedWorkout,
-  } = useContext(SetContext);
+  } = useMyContext();
   const navigate = useNavigate();
 
   const workoutClick = (workout: workoutType) => {
@@ -24,19 +23,20 @@ export const Workout = ({ i }: WorkoutPropType) => {
     workout: workoutType
   ) => {
     e.stopPropagation();
-    if (user.myWorkouts.length === 0) {
+    if (user && user.myWorkouts.length === 0) {
       changeUser({ ...user, myWorkouts: [...user.myWorkouts, workout] });
     } else {
-      user.myWorkouts.map((i: workoutType) => {
-        if (i.id === workout.id) {
-          changeUser({
-            ...user,
-            myWorkouts: user.myWorkouts.filter((i) => i.id !== workout.id),
-          });
-        } else {
-          changeUser({ ...user, myWorkouts: [...user.myWorkouts, workout] });
-        }
-      });
+      user &&
+        user.myWorkouts.map((i: workoutType) => {
+          if (i.id === workout.id) {
+            changeUser({
+              ...user,
+              myWorkouts: user.myWorkouts.filter((i) => i.id !== workout.id),
+            });
+          } else {
+            changeUser({ ...user, myWorkouts: [...user.myWorkouts, workout] });
+          }
+        });
     }
   };
 

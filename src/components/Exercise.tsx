@@ -1,7 +1,7 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import type { ExercisePropType, exercisesType } from "../types/types";
-import { SetContext } from "../context/context";
 import { InputTime } from "./InputTime";
+import { useMyContext } from "../hooks/checkContext";
 
 export const Exercise = ({
   i,
@@ -14,7 +14,7 @@ export const Exercise = ({
     useState<boolean>(false);
   const [isSetting, setIsSetting] = useState<boolean>(false);
   const [exercisesId, setExercisesId] = useState<string[]>([]);
-  const { additionalSetting, setAdditionalSetting } = useContext(SetContext);
+  const { additionalSetting, setAdditionalSetting } = useMyContext();
 
   const exerciseClick = (exercise: exercisesType) => {
     if (exercisesId.includes(exercise.id)) {
@@ -47,7 +47,7 @@ export const Exercise = ({
     (e.target as HTMLElement).blur();
   };
 
-  const focusInput = (exercise) => {
+  const focusInput = (exercise: exercisesType) => {
     if (!exercisesId.includes(exercise.id)) {
       exercise.sets = 1;
       setWorkout({
@@ -81,9 +81,9 @@ export const Exercise = ({
     if (additionalSetting.noSets.includes(exercise.id)) {
       setAdditionalSetting({
         ...additionalSetting,
-        noSets: [
-          additionalSetting.noSets.filter((i: string) => i !== exercise.id),
-        ],
+        noSets: additionalSetting.noSets.filter(
+        (i: string) => i !== exercise.id
+      ),
       });
     } else {
       setAdditionalSetting({

@@ -1,11 +1,10 @@
-import { useContext } from "react";
-import { SetContext } from "../context/context";
 import { useNavigate } from "react-router-dom";
 import { router } from "../pages/router";
 import { Logo } from "./Logo";
+import { useMyContext } from "../hooks/checkContext";
 
 export const Header = () => {
-  const { isOpenProfile, setIsOpenProfile, isAuth } = useContext(SetContext);
+  const { isOpenProfile, setIsOpenProfile, isAuth } = useMyContext();
 
   let navigate = useNavigate();
 

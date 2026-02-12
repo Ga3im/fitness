@@ -7,7 +7,7 @@ import type {
   workoutType,
 } from "../types/types";
 
-export const SetContext = createContext<contextType | null>(null);
+export const SetContext = createContext<contextType | undefined>(undefined);
 export const SettingProvider = ({ children }: MyProps) => {
   let [startedWorkout, setStartedWorkout] = useState<workoutType | null>(null);
   const [isOpenProfile, setIsOpenProfile] = useState<boolean>(false);
@@ -21,6 +21,8 @@ export const SettingProvider = ({ children }: MyProps) => {
   const [workouts, setWorkouts] = useState<workoutType[]>([]);
   let [time, setTime] = useState<number>(0);
   const [viewWorkout, setViewWorkout] = useState<workoutType | null>(null);
+  const [emptyReps, setEmptyReps] = useState<string[]>([]);
+
   let interval: number;
 
   const [favoriteWorkoutId, setFavoriteWorkoutId] = useState<string[]>([]);
@@ -49,6 +51,13 @@ export const SettingProvider = ({ children }: MyProps) => {
   }, []);
 
   useEffect(() => {
+    const savedWorkouts = localStorage.getItem("workouts");
+    if (savedWorkouts) {
+      changeWorkouts(JSON.parse(savedWorkouts));
+    }
+  }, []);
+
+  useEffect(() => {
     const savedUser = localStorage.getItem("user");
     if (savedUser) {
       setUser(JSON.parse(savedUser));
@@ -56,13 +65,13 @@ export const SettingProvider = ({ children }: MyProps) => {
     }
   }, []);
 
-  const changeAccounts = (newAccount: userType) => {
+  const changeAccounts = (newAccount: userType): void => {
     const arr = [...accounts, newAccount];
     setAccounts(arr);
     localStorage.setItem("accounts", JSON.stringify(arr));
   };
 
-  const changeUser = (newUser: userType) => {
+  const changeUser = (newUser: userType): void => {
     setUser(newUser);
     localStorage.setItem("user", JSON.stringify(newUser));
   };
@@ -123,6 +132,8 @@ export const SettingProvider = ({ children }: MyProps) => {
         setTime,
         viewWorkout,
         changeViewWorkout,
+        emptyReps,
+        setEmptyReps,
       }}
     >
       {children}

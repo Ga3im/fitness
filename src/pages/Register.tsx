@@ -1,13 +1,12 @@
-import { useContext, useRef } from "react";
-import { SetContext, type userType } from "../context/context";
+import { useRef } from "react";
 import { router } from "./router";
 import { useNavigate } from "react-router-dom";
 import { Logo } from "../components/Logo";
+import { useMyContext } from "../hooks/checkContext";
+import type { userType } from "../types/types";
 
 export const Register = () => {
   const {
-    setIsOpenProfile,
-    user,
     changeAccounts,
     setError,
     error,
@@ -15,7 +14,7 @@ export const Register = () => {
     setIsLoading,
     changeUser,
     setIsAuth,
-  } = useContext(SetContext);
+  } = useMyContext();
 
   const nameRef = useRef<HTMLInputElement | null>(null);
   const loginRef = useRef<HTMLInputElement | null>(null);
@@ -28,7 +27,7 @@ export const Register = () => {
     accounts = JSON.parse(savedAccounts);
   }
 
-  let userInfo: userType | {} = {
+  let userInfo: userType = {
     name: "",
     img: "",
     login: "",
@@ -55,6 +54,8 @@ export const Register = () => {
       password: passwordRef.current?.value,
       myWorkouts: [],
     };
+  
+
     setIsLoading(true);
     if (nameRef.current?.value === "") {
       setError("Введите имя");

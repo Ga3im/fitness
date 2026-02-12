@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
+import type { BottomBtnProp } from "../types/types";
 
-export const BottomBtn = ({ onClick, btnText }) => {
+export const BottomBtn = ({ onClick, btnText }: BottomBtnProp) => {
   const [scroll, setScroll] = useState(false);
   const [lowerPos, setLowerPos] = useState(false);
 
   useEffect(() => {
-    const handleScroll = (e) => {
+    const handleScroll = () => {
       if (
         window.scrollY + window.innerHeight <=
         document.documentElement.scrollHeight - 100

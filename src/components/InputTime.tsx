@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useOutsideClick } from "../hooks/modalClose";
+import type { addTimeType, InputTimeProps } from "../types/types";
 
-export const InputTime = ({ i, changeReps, focusInput }) => {
+export const InputTime = ({ i, changeReps, focusInput }: InputTimeProps) => {
   const [isOpenMinList, setIsOpenMinList] = useState<boolean>(false);
   const [isOpenSecList, setIsOpenSecList] = useState<boolean>(false);
   const [isInputNumber, setIsInputNumber] = useState<boolean>(false);
-  const [time, setTime] = useState({
+  const [time, setTime] = useState<addTimeType>({
     minutes: 0,
     seconds: 0,
   });
