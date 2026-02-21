@@ -1,11 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import { router } from "../pages/router";
 import { Logo } from "./Logo";
-import { useMyContext } from "../hooks/checkContext";
+import { setIsOpenProfile } from "../store/features/authSlice";
+import { useAppDispatch, useAppSelector } from "../store/features/store";
 
 export const Header = () => {
-  const { isOpenProfile, setIsOpenProfile, isAuth } = useMyContext();
-
+  const { isOpenProfile, isAuth } = useAppSelector((state) => state.authSlice);
+  const dispatch = useAppDispatch();
   let navigate = useNavigate();
 
   const handleToLogin = () => {
@@ -13,7 +14,7 @@ export const Header = () => {
   };
 
   const handleOpenProfile = () => {
-    setIsOpenProfile(!isOpenProfile);
+    dispatch(setIsOpenProfile(!isOpenProfile));
     if (!isOpenProfile) {
       navigate(router.profile);
     } else {
@@ -23,7 +24,7 @@ export const Header = () => {
 
   return (
     <>
-      <header className="mb-[20px] py-[40px] px-[16px] flex justify-between items-center bg-gradient-to-b bg-[#007386] to-[#ebfdff]">
+      <header className="mb-[20px] py-[20px] px-[16px] flex justify-between items-center bg-gradient-to-b bg-[#007386] to-[#ebfdff]">
         <Logo />
         {isAuth ? (
           <div

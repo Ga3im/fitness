@@ -1,7 +1,8 @@
 import { useState } from "react";
 import type { ExercisePropType, exercisesType } from "../types/types";
 import { InputTime } from "./InputTime";
-import { useMyContext } from "../hooks/checkContext";
+import { useAppDispatch, useAppSelector } from "../store/features/store";
+import { setAdditionalSetting } from "../store/features/workoutSlice";
 
 export const Exercise = ({
   i,
@@ -14,7 +15,8 @@ export const Exercise = ({
     useState<boolean>(false);
   const [isSetting, setIsSetting] = useState<boolean>(false);
   const [exercisesId, setExercisesId] = useState<string[]>([]);
-  const { additionalSetting, setAdditionalSetting } = useMyContext();
+  const dispatch = useAppDispatch();
+  const { additionalSetting } = useAppSelector((state) => state.workoutSlice);
 
   const exerciseClick = (exercise: exercisesType) => {
     if (exercisesId.includes(exercise.id)) {
@@ -79,17 +81,21 @@ export const Exercise = ({
 
   const accountingBySets = (exercise: exercisesType) => {
     if (additionalSetting.noSets.includes(exercise.id)) {
-      setAdditionalSetting({
-        ...additionalSetting,
-        noSets: additionalSetting.noSets.filter(
-        (i: string) => i !== exercise.id
-      ),
-      });
+      dispatch(
+        setAdditionalSetting({
+          ...additionalSetting,
+          noSets: additionalSetting.noSets.filter(
+            (i: string) => i !== exercise.id
+          ),
+        })
+      );
     } else {
-      setAdditionalSetting({
-        ...additionalSetting,
-        noSets: [...additionalSetting.noSets, exercise.id],
-      });
+      dispatch(
+        setAdditionalSetting({
+          ...additionalSetting,
+          noSets: [...additionalSetting.noSets, exercise.id],
+        })
+      );
     }
   };
 

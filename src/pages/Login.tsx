@@ -1,15 +1,17 @@
-import {  useRef } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { router } from "./router";
 import { Logo } from "../components/Logo";
-import { useMyContext } from "../hooks/checkContext";
 import type { userType } from "../types/types";
+import { useAppDispatch } from "../store/features/store";
+import { setIsAuth, setUser } from "../store/features/authSlice";
 
 export const Login = () => {
-  const { changeUser, error, setError, isLoading, setIsLoading, setIsAuth } =
-    useMyContext();
   const loginRef = useRef<HTMLInputElement | null>(null);
   const passwordRef = useRef<HTMLInputElement | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+  const dispatch = useAppDispatch();
 
   let savedAccounts = localStorage.getItem("accounts");
   let accounts: userType[];
@@ -41,21 +43,24 @@ export const Login = () => {
           setError("");
           setIsLoading(false);
           navigate(router.main);
-          setIsAuth(true);
-          changeUser({
-            name: "Admin",
-            login: loginRef.current?.value.toLowerCase(),
-            password: passwordRef.current?.value,
-            myWorkouts: [],
-          });
+          dispatch(setIsAuth(true));
+          dispatch(
+            setUser({
+              img: "",
+              name: "Admin",
+              login: loginRef.current?.value.toLowerCase(),
+              password: passwordRef.current?.value,
+              myWorkouts: [],
+            })
+          );
         } else {
           accounts.map((i: userType) => {
             if (
               i.login === loginRef.current?.value.toLowerCase() &&
               i.password === passwordRef.current?.value
             ) {
-              changeUser(i);
-              setIsAuth(true);
+              dispatch(setUser(i));
+              dispatch(setIsAuth(true));
               navigate(router.main);
               setError("");
               setIsLoading(false);

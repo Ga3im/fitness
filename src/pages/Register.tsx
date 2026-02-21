@@ -1,25 +1,20 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { router } from "./router";
 import { useNavigate } from "react-router-dom";
 import { Logo } from "../components/Logo";
-import { useMyContext } from "../hooks/checkContext";
 import type { userType } from "../types/types";
+import { useAppDispatch } from "../store/features/store";
+import { setIsAuth, setUser } from "../store/features/authSlice";
 
 export const Register = () => {
-  const {
-    changeAccounts,
-    setError,
-    error,
-    isLoading,
-    setIsLoading,
-    changeUser,
-    setIsAuth,
-  } = useMyContext();
+  const dispatch = useAppDispatch();
 
   const nameRef = useRef<HTMLInputElement | null>(null);
   const loginRef = useRef<HTMLInputElement | null>(null);
   const passwordRef = useRef<HTMLInputElement | null>(null);
   const repeatPasswordRef = useRef<HTMLInputElement | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
 
   let savedAccounts = localStorage.getItem("accounts");
   let accounts: userType[];
@@ -49,12 +44,11 @@ export const Register = () => {
   const handleRegister = () => {
     userInfo = {
       ...userInfo,
-      name: nameRef.current?.value,
-      login: loginRef.current?.value.toLowerCase(),
-      password: passwordRef.current?.value,
+      name: nameRef.current ? nameRef.current?.value : "",
+      login: loginRef.current ? loginRef.current?.value.toLowerCase() : "",
+      password: passwordRef.current ? passwordRef.current?.value : "",
       myWorkouts: [],
     };
-  
 
     setIsLoading(true);
     if (nameRef.current?.value === "") {
@@ -74,11 +68,10 @@ export const Register = () => {
     ) {
       setTimeout(() => {
         if (accounts === undefined) {
-          changeAccounts(userInfo);
-          changeUser(userInfo);
+          dispatch(setUser(userInfo));
           setError("");
           setIsLoading(false);
-          setIsAuth(true);
+          dispatch(setIsAuth(true));
           navigate(router.main);
         } else {
           accounts.map((i: userType) => {
@@ -86,8 +79,7 @@ export const Register = () => {
               setError("Пользователь с таким логином уже существует");
               setIsLoading(false);
             } else {
-              changeAccounts(userInfo);
-              changeUser(userInfo);
+              dispatch(setUser(userInfo));
               setError("");
               setIsLoading(false);
               navigate(router.main);

@@ -1,6 +1,29 @@
-
 export const data = {
   workouts: [
+    {
+      id: "5tons",
+      description:
+        "Челлендж 5 + 5 тонн - челлендж состоящий из двух упражнений подтягивание и отжимание на брусьях в совокупном объеме 5 тонн в каждом упражнении, за короткий промежуток времени",
+      nameEN: "challenge 5 tons",
+      nameRU: "Челлендж Семенихина",
+      order: 5,
+      timeLimit: 600,
+      img: "/img/challenge5tons.jpg",
+      challenge: true,
+      needWeight: true,
+      exercises: [
+        {
+          id: "pullup",
+          name: "Подтягивание",
+          img: "/workouts/pull-ups.jpg",
+        },
+        {
+          id: "dips",
+          name: "Отжимание на брусьях",
+          img: "/workouts/bars-push-ups.png",
+        },
+      ],
+    },
     {
       id: "fullbody",
       description:
@@ -177,30 +200,6 @@ export const data = {
           img: "/workouts/press.png",
           reps: 25,
           sets: 4,
-        },
-      ],
-    },
-    {
-      id: "5tons",
-      description:
-        "Челлендж 5 + 5 тонн - челлендж состоящий из двух упражнений подтягивание и отжимание на брусьях в совокупном объеме 5 тонн в каждом упражнении, за короткий промежуток времени",
-      nameEN: "challenge 5 tons",
-      nameRU: "Челлендж Семенихина",
-      order: 5,
-      timeLimit: 600,
-      img: "/img/challenge5tons.jpg",
-      challenge: true,
-      needWeight: true,
-      exercises: [
-        {
-          id: "pullup",
-          name: "Подтягивание",
-          img: "/workouts/pull-ups.jpg",
-        },
-        {
-          id: "dips",
-          name: "Отжимание на брусьях",
-          img: "/workouts/bars-push-ups.png",
         },
       ],
     },

@@ -9,29 +9,34 @@ import { StartTimeBtn } from "../components/StartTimeBtn";
 import { timeHHMMSS } from "../utils/functions";
 import { Exercise } from "../components/Exercise";
 import { exercises } from "../data";
-import { useMyContext } from "../hooks/checkContext";
 import { Confirm } from "../components/Confirm";
+import { useAppDispatch, useAppSelector } from "../store/features/store";
+import {
+  setStartedWorkout,
+  setViewWorkout,
+  setWorkouts,
+  setWorkoutTime,
+  setEmptyExerciseReps,
+  setFavoriteWorkoutsId,
+} from "../store/features/workoutSlice";
+import { setUser } from "../store/features/authSlice";
 
 export default function WorkoutPage() {
-  let {
-    isAuth,
-    user,
-    changeUser,
-    startedWorkout,
-    changeStartededWorkout,
-    changeWorkouts,
+  const {
     workouts,
-    favoriteWorkoutId,
-    additionalSetting,
-    time,
-    setTime,
     viewWorkout,
-    changeViewWorkout,
-    emptyReps,
-    setEmptyReps,
-  } = useMyContext();
-  const repsRef = useRef<(HTMLInputElement | null)[]>([]);
+    startedWorkout,
+    favoriteWorkoutsId,
+    workoutTime,
+    emptyExerciseReps,
+    additionalSetting,
+  } = useAppSelector((state) => state.workoutSlice);
+  const { isAuth, user } = useAppSelector((state) => state.authSlice);
+  const dispatch = useAppDispatch();
+
+  const repsRef = useRef<HTMLInputElement[]>([]);
   const btnRef = useRef<(HTMLInputElement | null)[]>([]);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const [doneWorkout, setDoneWorkout] = useState<boolean>(false);
   const [userWeight, setUserWeight] = useState<number | null>(null);
@@ -40,13 +45,24 @@ export default function WorkoutPage() {
   const [isAddingExercise, setIsAddingExercise] = useState<boolean>(false);
 
   let doneExerciseCount: number = 0;
+  let lastOrder: number | null = sessionStorage.getItem("lastOrder")
+    ? Number(sessionStorage.getItem("lastOrder"))
+    : null;
   let wakeLock: WakeLockSentinel | null = null;
+  const [selectedExercisesId, setSelectedExercisesId] = useState<string[]>([]);
+
+  // const stopTimer = () => {
+  //   if (intervalId) {
+  //     clearInterval(intervalId); // Остановка по ID
+  //     console.log("Интервал остановлен");
+  //   }
+  // };
 
   const requestWakeLock = async () => {
     try {
       // Запрос блокировки экрана
       wakeLock = await navigator.wakeLock.request("screen");
-      console.log("Экран не выключится");
+      // console.log("Экран не выключится");
     } catch (err) {
       console.error(err);
     }
@@ -55,10 +71,14 @@ export default function WorkoutPage() {
   const releaseWakeLock = async () => {
     try {
       await wakeLock?.release();
-      console.log("Cнятие блокировки");
+      // console.log("Cнятие блокировки");
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const changeViewWorkout = (workout: workoutType) => {
+    dispatch(setViewWorkout(workout));
   };
 
   useEffect(() => {
@@ -67,16 +87,16 @@ export default function WorkoutPage() {
     };
   }, []);
 
-  useEffect(() => {
-    const savedViewWorkout = localStorage.getItem("viewWorkout");
-    if (savedViewWorkout) {
-      changeViewWorkout(JSON.parse(savedViewWorkout));
-    }
-  }, []);
+  // useEffect(() => {
+  //   const savedViewWorkout = localStorage.getItem("viewWorkout");
+  //   if (savedViewWorkout) {
+  //     viewWorkout(JSON.parse(savedViewWorkout));
+  //   }
+  // }, []);
   let displayWorkout: workoutType | null = viewWorkout; // объект с тренировками для отображения на странице
-
   // событие на завершение тренировки
   useEffect(() => {
+    // stopTimer();
     startedWorkout?.exercises.map((i: exercisesType) => {
       if (i.done) {
         doneExerciseCount++;
@@ -103,14 +123,16 @@ export default function WorkoutPage() {
   };
 
   const confirmWeightBtn = () => {
-    if (userWeight && startedWorkout) {
+    if (userWeight) {
       let reps = Math.ceil(5000 / userWeight);
       startedWorkout?.exercises.map((i: exercisesType) => {
         i.reps = reps;
       });
-      changeStartededWorkout({ ...startedWorkout, needWeight: false });
-
+      if (startedWorkout) {
+        dispatch(setStartedWorkout({ ...startedWorkout, needWeight: false }));
+      }
       setIsEnteringWeight(false);
+      dispatch(setStartedWorkout(displayWorkout));
     }
   };
 
@@ -124,34 +146,70 @@ export default function WorkoutPage() {
     e: React.MouseEvent<HTMLDivElement | SVGSVGElement, MouseEvent>
   ) => {
     e.stopPropagation();
-    if (user && startedWorkout && user.myWorkouts.length === 0) {
-      changeUser({
-        ...user,
-        myWorkouts: [...user.myWorkouts, startedWorkout],
-      });
+    if (user && displayWorkout && user.myWorkouts.length === 0) {
+      dispatch(
+        setUser({
+          ...user,
+          myWorkouts: [...user.myWorkouts, displayWorkout],
+        })
+      );
+      dispatch(
+        setFavoriteWorkoutsId([...favoriteWorkoutsId, displayWorkout.id])
+      );
     } else {
       user &&
-        startedWorkout &&
+        displayWorkout &&
         user.myWorkouts.map((i: workoutType) => {
-          if (i.id === startedWorkout.id) {
-            changeUser({
-              ...user,
-              myWorkouts: user.myWorkouts.filter(
-                (i: exercisesType) => i.id !== startedWorkout.id
-              ),
-            });
+          if (i.id === displayWorkout.id) {
+            dispatch(
+              setUser({
+                ...user,
+                myWorkouts: user.myWorkouts.filter(
+                  (i) => i.id !== displayWorkout.id
+                ),
+              })
+            );
+            dispatch(
+              setFavoriteWorkoutsId(
+                favoriteWorkoutsId.filter((i) => i !== displayWorkout.id)
+              )
+            );
           } else {
-            changeUser({
-              ...user,
-              myWorkouts: [...user.myWorkouts, startedWorkout],
-            });
+            dispatch(
+              setUser({
+                ...user,
+                myWorkouts: [...user.myWorkouts, displayWorkout],
+              })
+            );
+            dispatch(
+              setFavoriteWorkoutsId([...favoriteWorkoutsId, displayWorkout.id])
+            );
           }
         });
     }
   };
 
-  const openExerciseList = () => {
+  const backExerciseBtn = () => {
+    if (innerWidth <= 600) {
+      containerRef.current?.scrollBy({ left: -330, behavior: "smooth" });
+    } else {
+      containerRef.current?.scrollBy({ left: -660, behavior: "smooth" });
+    }
+  };
+
+  const nextExerciseBtn = () => {
+    if (innerWidth <= 600) {
+      containerRef.current?.scrollBy({ left: 330, behavior: "smooth" });
+    } else {
+      containerRef.current?.scrollBy({ left: 660, behavior: "smooth" });
+    }
+  };
+
+  const openAddingExercise = () => {
     setIsAddingExercise(true);
+    displayWorkout?.exercises.map((i: exercisesType) => {
+      selectedExercisesId.push(i.id);
+    });
   };
 
   const exerciseClick = (e: HTMLElement) => {
@@ -178,11 +236,12 @@ export default function WorkoutPage() {
     ) {
       exercise.done = true;
     }
-    changeStartededWorkout({
-      ...startedWorkout,
-    });
+    dispatch(setStartedWorkout(startedWorkout));
     !exercise.static &&
-    (repsRef.current[displayWorkout.exercises.indexOf(exercise)].value = "");
+      (repsRef.current && displayWorkout
+        ? (repsRef.current[displayWorkout.exercises.indexOf(exercise)].value =
+            "")
+        : null);
   };
 
   const editWeightBtn = () => {
@@ -194,33 +253,50 @@ export default function WorkoutPage() {
     if (displayWorkout && displayWorkout.needWeight) {
       setIsEnteringWeight(true);
     } else {
-      changeStartededWorkout({
-        ...displayWorkout,
-        exercises: displayWorkout.exercises,
+      if (displayWorkout) {
+        dispatch(
+          setStartedWorkout({
+            ...displayWorkout,
+            exercises: displayWorkout.exercises,
+          })
+        );
+      }
+
+      workouts.map((i) => {
+        if (i.id === displayWorkout?.id) {
+          lastOrder = displayWorkout.order;
+          sessionStorage.setItem("lastOrder", String(lastOrder));
+        }
       });
+      dispatch(setWorkouts([...workouts]));
     }
   };
 
   const returnToMain = () => {
     localStorage.removeItem("viewWorkout");
     localStorage.removeItem("startedWorkout");
-    changeStartededWorkout(null);
+    dispatch(setStartedWorkout(null));
     navigate(router.main);
   };
 
   const finishWorkout = () => {
+    // stopTimer();
     setIsConfirm(false);
     releaseWakeLock();
-    changeStartededWorkout(null);
-    setTime(0);
+    dispatch(setStartedWorkout(null));
+    sessionStorage.removeItem("lastOrder");
+    dispatch(setWorkouts([...workouts]));
+    dispatch(setWorkoutTime(0));
   };
 
   const deleteWorkout = () => {
-
-    changeStartededWorkout(null);
-    changeWorkouts(
-      workouts.filter((i: workoutType) => i.id !== displayWorkout?.id)
+    dispatch(setStartedWorkout(null));
+    dispatch(
+      setWorkouts(
+        workouts.filter((i: workoutType) => i.id !== displayWorkout?.id)
+      )
     );
+
     navigate(router.main);
   };
 
@@ -241,17 +317,17 @@ export default function WorkoutPage() {
                 id=""
               />
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-[20px]">
               <button
                 onClick={cancelWeightBtn}
-                className="mt-[10px] text-[16px] rounded-[45px] bg-[white] border-1 px-[16px] py-[8px] hover:bg-[#C6FF00] hover:cursor-pointer"
+                className="w-full mt-[10px] text-[16px] rounded-[45px] bg-[white] border-1 px-[16px] py-[8px] hover:bg-[#C6FF00] hover:cursor-pointer"
               >
                 Отмена
               </button>
 
               <button
                 onClick={confirmWeightBtn}
-                className="mt-[10px] text-[16px] rounded-[45px] border-1 border-[#BCEC30] bg-[#BCEC30] px-[16px] py-[8px] hover:bg-[#C6FF00] hover:cursor-pointer"
+                className="w-full mt-[10px] text-[16px] rounded-[45px] border-1 border-[#BCEC30] bg-[#BCEC30] px-[16px] py-[8px] hover:bg-[#C6FF00] hover:cursor-pointer"
               >
                 Далее
               </button>
@@ -267,7 +343,7 @@ export default function WorkoutPage() {
         />
       )}
       <Header />
-      {displayWorkout && (
+      {
         <div className="px-[16px] pb-[20px]">
           <div
             onClick={backBtn}
@@ -276,28 +352,79 @@ export default function WorkoutPage() {
             &laquo; Назад
           </div>
           <h1 className="text-[32px] pl-[25px] pb-[20px] font-600">
-            {displayWorkout.nameRU}
+            {displayWorkout && displayWorkout.nameRU}
           </h1>
           <div className="flex flex-col md:flex-row md:gap-[20px] place-items-center  md:items-center justify-center">
             <div className="relative w-[300px]">
               {isAuth && displayWorkout ? (
-                favoriteWorkoutId.includes(displayWorkout.id) ? (
-                  <div
-                    title="Удалить из избранных"
+                favoriteWorkoutsId.includes(displayWorkout.id) ? (
+                  <svg
+                    xlinkTitle="Удалить из избранных"
                     onClick={(e) => addFavoriteWorkout(e)}
-                    className="bg-[red] z-1 shadow-[0px_0px_20px_0px_white] place-self-end relative top-[45px] right-[15px] hover:scale-[1.3] hover:border-[#000000] hover:border-[1px] transition-[0.3s] w-[27px] h-[27px] rounded-[100%] relative"
+                    className="relative top-[35px] place-self-end right-[10px]"
+                    width="30"
+                    height="30"
+                    viewBox="0 0 64 64"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlnsXlink="http://www.w3.org/1999/xlink"
                   >
-                    <div className="h-[3px] w-[15px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
-                  </div>
+                    <rect width="64" height="64" fill="url(#pattern0_7_4)" />
+                    <defs>
+                      <pattern
+                        id="pattern0_7_4"
+                        patternContentUnits="objectBoundingBox"
+                        width="1"
+                        height="1"
+                      >
+                        <use
+                          xlinkHref="#image0_7_4"
+                          transform="scale(0.015625)"
+                        />
+                      </pattern>
+                      <image
+                        id="image0_7_4"
+                        width="64"
+                        height="64"
+                        preserveAspectRatio="none"
+                        xlinkHref="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAACxAAAAsQAa0jvXUAAAGHaVRYdFhNTDpjb20uYWRvYmUueG1wAAAAAAA8P3hwYWNrZXQgYmVnaW49J++7vycgaWQ9J1c1TTBNcENlaGlIenJlU3pOVGN6a2M5ZCc/Pg0KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyI+PHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj48cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0idXVpZDpmYWY1YmRkNS1iYTNkLTExZGEtYWQzMS1kMzNkNzUxODJmMWIiIHhtbG5zOnRpZmY9Imh0dHA6Ly9ucy5hZG9iZS5jb20vdGlmZi8xLjAvIj48dGlmZjpPcmllbnRhdGlvbj4xPC90aWZmOk9yaWVudGF0aW9uPjwvcmRmOkRlc2NyaXB0aW9uPjwvcmRmOlJERj48L3g6eG1wbWV0YT4NCjw/eHBhY2tldCBlbmQ9J3cnPz4slJgLAAACXElEQVR4Xu2ZsU7cQBRFz6x3CaSkQ4IOagq+IPmDKPxlpPxBpHxBirSUSFEaKAMJLDfF2pL1PF6v7Rl7154j0dyH5HfPji28QCKRSCQSiURinjgb7Egm6dWGPpxzK2Cn3/WwkvTPhj6cc0tgbfMm2go4kfQH4PHiys68nN7fwWbBM+C3nddwJukX3a5zAjzbeR1tBNxK+rLrQpbSgsfAXzvPeSfpmRbFLaf3dzjnPgNf7czHLgIWktb0WKpMvuAH4LsZfZT0LdQ12MheALLzMk0CFpLWIZYqYxZE0huBBJfJZWfAm50VbBUgSaGXKlOIiH0N51xtz4UNStzaIDSPF1dRy5f4ZIOCOjPHkp4GWi46+Sl4DzzZmVdA7KM/BnW3gu8WyGwwISp9K0am+OkX+E5BxcjcSAJsMDeSABvMjSTABnMjCbCBc+6oeEubEvkfQUc2rwgAXmwwISrdfAImdwryT39lc+oEAC/OuespSMjL39R9M10nAOCnDQ6YHzYoqLwNWg757dD39mfZdgJg8zxYHuKtkJdf2tzSKABYH5qE0kOv8T9FW4+HIZP0uu+3Q6m896FnaSOAfZfQtjwdBLCvErqUp6MA9k1C1/L0EMC+SOhTnp4CGFtC3/IEEMBYEkKUJ5AAhpYQqjwBBTCUhJDlCSyA2BJClyeCAGJJiFGeSAIILSFWeSIKIJSEmOWJLIC+EmKXZwABdJUwRHkGEkBbCUOVZ0AB7CphyPIMLIAmCUOXZwQB1EkYo/yYZJL0cH6ph/NLSRLQ+AXm1MiUM8fyBVn+k0gkEokx+A9KljoEt6jSJAAAAABJRU5ErkJggg=="
+                      />
+                    </defs>
+                  </svg>
                 ) : (
-                  <div
-                    title="Добавить в избранные"
+                  <svg
                     onClick={(e) => addFavoriteWorkout(e)}
-                    className="bg-[green] z-1 shadow-[0px_0px_20px_0px_white] place-self-end relative top-[45px] right-[15px]  hover:scale-[1.3] top-[10px] hover:border-[#000000] hover:border-[1px] transition-[0.3s] w-[27px] h-[27px] rounded-[100%] relative"
+                    xlinkTitle="Добавить в избранное"
+                    className="relative top-[35px] place-self-end right-[10px]"
+                    width="30"
+                    height="30"
+                    viewBox="0 0 64 64"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlnsXlink="http://www.w3.org/1999/xlink"
                   >
-                    <div className="h-[15px] w-[3px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
-                    <div className="h-[3px] w-[15px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
-                  </div>
+                    <rect width="64" height="64" fill="url(#pattern0_8_5)" />
+                    <defs>
+                      <pattern
+                        id="pattern0_8_5"
+                        patternContentUnits="objectBoundingBox"
+                        width="1"
+                        height="1"
+                      >
+                        <use
+                          xlinkHref="#image0_8_5"
+                          transform="scale(0.015625)"
+                        />
+                      </pattern>
+                      <image
+                        id="image0_8_5"
+                        width="64"
+                        height="64"
+                        preserveAspectRatio="none"
+                        xlinkHref="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAACxAAAAsQAa0jvXUAAAGHaVRYdFhNTDpjb20uYWRvYmUueG1wAAAAAAA8P3hwYWNrZXQgYmVnaW49J++7vycgaWQ9J1c1TTBNcENlaGlIenJlU3pOVGN6a2M5ZCc/Pg0KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyI+PHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj48cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0idXVpZDpmYWY1YmRkNS1iYTNkLTExZGEtYWQzMS1kMzNkNzUxODJmMWIiIHhtbG5zOnRpZmY9Imh0dHA6Ly9ucy5hZG9iZS5jb20vdGlmZi8xLjAvIj48dGlmZjpPcmllbnRhdGlvbj4xPC90aWZmOk9yaWVudGF0aW9uPjwvcmRmOkRlc2NyaXB0aW9uPjwvcmRmOlJERj48L3g6eG1wbWV0YT4NCjw/eHBhY2tldCBlbmQ9J3cnPz4slJgLAAADXElEQVR4Xu2Zy24TMRhGT5q00E25eIcMRGDYwaIbkHgGBBLiRXkIoEgIiR3FBSEZWBkKSFzEJSwyJe0f2/FMZiaDOkeKVJ1JJ/4+e5xJAj09PT09PT09PceTgRSZrHltfksZQjl7BtiXPpPTXpuPUoZQzg6BP9IvomwBJ7w236UEYDCAyUTafyhnt4Fn0kfY9to8lTIH5exJ4If0MbIL8NrE05VAOXsOeC99wTmvzVspq6Cczcq2JkWAQXb4wew1Y6/utXkH3JMeuF9XeGYTFhvGPxY9YeC1KX1d5XIwS9kFV0A5uwZEz58sIDWwzM1ty2vzScoyKGdPAZ+lFyQ3y9TlED0QC6+cvQE8kX4BZ702XsoUytmzQDRUhBtem8dSkightgeckILpSS5WCA/wQTk7UM7elQckytk7xWDLhgfYUc6OpSzYkILYCgjNvnL2JrAjfQWuem1eSMn0Na4CL6WvwE2vzSMpQ6tgbgWEwhfUER5gt9g/jqCcPV1TeIDgZRDKOydChAa8JPuHz1n8vdRmKSn2kCOE7l6zCsjY7auwr5w9r5w939D5s/aQ3AKawhWPlbHqAlZOX4AUx42+ACmOG7kFzL2n/gdclyLE3K0hsOm1+Spl6Dayy4TuaJWzW8CXwy60Ar5JUXBbiq4SCl9wJDyRAlDObkrntXkAXJG+g1yTgtnszxEsAPiunL0lpddmF4h93OwCY6/NcykL5mafRAEAD6VgWsJr4JL0HeBCMbY5UvtXqoDoP3pt9jq2EsZemzdSMs2QzJg8yPQEQ+mYrYQulDBOzPww9YUokbfBENFvh5Wzl4FX0rfEhcTMZ/1SlFsAHSxh6fCULIAOlVBLeHL2AMEksSfstfTukAo/KhOeCivggOivww2vhEXhg2NKUbUAVlBC7eGpcAkc5k+Ll0Mq/HrV8CxZAEUJIympt4RF4X9JX4ZlLoHDDL02wYEseTk0Gp4aC6CBEhoPT80FUGMJrYSngQKooYTWwtNQASxRQqvhabAAKpTQengaLoASJawkPC0UQEYJv1YVnpYKABh5bX5KmaKN8LRYAKmVIGkrPC0XQE4JbYanhs8CZfkd++zANPxGm+FZwQo4YG5PaHvmu8DQazMpfsZalwePC6Pi0dPT09OzCv4CplJ65wfIVNcAAAAASUVORK5CYII="
+                      />
+                    </defs>
+                  </svg>
                 )
               ) : null}
               <img
@@ -320,32 +447,44 @@ export default function WorkoutPage() {
             <div>
               <div
                 onClick={() => setIsAddingExercise(false)}
-                className="bg-[red] top-[45px] right-[10px] w-[30px] h-[30px] place-self-end rounded-full relative cursor-pointer"
+                className="bg-[red] z-1 top-[65px] right-[10px] w-[30px] h-[30px] place-self-end rounded-full relative cursor-pointer"
               >
                 <div className="h-[3px] w-[20px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
               </div>
+              <div className="flex justify-center top-[40px] relative gap-[10px]">
+                <button onClick={backExerciseBtn}>Back</button>
+                <button onClick={nextExerciseBtn}>Next</button>
+              </div>
 
-              <div className="flex overflow-x-auto overflow-y-hidden gap-[30px] pt-[60px] flex-row border-1 rounded-[10px] p-[20px] shadow-[0px_0px_15px_-5px] w-full">
-                {exercises.map((addExercise: exercisesType, index: number) => (
-                  <div
-                    ref={(el) => (btnRef.current[index] = el)}
-                    onClick={() => exerciseClick(btnRef.current[index])}
-                  >
-                    <Exercise
-                      workout={viewWorkout}
-                      setWorkout={changeViewWorkout}
-                      i={addExercise}
-                      emptyReps={emptyReps}
-                      setEmptyReps={setEmptyReps}
-                    />
-                  </div>
+              <div
+                ref={containerRef}
+                className="flex overflow-x-auto overflow-y-hidden gap-[30px] pt-[60px] flex-row border-1 rounded-[10px] p-[20px] shadow-[0px_0px_15px_-5px] w-full"
+              >
+                {exercises.map((addExercise, index) => (
+                  <>
+                    {addExercise &&
+                    selectedExercisesId.includes(addExercise.id) ? null : (
+                      <div
+                        ref={(el) => (btnRef.current[index] = el)}
+                        onClick={() => exerciseClick(btnRef.current[index])}
+                      >
+                        <Exercise
+                          workout={displayWorkout}
+                          setWorkout={changeViewWorkout}
+                          i={addExercise}
+                          emptyReps={emptyExerciseReps}
+                          setEmptyReps={setEmptyExerciseReps}
+                        />
+                      </div>
+                    )}
+                  </>
                 ))}
               </div>
             </div>
           ) : (
             <div
-              onClick={openExerciseList}
-              className="bg-[#BCEC30] top-[40px] right-[10px] w-[30px] h-[30px] place-self-end rounded-full relative cursor-pointer"
+              onClick={openAddingExercise}
+              className="bg-[#BCEC30] top-[60px] right-[10px] w-[30px] h-[30px] place-self-end rounded-full relative cursor-pointer"
             >
               <div className="h-[20px] w-[3px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
               <div className="h-[3px] w-[20px] bg-[white] absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%]"></div>
@@ -510,7 +649,9 @@ export default function WorkoutPage() {
                   <path d="M 16 4 C 9.382813 4 4 9.382813 4 16 C 4 22.617188 9.382813 28 16 28 C 22.617188 28 28 22.617188 28 16 C 28 9.382813 22.617188 4 16 4 Z M 16 6 C 21.535156 6 26 10.464844 26 16 C 26 21.535156 21.535156 26 16 26 C 10.464844 26 6 21.535156 6 16 C 6 10.464844 10.464844 6 16 6 Z M 15 8 L 15 17 L 22 17 L 22 15 L 17 15 L 17 8 Z" />
                 </svg>
 
-                <span className="font-medium pl-[5px]">{timeHHMMSS(time)}</span>
+                <span className="font-medium pl-[5px]">
+                  {timeHHMMSS(workoutTime)}
+                </span>
 
                 {displayWorkout?.timeLimit && (
                   <p>
@@ -533,7 +674,7 @@ export default function WorkoutPage() {
             startedWorkout.id === displayWorkout.id ? (
             <>
               <div className="text-center text-[20px]">
-                Время тренировки: <Stopwatch time={time} setTime={setTime} />{" "}
+                Время тренировки: <Stopwatch time={workoutTime} />{" "}
               </div>
 
               <button
@@ -583,7 +724,7 @@ export default function WorkoutPage() {
             </>
           )}
         </div>
-      )}
+      }
     </>
   );
 }

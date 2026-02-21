@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import { data } from "../data";
 import { Header } from "../components/Header";
 import { Outlet } from "react-router-dom";
-import { Filter } from "../components/Filter";
 import type { workoutType } from "../types/types";
 import { Workout } from "../components/Workout";
 import { BottomBtn } from "../components/BottomBtn";
-import { useMyContext } from "../hooks/checkContext";
+import { useAppSelector } from "../store/features/store";
+import { FilterWorkout } from "../components/FilterWorkout";
 
 export const sortArray = (a: number, b: number): number => {
   if (a > b) {
@@ -17,22 +16,17 @@ export const sortArray = (a: number, b: number): number => {
 };
 
 export default function Main() {
-  const { workouts, changeWorkouts } = useMyContext();
+  const { workouts } = useAppSelector((state) => state.workoutSlice);
   const [search, setSearch] = useState<string>("");
-  const [filteredCourses, setFilteredCourses] = useState<workoutType[] | []>(
-    []
-  );
+  const [filteredCourses, setFilteredCourses] = useState<workoutType[]>([]);
 
-  useEffect(() => {
-    const savedWorkouts = localStorage.getItem("workouts");
-    if (savedWorkouts) {
-      changeWorkouts(
-        JSON.parse(savedWorkouts).sort((a, b) => sortArray(a.order, b.order))
-      );
-    } else {
-      changeWorkouts(data.workouts.sort((a, b) => sortArray(a.order, b.order)));
-    }
-  }, []);
+  // useEffect(() => {
+  //     dispatch(
+  //       setWorkouts(
+  //         workouts.sort((a, b) => sortArray(a.order, b.order))
+  //       )
+  //     );
+  // }, []);
 
   useEffect(() => {
     const arr: workoutType[] = [];
@@ -60,7 +54,7 @@ export default function Main() {
         <h1 className="pb-[30px] text-[32px] font-medium leading-none">
           Начните заниматься спортом и улучшите качество жизни
         </h1>
-        <Filter
+        <FilterWorkout
           search={search}
           setSearch={setSearch}
           array={workouts}
@@ -68,8 +62,8 @@ export default function Main() {
         />
         <div className="pt-[20px] flex gap-[24px] flex-wrap justify-center">
           {search === ""
-            ? workouts.map((i: workoutType) => <Workout i={i} />)
-            : filteredCourses.map((i: workoutType) => <Workout i={i} />)}
+            ? workouts.map((i) => <Workout i={i} />)
+            : filteredCourses.map((i) => <Workout i={i} />)}
         </div>
         <BottomBtn onClick={handleToTopBtn} btnText={<p>Наверх &#8593;</p>} />
       </div>

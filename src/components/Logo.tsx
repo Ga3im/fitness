@@ -1,14 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { router } from "../pages/router";
-import { useMyContext } from "../hooks/checkContext";
+import { setIsOpenProfile } from "../store/features/authSlice";
+import { useAppDispatch } from "../store/features/store";
 
 export const Logo = () => {
-  const { setIsOpenProfile } = useMyContext();
+  const dispatch = useAppDispatch();
 
   const navigate = useNavigate();
   const handleLogoClick = () => {
     navigate(router.main);
-    setIsOpenProfile(false);
+    dispatch(setIsOpenProfile(false));
   };
 
   return (

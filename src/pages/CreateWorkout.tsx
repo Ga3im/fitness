@@ -2,21 +2,23 @@ import { useNavigate } from "react-router-dom";
 import { Header } from "../components/Header";
 import { router } from "./router";
 import { useEffect, useState } from "react";
-import { Filter } from "../components/Filter";
 import type { exercisesType, workoutType } from "../types/types";
 import { exercises } from "../data";
 import { BottomBtn } from "../components/BottomBtn";
 import { Exercise } from "../components/Exercise";
-import { useMyContext } from "../hooks/checkContext";
+import { useAppDispatch, useAppSelector } from "../store/features/store";
+import {
+  setEmptyExerciseReps,
+  setWorkouts,
+} from "../store/features/workoutSlice";
+import { setIsOpenProfile } from "../store/features/authSlice";
+import { FilterExercise } from "../components/FilterExercise";
 
 export const CreateWorkout = () => {
-  const {
-    changeWorkouts,
-    workouts,
-    setIsOpenProfile,
-    emptyReps,
-    setEmptyReps,
-  } = useMyContext();
+  const { workouts, emptyExerciseReps } = useAppSelector(
+    (state) => state.workoutSlice
+  );
+  const dispatch = useAppDispatch();
   const [isSelectedName, setIsSelectedName] = useState<boolean>(true);
   const [isSelectedExercise, setIsSelectedExercise] = useState<boolean>(true);
   const [displayedExercises, setDisplayedExercisess] = useState<
@@ -141,16 +143,16 @@ export const CreateWorkout = () => {
         }
       }
     });
-    setEmptyReps(errRepsH);
+    dispatch(setEmptyExerciseReps(errRepsH));
 
     if (
       workout.nameRU !== "" &&
       workout.exercises.length !== 0 &&
-      emptyReps.length === 0
+      emptyExerciseReps.length === 0
     ) {
-      changeWorkouts([...workouts, workout]);
-      setEmptyReps([]);
-      setIsOpenProfile(false);
+      dispatch(setWorkouts([...workouts, workout]));
+      dispatch(setEmptyExerciseReps([]));
+      dispatch(setIsOpenProfile(false));
       navigate(router.main);
       localStorage.removeItem("workout");
     }
@@ -226,7 +228,7 @@ export const CreateWorkout = () => {
           }
         >
           <p className="text-[20px] pb-[10px]">Упражнения:</p>
-          <Filter
+          <FilterExercise
             search={search}
             setSearch={setSearch}
             array={exercises}
@@ -239,8 +241,8 @@ export const CreateWorkout = () => {
                     workout={workout}
                     setWorkout={setWorkout}
                     i={i}
-                    emptyReps={emptyReps}
-                    setEmptyReps={setEmptyReps}
+                    emptyReps={emptyExerciseReps}
+                    setEmptyReps={setEmptyExerciseReps}
                   />
                 ))
               : filteredExercises.map((i: exercisesType) => (
@@ -248,8 +250,8 @@ export const CreateWorkout = () => {
                     workout={workout}
                     setWorkout={setWorkout}
                     i={i}
-                    emptyReps={emptyReps}
-                    setEmptyReps={setEmptyReps}
+                    emptyReps={emptyExerciseReps}
+                    setEmptyReps={setEmptyExerciseReps}
                   />
                 ))}
 

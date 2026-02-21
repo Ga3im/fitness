@@ -1,3 +1,4 @@
+import type { ActionCreatorWithPayload } from "@reduxjs/toolkit";
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 
 export type MyProps = {
@@ -23,6 +24,7 @@ export type exercisesType = {
   static?: boolean;
   table?: number[];
 };
+
 
 export type workoutType = {
   id: string;
@@ -50,21 +52,17 @@ export type WorkoutPropType = {
 export type ExercisePropType = {
   i: exercisesType;
   emptyReps: string[];
-  setEmptyReps: Dispatch<SetStateAction<string[]>>;
+  setEmptyReps: ActionCreatorWithPayload<string[]>;
   workout: workoutType;
   setWorkout: Dispatch<SetStateAction<workoutType>>;
 };
 
 export type StopwatchropType = {
   time: number;
-  setTime: Dispatch<SetStateAction<number>>;
 };
 
 export type StartTimeBtnProp = {
-  addRepsBtn: (
-    exercise: exercisesType,
-    currentReps: number 
-  ) => void;
+  addRepsBtn: (exercise: exercisesType, currentReps: number) => void;
   exercise: exercisesType;
   time: number;
 };
@@ -74,13 +72,18 @@ export type InputTimeProps = {
   focusInput: (exercise: exercisesType) => void;
 };
 
-export type FilterProp = {
+export type FilterExerciseProp = {
   search: string;
   setSearch: Dispatch<SetStateAction<string>>;
-  array: workoutType[] | exercisesType[];
-  setFilteredArray: Dispatch<
-    SetStateAction<workoutType[] | [] | exercisesType[]>
-  >;
+  array: exercisesType[];
+  setFilteredArray: Dispatch<SetStateAction<exercisesType[]>>;
+};
+
+export type FilterWorkoutProp = {
+  search: string;
+  setSearch: Dispatch<SetStateAction<string>>;
+  array: workoutType[];
+  setFilteredArray: Dispatch<SetStateAction<workoutType[]>>;
 };
 
 export type BottomBtnProp = {
@@ -101,34 +104,8 @@ export type additionalSettingType = {
 };
 
 export type contextType = {
-  startedWorkout: workoutType | null;
-  isOpenProfile: boolean;
-  setIsOpenProfile: Dispatch<SetStateAction<boolean>>;
   isAuth: boolean;
   setIsAuth: Dispatch<SetStateAction<boolean>>;
   user: userType | null;
-  setUser: Dispatch<SetStateAction<userType | null>>;
   changeUser: (newUser: userType) => void;
-  error: string;
-  setError: Dispatch<SetStateAction<string>>;
-  isLoading: boolean;
-  setIsLoading: Dispatch<SetStateAction<boolean>>;
-  changeAccounts: (newAccount: userType) => void;
-  setAccounts: Dispatch<SetStateAction<userType[]>>;
-  changeStartededWorkout: (newWorkout: workoutType) => void;
-  workouts: workoutType[];
-  setWorkouts: Dispatch<SetStateAction<workoutType[]>>;
-  changeWorkouts: (workouts: workoutType[]) => void;
-  isStartingWorkout: workoutType | null;
-  setIsStartingWorkout: Dispatch<SetStateAction<workoutType | null>>;
-  favoriteWorkoutId: string[];
-  setFavoriteWorkoutId: Dispatch<SetStateAction<string[]>>;
-  additionalSetting: additionalSettingType;
-  setAdditionalSetting: Dispatch<SetStateAction<additionalSettingType>>;
-  time: number;
-  setTime: Dispatch<SetStateAction<number>>;
-  viewWorkout: workoutType | null;
-  changeViewWorkout: (workout: workoutType) => void;
-  emptyReps: string[];
-  setEmptyReps: Dispatch<SetStateAction<string[]>>;
 };

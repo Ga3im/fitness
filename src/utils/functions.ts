@@ -1,3 +1,4 @@
+
 export const timeHHMMSS = (time: number): string => {
   let hour;
   let HH;
@@ -13,3 +14,10 @@ export const timeHHMMSS = (time: number): string => {
   return time >= 3600 ? `${HH}:${MM}:${SS}` : `${MM}:${SS}`;
 };
 
+// export const swapElements = (arr, swapEl) => {
+//   let lastValue = swapEl;
+//   for (let i = 0; i < arr.length; i++) {
+//     const element = arr[i];
+   
+//   }
+// };

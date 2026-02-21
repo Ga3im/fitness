@@ -1,21 +1,29 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Header } from "../components/Header";
 import { useNavigate } from "react-router-dom";
 import { router } from "./router";
-import { Filter } from "../components/Filter";
 import type { workoutType } from "../types/types";
 import { Workout } from "../components/Workout";
 import { BottomBtn } from "../components/BottomBtn";
-import { useMyContext } from "../hooks/checkContext";
+import { useOutsideClick } from "../hooks/modalClose";
+import {
+  setIsAuth,
+  setIsOpenProfile,
+  setUser,
+} from "../store/features/authSlice";
+import { useAppDispatch, useAppSelector } from "../store/features/store";
+import { FilterWorkout } from "../components/FilterWorkout";
 
 export default function Profile() {
-  const { user, changeUser, setIsOpenProfile, isAuth, setIsAuth } =
-    useMyContext();
   const [isOpenSetting, setIsOpenSetting] = useState<boolean>(false);
   const [search, setSearch] = useState<string>("");
   const [filteredMyCourses, setFilteredMyCourses] = useState<
     workoutType[] | []
   >([]);
+  const profileMenuRef = useRef(null);
+  const profileMenuBtnRef = useRef(null);
+  const dispatch = useAppDispatch();
+  const { user, isAuth } = useAppSelector((state) => state.authSlice);
 
   useEffect(() => {
     const arr: workoutType[] = [];
@@ -30,7 +38,7 @@ export default function Profile() {
   }, [search]);
 
   useEffect(() => {
-    setIsOpenProfile(true);
+    dispatch(setIsOpenProfile(true));
   }, []);
 
   const navigate = useNavigate();
@@ -47,7 +55,7 @@ export default function Profile() {
       if (file) {
         previewUrl = URL.createObjectURL(file);
         if (user) {
-          changeUser({ ...user, img: previewUrl });
+          dispatch(setUser({ ...user, img: previewUrl }));
         }
       }
     }
@@ -57,7 +65,7 @@ export default function Profile() {
   const deleteProfilePhoto = () => {
     setIsOpenSetting(false);
     if (user) {
-      changeUser({ ...user, img: "" });
+      dispatch(setUser({ ...user, img: "" }));
     }
   };
 
@@ -66,10 +74,10 @@ export default function Profile() {
   };
 
   const handleLogout = () => {
-    changeUser(null);
+    dispatch(setUser(null));
     navigate(router.main);
-    setIsOpenProfile(false);
-    setIsAuth(false);
+    dispatch(setIsOpenProfile(false));
+    dispatch(setIsAuth(false));
     localStorage.removeItem("user");
   };
 
@@ -81,15 +89,21 @@ export default function Profile() {
     });
   };
 
+  const closeProfileMenu = () => {
+    setIsOpenSetting(false);
+  };
+  useOutsideClick(profileMenuRef, profileMenuBtnRef, closeProfileMenu);
+
   return (
     <>
       <Header />
-      {isAuth && user? (
+      {isAuth && user ? (
         <div className="px-[16px] pb-[24px]">
           <p className="text-[24px] font-medium pb-[24px]">Профиль</p>
           <div className="relative md:flex md:gap-[33px] md:items-center shadow-[0px_0px_10px_-7px] p-[30px] rounded-[30px]">
             <div>
               <div
+                ref={profileMenuBtnRef}
                 onClick={handleOpenSetting}
                 className="flex flex-col relative md:top-[40px] md:right-[20px] gap-[5px] place-self-end cursor-pointer"
               >
@@ -98,7 +112,10 @@ export default function Profile() {
                 <div className="bg-[#4f4f4f] rounded-full w-[5px] h-[5px]"></div>
               </div>
               {isOpenSetting && (
-                <div className="absolute py-[5px] px-[10px] top-[50px] md:top-[95px] mt-[10px] rounded-[10px] bg-[#f4f4f4] place-self-end mr-[10px] shadow-[0px_0px_10px_-5px]">
+                <div
+                  ref={profileMenuRef}
+                  className="absolute py-[5px] px-[10px] top-[50px] md:top-[95px] mt-[10px] rounded-[10px] bg-[#f4f4f4] place-self-end mr-[10px] shadow-[0px_0px_10px_-5px]"
+                >
                   <label
                     className="cursor-pointer hover:underline"
                     htmlFor="profilePhoto"
@@ -190,7 +207,7 @@ export default function Profile() {
               Избранные
             </h1>
             {user.myWorkouts.length !== 0 && (
-              <Filter
+              <FilterWorkout
                 search={search}
                 setSearch={setSearch}
                 array={user.myWorkouts}
