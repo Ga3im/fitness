@@ -1,11 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { router } from "../pages/router";
 import { Logo } from "./Logo";
-import { setIsOpenProfile } from "../store/features/authSlice";
+import { setIsOpenProfile } from "../store/features/userSlice";
 import { useAppDispatch, useAppSelector } from "../store/features/store";
 
 export const Header = () => {
-  const { isOpenProfile, isAuth } = useAppSelector((state) => state.authSlice);
+  const { isOpenProfile, isAuth } = useAppSelector((state) => state.userSlice);
   const dispatch = useAppDispatch();
   let navigate = useNavigate();
 
@@ -24,7 +24,7 @@ export const Header = () => {
 
   return (
     <>
-      <header className="mb-[20px] py-[20px] px-[16px] flex justify-between items-center bg-gradient-to-b bg-[#007386] to-[#ebfdff]">
+      <header className="mb-[10px] py-[10px] px-[16px] flex justify-between items-center bg-gradient-to-b bg-[#007386] to-[#ebfdff]">
         <Logo />
         {isAuth ? (
           <div
@@ -32,8 +32,8 @@ export const Header = () => {
             className="flex gap-[13px] items-center"
           >
             <svg
-              width="30"
-              height="30"
+              width="20"
+              height="20"
               viewBox="0 0 30 30"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -54,7 +54,7 @@ export const Header = () => {
         ) : (
           <button
             onClick={handleToLogin}
-            className="text-[18px] rounded-[45px] hover:bg-[#C6FF00] active:bg-black active:text-[#FFFFFF] bg-[#BCEC30] px-[16px] py-[8px] "
+            className="text-[12px] rounded-[45px] hover:bg-[#C6FF00] active:bg-black active:text-[#FFFFFF] bg-[#BCEC30] px-[10px] py-[5px] "
           >
             Войти
           </button>

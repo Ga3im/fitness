@@ -29,9 +29,9 @@ export const StartTimeBtn = ({
   let timerInterval: number;
   let exerciseTimer: number;
   const [play, { stop }] = useSound(boopSfx, {
-    volume: 0.5, // Optional: set volume
-    playbackRate: 1, // Optional: set playback speed
-    interrupt: true, // Optional: stop previous sound when new one plays
+    volume: 0.5, 
+    playbackRate: 1, 
+    interrupt: true, 
   });
 
   // обратный отсчет

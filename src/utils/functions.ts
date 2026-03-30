@@ -1,4 +1,3 @@
-
 export const timeHHMMSS = (time: number): string => {
   let hour;
   let HH;
@@ -18,6 +17,14 @@ export const timeHHMMSS = (time: number): string => {
 //   let lastValue = swapEl;
 //   for (let i = 0; i < arr.length; i++) {
 //     const element = arr[i];
-   
+
 //   }
 // };
+
+export const sortArray = (a: number, b: number): number => {
+  if (a > b) {
+    return 1;
+  } else {
+    return -1;
+  }
+};

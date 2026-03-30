@@ -4,16 +4,18 @@ import type { userType } from "../../types/types";
 type WorkoutStateType = {
   isAuth: boolean;
   isOpenProfile: boolean;
+  isFavoriteTabata: boolean;
   user: null | userType;
 };
 
 const initialState: WorkoutStateType = {
   isAuth: false,
   isOpenProfile: false,
+  isFavoriteTabata: false,
   user: null,
 };
 
-const authSlice = createSlice({
+const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
@@ -26,8 +28,12 @@ const authSlice = createSlice({
     setUser: (state, action: PayloadAction<userType | null>) => {
       state.user = action.payload;
     },
+    setIsFavoriteTabata: (state, action) => {
+      state.isFavoriteTabata = action.payload;
+    },
   },
 });
 
-export const { setIsAuth, setIsOpenProfile, setUser } = authSlice.actions;
-export const authReduser = authSlice.reducer;
+export const { setIsAuth, setIsOpenProfile, setUser, setIsFavoriteTabata } =
+  userSlice.actions;
+export const authReduser = userSlice.reducer;

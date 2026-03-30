@@ -7,11 +7,8 @@ import { exercises } from "../data";
 import { BottomBtn } from "../components/BottomBtn";
 import { Exercise } from "../components/Exercise";
 import { useAppDispatch, useAppSelector } from "../store/features/store";
-import {
-  setEmptyExerciseReps,
-  setWorkouts,
-} from "../store/features/workoutSlice";
-import { setIsOpenProfile } from "../store/features/authSlice";
+import { setWorkouts } from "../store/features/workoutSlice";
+import { setIsOpenProfile } from "../store/features/userSlice";
 import { FilterExercise } from "../components/FilterExercise";
 
 export const CreateWorkout = () => {
@@ -143,7 +140,6 @@ export const CreateWorkout = () => {
         }
       }
     });
-    dispatch(setEmptyExerciseReps(errRepsH));
 
     if (
       workout.nameRU !== "" &&
@@ -151,7 +147,6 @@ export const CreateWorkout = () => {
       emptyExerciseReps.length === 0
     ) {
       dispatch(setWorkouts([...workouts, workout]));
-      dispatch(setEmptyExerciseReps([]));
       dispatch(setIsOpenProfile(false));
       navigate(router.main);
       localStorage.removeItem("workout");
@@ -160,30 +155,30 @@ export const CreateWorkout = () => {
   return (
     <>
       <Header />
-      <div className="px-[16px]">
+      <div className="px-[16px] pb-[20px]">
         <div
           onClick={backBtn}
-          className="text-[24px] opacity-[0.7] pb-[10px] hover:underline cursor-pointer"
+          className="text-[16px] opacity-[0.7] pb-[5px] hover:underline cursor-pointer"
         >
           &laquo; Назад
         </div>
-        <h1 className="text-[32px] font-medium leading-none mb-[34px]">
+        <h1 className="text-[20px] font-medium leading-none mb-[10px]">
           Создайте свою тренировку
         </h1>
-        <div className="flex flex-col gap-[10px] pb-[20px]">
-          <p className="text-[26px]">Название тренировки:</p>
+        <div className="flex flex-col gap-[10px] pb-[10px]">
+          <p className="text-[16px]">Название тренировки:</p>
           <input
             onChange={(e) => setWorkout({ ...workout, nameRU: e.target.value })}
             className={
               isSelectedName
-                ? "border-[1px] border-[#000000] px-[16px] py-[8px] rounded-[10px]"
-                : "border-[2px] border-[red] px-[16px] py-[8px] rounded-[10px]"
+                ? "border-[1px] border-[#000000] px-[16px] py-[5px] rounded-[10px]"
+                : "border-[2px] border-[red] px-[16px] py-[5px] rounded-[10px]"
             }
             type="text"
             placeholder="Введите назвавние тренировки"
           />
         </div>
-        <div className="text-center mt-[10px] text-[18px] w-full rounded-[45px] bg-[#BCEC30] hover:bg-[#C6FF00] active:bg-[#A0B000] active:text-[white] px-[16px] py-[8px] mb-[10px]">
+        <div className="text-center mt-[10px] text-[14px] w-full rounded-[45px] bg-[#BCEC30] hover:bg-[#C6FF00] active:bg-[#A0B000] active:text-[white] px-[16px] py-[5px] mb-[10px]">
           <label htmlFor="mainWorkoutPhoto">
             {previewUrl ? "Обновить фото" : "Загрузить фото тренировки"}
           </label>
@@ -223,8 +218,8 @@ export const CreateWorkout = () => {
         <div
           className={
             !isSelectedExercise
-              ? "pb-[20px] border-2 border-[red] rounded-[10px] p-[10px]"
-              : "pb-[20px]"
+              ? "border-2 border-[red] rounded-[10px] p-[10px]"
+              : ""
           }
         >
           <p className="text-[20px] pb-[10px]">Упражнения:</p>
@@ -236,36 +231,32 @@ export const CreateWorkout = () => {
           />
           <div className="flex pt-[20px] flex-wrap gap-[20px] justify-center">
             {search === ""
-              ? displayedExercises.map((i: exercisesType) => (
+              ? displayedExercises.map((ex: exercisesType) => (
                   <Exercise
                     workout={workout}
                     setWorkout={setWorkout}
-                    i={i}
-                    emptyReps={emptyExerciseReps}
-                    setEmptyReps={setEmptyExerciseReps}
+                    exercise={ex}
                   />
                 ))
-              : filteredExercises.map((i: exercisesType) => (
+              : filteredExercises.map((ex: exercisesType) => (
                   <Exercise
                     workout={workout}
                     setWorkout={setWorkout}
-                    i={i}
-                    emptyReps={emptyExerciseReps}
-                    setEmptyReps={setEmptyExerciseReps}
+                    exercise={ex}
                   />
                 ))}
 
             {exercises.length === displayedExercises.length ? (
               <div
                 onClick={hideExercisesBtn}
-                className="h-[30px] w-full bg-[#d1d1d1] flex justify-center shadow-[0px_0px_20px_10px_#d1d1d1] rounded-[5px]"
+                className="h-[25px] w-full bg-[#d1d1d1] flex justify-center shadow-[0px_0px_20px_10px_#d1d1d1] rounded-[5px]"
               >
                 <div className="w-[20px] mt-[10px] h-[20px] border-l-2 border-b-2 rotate-[135deg]"></div>
               </div>
             ) : (
               <div
                 onClick={moreExercisesBtn}
-                className="h-[30px] w-full bg-[#d1d1d1] flex justify-center rounded-[5px]"
+                className="h-[25px] w-full bg-[#d1d1d1] flex justify-center rounded-[5px]"
               >
                 <div className="w-[20px] h-[20px] border-l-2 border-b-2 rotate-[-45deg]"></div>
               </div>

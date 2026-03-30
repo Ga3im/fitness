@@ -1,47 +1,72 @@
-import { useState } from "react";
-import type { ExercisePropType, exercisesType } from "../types/types";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
+import type { exercisesType, workoutType } from "../types/types";
 import { InputTime } from "./InputTime";
-import { useAppDispatch, useAppSelector } from "../store/features/store";
-import { setAdditionalSetting } from "../store/features/workoutSlice";
+
+type ExercisePropType = {
+  exercise: exercisesType;
+  workout: workoutType;
+  setWorkout: Dispatch<SetStateAction<workoutType>>;
+};
 
 export const Exercise = ({
-  i,
-  emptyReps,
-  setEmptyReps,
+  exercise,
   workout,
   setWorkout,
 }: ExercisePropType) => {
   const [isAdditionalSetting, setIsAdditionalSetting] =
     useState<boolean>(false);
-  const [isSetting, setIsSetting] = useState<boolean>(false);
-  const [exercisesId, setExercisesId] = useState<string[]>([]);
-  const dispatch = useAppDispatch();
-  const { additionalSetting } = useAppSelector((state) => state.workoutSlice);
+  const [reps, setReps] = useState<number | null>(null);
+  const [timebtwmSets, setTimebtwmSets] = useState<number>(0);
+  const [sets, setSets] = useState<number>(1);
+  const [isSelected, setIsSelected] = useState<boolean>(false);
 
-  const exerciseClick = (exercise: exercisesType) => {
-    if (exercisesId.includes(exercise.id)) {
-      workout.exercises.map((i: exercisesType) => {
-        if (i.id === exercise.id) {
-          delete exercise.reps;
-          setWorkout({
-            ...workout,
-            exercises: workout.exercises.filter(
-              (item: exercisesType) => item.id !== exercise.id
-            ),
-          });
-        }
-      });
-      setExercisesId([...exercisesId.filter((i) => i !== exercise.id)]);
-      setIsSetting(false);
-    } else {
-      exercise.sets = 1;
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const updateWorkoutDebounced = (newExercises: exercisesType[]) => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
       setWorkout({
         ...workout,
-        exercises: [...workout.exercises, exercise],
+        exercises: newExercises,
+      });
+    }, 500);
+  };
+
+  useEffect(() => {
+    const newExercise: exercisesType[] = workout.exercises.map((ex) => {
+      if (ex.id === exercise.id) {
+        return {
+          ...ex,
+          reps: reps,
+          sets: sets,
+          timeBtwnSets: timebtwmSets,
+        };
+      }
+      return ex;
+    });
+    updateWorkoutDebounced(newExercise);
+  }, [sets, reps, timebtwmSets]);
+
+  const exerciseClick = (exercise: exercisesType) => {
+    if (isSelected) {
+      setWorkout({
+        ...workout,
+        exercises: workout.exercises.filter((ex) => ex.id !== exercise.id),
       });
 
-      setExercisesId([...exercisesId, exercise.id]);
-      setIsSetting(true);
+      setIsSelected(false);
+    } else {
+      setWorkout({
+        ...workout,
+        exercises: [...workout.exercises, { ...exercise, sets: 1 }],
+      });
+
+      setIsSelected(true);
     }
   };
 
@@ -49,135 +74,107 @@ export const Exercise = ({
     (e.target as HTMLElement).blur();
   };
 
-  const focusInput = (exercise: exercisesType) => {
-    if (!exercisesId.includes(exercise.id)) {
-      exercise.sets = 1;
-      setWorkout({
-        ...workout,
-        exercises: [...workout.exercises, exercise],
-      });
-
-      setExercisesId([...exercisesId, exercise.id]);
-    }
-  };
-
-  const changeReps = (val: number, exercise: exercisesType) => {
+  const changeSets = (val: number) => {
     if (val > 0) {
-      workout.exercises[workout.exercises.indexOf(exercise)].reps = val;
-      setEmptyReps(emptyReps.filter((i: string) => i !== exercise.id));
+      setSets(val);
     }
   };
 
-  const changeSets = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    exercise: exercisesType
-  ) => {
-    if (Number(e.target.value) > 0) {
-      workout.exercises[workout.exercises.indexOf(exercise)].sets = Number(
-        e.target.value
-      );
+  const changeReps = (val: number) => {
+    if (val > 0) {
+      setReps(val);
     }
   };
 
-  const accountingBySets = (exercise: exercisesType) => {
-    if (additionalSetting.noSets.includes(exercise.id)) {
-      dispatch(
-        setAdditionalSetting({
-          ...additionalSetting,
-          noSets: additionalSetting.noSets.filter(
-            (i: string) => i !== exercise.id
-          ),
-        })
-      );
-    } else {
-      dispatch(
-        setAdditionalSetting({
-          ...additionalSetting,
-          noSets: [...additionalSetting.noSets, exercise.id],
-        })
-      );
+  const changeTimeSets = (val: number) => {
+    if (val > 0) {
+      setTimebtwmSets(val);
     }
   };
+
+  const isSelectedExercise = workout.exercises.some(
+    (ex) => ex.id === exercise.id
+  );
+
+  const isEmptySets = workout.exercises.some((ex) => (ex.sets ?? 0) > 0);
+  const isEmptyReps = workout.exercises.some((ex) => (ex.reps ?? 0) > 0);
+  const currentExercise = workout.exercises.find((ex) => ex.id === exercise.id);
+
+  const repsValue = currentExercise?.reps || 0;
+  const setsValue = currentExercise?.sets || 1;
 
   return (
     <>
       <div
-        key={i.id}
+        key={exercise.id}
         className={
-          exercisesId.includes(i.id)
-            ? `w-[300px] h-[100%] p-[20px] border-[#00ff14] border-1 rounded-[20px] shadow-[0px_0px_10px_0px_#00ff14]`
-            : `w-[300px] h-[100%] p-[20px] border-1 rounded-[20px] shadow-[0px_0px_10px_0px]`
+          isSelectedExercise
+            ? `w-[250px] p-[20px] border-[#00ff14] border-1 rounded-[20px] shadow-[0px_0px_10px_0px_#00ff14]`
+            : `w-[250px] p-[20px] border-1 rounded-[20px] shadow-[0px_0px_10px_0px]`
         }
       >
-        <div className="h-[240px] content-center">
+        <div className="h-[200px] content-center">
           <img
-            onClick={() => exerciseClick(i)}
+            loading="lazy"
+            onClick={() => exerciseClick(exercise)}
             className="mb-[10px]"
-            src={i.img}
+            src={exercise.img}
           />
         </div>
-        <p onClick={() => exerciseClick(i)} className="text-[24px] pb-[20px]">
-          {i.name}
+        <p
+          onClick={() => exerciseClick(exercise)}
+          className="text-[18px] pb-[20px]"
+        >
+          {exercise.name}
         </p>
 
         <div
-          onClick={() => setIsSetting(!isSetting)}
+          onClick={() => setIsSelected(!isSelected)}
           className={
-            emptyReps.includes(i.id)
-              ? "border-[red] border-2 h-[30px] w-full bg-[#f7f7f7] flex justify-center items-end shadow-[0px_0px_14px_-10px] rounded-[5px]"
-              : "h-[30px] w-full bg-[#f7f7f7] flex justify-center items-end shadow-[0px_0px_14px_-10px] rounded-[5px]"
+            "h-[20px] w-full bg-[#f7f7f7] flex justify-center items-end shadow-[0px_0px_14px_-10px] rounded-[5px]"
           }
         >
           <div
             className={
-              isSetting
-                ? "w-[15px] mb-[3px] h-[15px] border-l-2 border-b-2 rotate-[135deg]"
-                : "w-[15px] mb-[12px] h-[15px] border-l-2 border-b-2 rotate-[-45deg]"
+              isSelected
+                ? "w-[15px] mb-[0px] h-[15px] border-l-2 border-b-2 rotate-[135deg]"
+                : "w-[15px] mb-[7px] h-[15px] border-l-2 border-b-2 rotate-[-45deg]"
             }
           ></div>
         </div>
-        {isSetting && (
+        {isSelected && (
           <div>
             <div className="flex flex-col gap-[5px] pb-[10px]">
-              <p className="text-[20px] pt-[10px]">Подходы:</p>
+              <p className="text-[16px] pt-[10px]">Подходы:</p>
               <input
-                onFocus={() => focusInput(i)}
                 onWheel={(e) => handleWheel(e)}
-                onChange={(e) => changeSets(e, i)}
-                className="border-[1px] border-[#000000] px-[16px] py-[8px] rounded-[10px]"
+                onChange={(e) => changeSets(Number(e.target.value))}
+                className={
+                  !isEmptySets
+                    ? "border-[2px] border-[red] px-[10px] py-[5px] rounded-[10px] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:margin-[0] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:margin-[0]"
+                    : "border-[1px] border-[#000000] px-[10px] py-[5px] rounded-[10px] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:margin-[0] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:margin-[0]"
+                }
                 type="number"
-                defaultValue="1"
+                defaultValue={setsValue}
                 placeholder="Количество подходов"
               />
             </div>
 
-            {!additionalSetting.noSets.includes(i.id) && i.static ? (
-              <div className="flex flex-col gap-[5px] pb-[10px]">
-                <p className="text-[20px]">Время:</p>
-                <InputTime
-                  i={i}
-                  changeReps={changeReps}
-                  focusInput={focusInput}
-                />
-              </div>
-            ) : (
-              <div className="flex flex-col gap-[5px] pb-[10px]">
-                <p className="text-[20px]">Повторения:</p>
-                <input
-                  onFocus={() => focusInput(i)}
-                  onWheel={handleWheel}
-                  onChange={(e) => changeReps(Number(e.target.value), i)}
-                  className={
-                    emptyReps.includes(i.id)
-                      ? "border-[2px] border-[red] px-[16px] py-[8px] rounded-[10px] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:margin-[0] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:margin-[0]"
-                      : "border-[1px] border-[#000000] px-[16px] py-[8px] rounded-[10px] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:margin-[0] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:margin-[0]"
-                  }
-                  type="number"
-                  placeholder="Количество повторений"
-                  value={i.reps}
-                />
-              </div>
-            )}
+            <div className="flex flex-col gap-[5px] pb-[10px]">
+              <p className="text-[16px]">Повторения:</p>
+              <input
+                onWheel={handleWheel}
+                onChange={(e) => changeReps(Number(e.target.value))}
+                className={
+                  !isEmptyReps
+                    ? "border-[2px] border-[red] px-[10px] py-[5px] rounded-[10px] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:margin-[0] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:margin-[0]"
+                    : "border-[1px] border-[#000000] px-[10px] py-[5px] rounded-[10px] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:margin-[0] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:margin-[0]"
+                }
+                type="number"
+                placeholder="Количество повторений"
+                defaultValue={repsValue}
+              />
+            </div>
 
             <div>
               <p
@@ -191,40 +188,17 @@ export const Exercise = ({
                 Дополнительные настройки
               </p>
               {isAdditionalSetting && (
-                <div className="pt-[10px]">
-                  <div
-                    onClick={() => accountingBySets(i)}
-                    className="flex items-start gap-[10px] pb-[!0px]"
-                  >
-                    <input
-                      checked={additionalSetting.noSets.includes(i.id)}
-                      className="relative top-[8px]"
-                      type="checkbox"
-                    />
-                    <p>Учет по подходам</p>
-                  </div>
-
-                  <div className="flex flex-col gap-[5px] pt-[10px] pb-[10px]">
-                    <p className="text-[20px]">Отдых между подходами:</p>
-                    <input
-                      className="border-[1px] border-[#000000] px-[16px] py-[8px] rounded-[10px]"
-                      type="number"
-                      placeholder="Отдых между подходами"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-[5px] pb-[20px]">
-                    <p className="text-[20px]">Отдых между повторами:</p>
-                    <input
-                      className="border-[1px] border-[#000000] px-[16px] py-[8px] rounded-[10px]"
-                      type="number"
-                      placeholder="Отдых между повторениями"
-                    />
-                  </div>
+                <div className="flex flex-col gap-[5px] pt-[10px] pb-[10px]">
+                  <p className="text-[16px]">Отдых между подходами:</p>
+                  <InputTime value={timebtwmSets} changeVal={changeTimeSets} />
                 </div>
               )}
             </div>
           </div>
         )}
+        <button className="mt-[10px] text-[16px] w-full rounded-[45px] bg-[#BCEC30] px-[16px] hover:bg-[#C6FF00] hover:cursor-pointer">
+          Добавить
+        </button>
       </div>
     </>
   );

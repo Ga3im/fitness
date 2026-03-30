@@ -1,4 +1,3 @@
-import type { ActionCreatorWithPayload } from "@reduxjs/toolkit";
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 
 export type MyProps = {
@@ -20,11 +19,11 @@ export type exercisesType = {
   sets?: number;
   reps?: number;
   doneReps?: number;
-  done?: boolean;
   static?: boolean;
+  done?: boolean;
   table?: number[];
+  timeBtwnSets?: number;
 };
-
 
 export type workoutType = {
   id: string;
@@ -36,25 +35,12 @@ export type workoutType = {
   img: string;
   custom?: boolean;
   timeLimit?: number;
-  challenge?: boolean;
   needWeight?: boolean;
 };
 
 export type addTimeType = {
   minutes: number;
   seconds: number;
-};
-
-export type WorkoutPropType = {
-  i: workoutType;
-};
-
-export type ExercisePropType = {
-  i: exercisesType;
-  emptyReps: string[];
-  setEmptyReps: ActionCreatorWithPayload<string[]>;
-  workout: workoutType;
-  setWorkout: Dispatch<SetStateAction<workoutType>>;
 };
 
 export type StopwatchropType = {
@@ -65,11 +51,6 @@ export type StartTimeBtnProp = {
   addRepsBtn: (exercise: exercisesType, currentReps: number) => void;
   exercise: exercisesType;
   time: number;
-};
-export type InputTimeProps = {
-  i: exercisesType;
-  changeReps: (seconds: number, i: exercisesType) => void;
-  focusInput: (exercise: exercisesType) => void;
 };
 
 export type FilterExerciseProp = {
@@ -95,12 +76,6 @@ export type ConfirmProp = {
   text: string;
   noBtn: () => void;
   yesBtn: () => void;
-};
-
-export type additionalSettingType = {
-  isTimeReps: boolean;
-  isTimeSets: boolean;
-  noSets: string[];
 };
 
 export type contextType = {

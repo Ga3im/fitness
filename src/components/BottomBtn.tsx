@@ -48,7 +48,7 @@ export const BottomBtn = ({ onClick, btnText }: BottomBtnProp) => {
         <button
           onClick={onClick}
           className={
-            "fixed z-2 bottom-0 right-0 mt-[20px] mx-[16px] text-[18px] rounded-[45px] bg-[#BCEC30] hover:bg-[#C6FF00] active:bg-[#A0B000] active:text-[white] px-[16px] py-[8px] mb-[10px]"
+            "fixed z-2 bottom-0 right-0 mx-[16px] text-[16px] rounded-[45px] bg-[#BCEC30] hover:bg-[#C6FF00] active:bg-[#A0B000] active:text-[white] px-[16px] py-[5px] mb-[10px]"
           }
         >
           {btnText}
@@ -57,7 +57,7 @@ export const BottomBtn = ({ onClick, btnText }: BottomBtnProp) => {
         <button
           onClick={onClick}
           className={
-            "flex place-self-center place-content-center w-full md:w-auto md:place-self-end mt-[20px] text-[18px] rounded-[45px] bg-[#BCEC30] hover:bg-[#C6FF00] active:bg-[#A0B000] active:text-[white] px-[16px] py-[8px] mb-[10px]"
+            "font-[700] flex place-self-center place-content-center w-full md:w-auto md:place-self-end mt-[20px] text-[16px] rounded-[45px] bg-[#BCEC30] px-[16px] py-[5px] hover:bg-[#a6d120] transition-all shadow-md active:scale-95"
           }
         >
           {btnText}

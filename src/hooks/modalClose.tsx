@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-export const useOutsideClick = (ref, btnRef, callback) => {
+export const useOutsideClick = (ref: any, btnRef: any, callback: any) => {
   useEffect(() => {
     const clickOutside = (e: MouseEvent) => {
       if (
