@@ -1,5 +1,5 @@
-import type { exercisesType } from "../types/types";
-import { timeHHMMSS } from "../utils/functions";
+import type { exercisesType } from "../../types/types";
+import { timeHHMMSS } from "../../utils/functions";
 
 type ResultTableType = {
   exercise: exercisesType;

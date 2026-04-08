@@ -1,14 +1,19 @@
-import type {
-  exercisesType,
-  FilterExerciseProp,
-} from "../types/types";
+import type { exercisesType } from "../types/types";
+import type { Dispatch, SetStateAction } from "react";
 
+type FilterExerciseProp = {
+  search: string;
+  setSearch: Dispatch<SetStateAction<string>>;
+  array: exercisesType[];
+  setFilteredArray: Dispatch<SetStateAction<exercisesType[]>>;
+};
 export const FilterExercise = ({
   search,
   setSearch,
   array,
   setFilteredArray,
 }: FilterExerciseProp) => {
+
   const handleSearchBtn = () => {
     const arr: exercisesType[] = [];
     array.map((i: any) => {

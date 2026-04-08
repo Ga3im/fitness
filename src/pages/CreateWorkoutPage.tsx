@@ -226,7 +226,7 @@ export const CreateWorkout = () => {
           <FilterExercise
             search={search}
             setSearch={setSearch}
-            array={exercises}
+            array={exercises.filter((e): e is exercisesType => !!e)}
             setFilteredArray={setFilteredExercises}
           />
           <div className="flex pt-[20px] flex-wrap gap-[20px] justify-center">

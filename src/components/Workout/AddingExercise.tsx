@@ -1,10 +1,9 @@
-import { useRef, type Dispatch, type SetStateAction } from "react";
-import { Exercise } from "./Exercise";
-import type { exercisesType, workoutType } from "../types/types";
+import { useRef } from "react";
+import { Exercise } from "../Exercise";
+import type { exercisesType, workoutType } from "../../types/types";
 
 type AddingExerciseType = {
   displayWorkout: workoutType | null;
-  setIsAddingExercise: Dispatch<SetStateAction<boolean>>;
   exercises: exercisesType[];
 };
 
@@ -20,7 +19,7 @@ export const AddingExercise = ({
     if (!container) return;
 
     const itemWidth = container.querySelector("div")?.clientWidth || 330;
-    const gap = 30; 
+    const gap = 30;
     const step = itemWidth + gap;
 
     const currentScroll = container.scrollLeft;
@@ -60,6 +59,7 @@ export const AddingExercise = ({
           {exercises.map((addExercise, index) => (
             <>
               {addExercise &&
+                displayWorkout &&
                 !displayWorkout?.exercises.some(
                   (ex) => ex.id === addExercise.id
                 ) && (

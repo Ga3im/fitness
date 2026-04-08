@@ -2,18 +2,12 @@ import { useNavigate } from "react-router-dom";
 import { Header } from "../components/Header";
 import { useAppDispatch, useAppSelector } from "../store/features/store";
 import { setIsFavoriteTabata } from "../store/features/userSlice";
-import {
-  finishWorkout,
-  setCycles,
-  setPrepTime,
-  setRestTime,
-  setTickTime,
-  setWorkTime,
-  startWorkout,
-} from "../store/features/timerSlice";
-import { BottomBtn } from "../components/BottomBtn";
-import { useEffect } from "react";
-import { Button } from "../components/Button";
+import { setTickTime, setTickTimer } from "../store/features/timerSlice";
+import { useEffect, useMemo, useRef } from "react";
+import useSound from "use-sound";
+import boopSfx from "/sounds/notification.mp3";
+import { IntervalList } from "../components/IntervalWorkout/IntervalList";
+import { SetIntervalWorkout } from "../components/IntervalWorkout/SetIntervalWorkout";
 
 export const IntervalWorkoutPage = () => {
   const { isAuth, isFavoriteTabata } = useAppSelector(
@@ -31,6 +25,11 @@ export const IntervalWorkoutPage = () => {
   } = useAppSelector((state) => state.timer);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const [play] = useSound(boopSfx, {
+    volume: 0.5,
+    playbackRate: 1,
+    interrupt: true,
+  });
 
   const HeartIcon = () => (
     <div
@@ -62,6 +61,7 @@ export const IntervalWorkoutPage = () => {
     if (isStart) {
       // Запускаем интервал только если нажали "Старт"
       intervalId = setInterval(() => {
+        dispatch(setTickTimer());
         dispatch(setTickTime());
       }, 1000);
     }
@@ -69,13 +69,61 @@ export const IntervalWorkoutPage = () => {
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [isStart]);
+  }, [isStart, dispatch]);
+
+  useEffect(() => {
+    if (time < 4) {
+      play();
+    }
+  }, [time]);
+
+  // Автоскролл к активному шагу
+  useEffect(() => {
+    if (isStart && activeStepRef.current) {
+      activeStepRef.current.scrollIntoView({
+        behavior: "smooth", // Плавная анимация
+        block: "center", // Центрируем элемент в контейнере
+      });
+    }
+  }, [status, currentCycle, isStart]);
+
+  const plan = useMemo(() => {
+    const steps = [];
+
+    // 1. Подготовка
+    steps.push({
+      label: "Подготовка",
+      duration: prepTime,
+      type: "Подготовка", // Должно совпадать со state.status
+    });
+
+    // 2. Циклы
+    for (let i = 1; i <= cycles; i++) {
+      steps.push({
+        label: "Работа",
+        duration: workTime,
+        type: "Работа",
+        cycle: i,
+      });
+
+      if (i < cycles) {
+        steps.push({
+          label: "Отдых",
+          duration: restTime,
+          type: "Отдых",
+          cycle: i,
+        });
+      }
+    }
+    return steps;
+  }, [prepTime, workTime, restTime, cycles]);
+
+  const activeStepRef = useRef<HTMLDivElement | null>(null);
 
   return (
     <>
       <Header />
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 pb-10">
-        {/* Кнопка Назад */}
         <div
           onClick={() => navigate(-1)}
           className="inline-block text-[16px] opacity-70 py-4 hover:underline cursor-pointer"
@@ -96,173 +144,76 @@ export const IntervalWorkoutPage = () => {
           {/* Левая колонка: Таймер и Настройки */}
           <div className="lg:col-span-5 flex flex-col items-center">
             {/* Иконка секундомера */}
-            <div className="mb-6 p-4 bg-[#BCEC30]/10 rounded-full">
-              <svg width="100" height="100" viewBox="0 0 24 24" fill="none">
-                <circle
-                  cx="12"
-                  cy="13"
-                  r="8"
-                  stroke="#BCEC30"
-                  strokeWidth="1.5"
-                />
-                <path
-                  d="M12 9V13L14.5 15.5"
-                  stroke="#BCEC30"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M10 2H14"
-                  stroke="#BCEC30"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M12 2V5"
-                  stroke="#BCEC30"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </div>
+            {!isStart && (
+              <div className="mb-6 p-4 bg-[#BCEC30]/10 rounded-full">
+                <svg width="100" height="100" viewBox="0 0 24 24" fill="none">
+                  <circle
+                    cx="12"
+                    cy="13"
+                    r="8"
+                    stroke="#BCEC30"
+                    strokeWidth="1.5"
+                  />
+                  <path
+                    d="M12 9V13L14.5 15.5"
+                    stroke="#BCEC30"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M10 2H14"
+                    stroke="#BCEC30"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M12 2V5"
+                    stroke="#BCEC30"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
+            )}
 
             {/* Карточка настроек */}
-            <div className="bg-white p-6 rounded-[30px] shadow-lg w-full max-w-[360px] border border-gray-50">
-              <h3 className="text-center font-bold opacity-50 uppercase text-xs tracking-widest">
-                {isStart ? (
-                  <p className="text-[30px]">{status}</p>
-                ) : (
-                  "Настройка таймера"
-                )}
-              </h3>
-
-              {isStart ? (
-                <p className="text-[120px] text-center">{time}</p>
-              ) : (
-                <div className="space-y-5">
-                  {/* Подготовка */}
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Подготовка:</span>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        defaultValue={prepTime}
-                        onChange={(e) =>
-                          dispatch(setPrepTime(Number(e.target.value)))
-                        }
-                        className="w-16 h-10 bg-gray-50 rounded-xl text-center font-bold focus:ring-2 focus:ring-[#BCEC30] outline-none border border-gray-100"
-                      />
-                      <span className="text-[10px] uppercase opacity-40 font-bold w-6">
-                        сек
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Работа */}
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Работа:</span>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        defaultValue={workTime}
-                        onChange={(e) =>
-                          dispatch(setWorkTime(Number(e.target.value)))
-                        }
-                        className="w-16 h-10 bg-gray-50 rounded-xl text-center font-bold focus:ring-2 focus:ring-[#BCEC30] outline-none border border-gray-100"
-                      />
-                      <span className="text-[10px] uppercase opacity-40 font-bold w-6">
-                        сек
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Отдых */}
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Отдых:</span>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        defaultValue={restTime}
-                        onChange={(e) =>
-                          dispatch(setRestTime(Number(e.target.value)))
-                        }
-                        className="w-16 h-10 bg-gray-50 rounded-xl text-center font-bold focus:ring-2 focus:ring-[#BCEC30] outline-none border border-gray-100"
-                      />
-                      <span className="text-[10px] uppercase opacity-40 font-bold w-6">
-                        сек
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Циклы — отделены чертой и имеют другую подпись */}
-                  <div className="flex justify-between items-center border-t pt-4 mt-2">
-                    <span className="text-gray-600 font-medium">Циклы:</span>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        defaultValue={cycles}
-                        onChange={(e) =>
-                          dispatch(setCycles(Number(e.target.value)))
-                        }
-                        className="w-16 h-10 bg-gray-50 rounded-xl text-center font-bold focus:ring-2 focus:ring-[#BCEC30] outline-none border border-gray-100"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {isStart ? (
-                <>
-                  <div className="text-[20px] text-center border-t-1 py-[10px]">
-                    {currentCycle} / {cycles}
-                  </div>
-
-                  <Button
-                    onClick={() => dispatch(finishWorkout())}
-                    color={"#ec3030"}
-                  >
-                    Завершить тренировку
-                  </Button>
-                </>
-              ) : (
-                <BottomBtn
-                  onClick={() => dispatch(startWorkout())}
-                  btnText={"Начать тренировку"}
-                />
-              )}
-            </div>
+            <SetIntervalWorkout />
           </div>
 
           {/* Правая колонка: Описание */}
-          <div className="lg:col-span-7">
-            <p className="text-[18px] font-bold mb-4 ml-2">Описание:</p>
-            <div className="p-6 sm:p-8 bg-white rounded-[30px] shadow-sm border border-gray-100">
-              <p className="text-justify leading-relaxed text-gray-700">
-                Интервальная тренировка — это чередование коротких промежутков
-                высокой интенсивности (на пределе возможностей) с периодами
-                отдыха или легкой активности.
-                <br />
-                <br />
-                Она эффективно сжигает жир, улучшает выносливость и экономит
-                время. Основной принцип — пульс поднимается до 85–95% от
-                максимума в активной фазе.
-              </p>
+          {isStart ? (
+            <IntervalList activeStepRef={activeStepRef} plan={plan} />
+          ) : (
+            <div className="lg:col-span-7">
+              <p className="text-[18px] font-bold mb-4 ml-2">Описание:</p>
+              <div className="p-6 sm:p-8 bg-white rounded-[30px] shadow-sm border border-gray-100">
+                <p className="text-justify leading-relaxed text-gray-700">
+                  Интервальная тренировка — это чередование коротких промежутков
+                  высокой интенсивности (на пределе возможностей) с периодами
+                  отдыха или легкой активности.
+                  <br />
+                  <br />
+                  Она эффективно сжигает жир, улучшает выносливость и экономит
+                  время. Основной принцип — пульс поднимается до 85–95% от
+                  максимума в активной фазе.
+                </p>
 
-              {/* Бейджи с итоговой информацией */}
-              <div className="flex flex-wrap gap-3 mt-8">
-                <div className="px-4 py-2 bg-gray-50 rounded-full text-sm font-medium">
-                  🔥 {workTime} сек работа
-                </div>
-                <div className="px-4 py-2 bg-gray-50 rounded-full text-sm font-medium">
-                  🧘 {restTime} сек отдых
-                </div>
-                <div className="px-4 py-2 bg-[#BCEC30]/20 rounded-full text-sm font-bold text-gray-800">
-                  🔄 {cycles} кругов
+                {/* Бейджи с итоговой информацией */}
+                <div className="flex flex-wrap gap-3 mt-8">
+                  <div className="px-4 py-2 bg-gray-50 rounded-full text-sm font-medium">
+                    🔥 {workTime} сек работа
+                  </div>
+                  <div className="px-4 py-2 bg-gray-50 rounded-full text-sm font-medium">
+                    🧘 {restTime} сек отдых
+                  </div>
+                  <div className="px-4 py-2 bg-[#BCEC30]/20 rounded-full text-sm font-bold text-gray-800">
+                    🔄 {cycles} кругов
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </>

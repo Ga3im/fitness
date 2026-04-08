@@ -47,19 +47,6 @@ export type StopwatchropType = {
   time: number;
 };
 
-export type StartTimeBtnProp = {
-  addRepsBtn: (exercise: exercisesType, currentReps: number) => void;
-  exercise: exercisesType;
-  time: number;
-};
-
-export type FilterExerciseProp = {
-  search: string;
-  setSearch: Dispatch<SetStateAction<string>>;
-  array: exercisesType[];
-  setFilteredArray: Dispatch<SetStateAction<exercisesType[]>>;
-};
-
 export type FilterWorkoutProp = {
   search: string;
   setSearch: Dispatch<SetStateAction<string>>;
@@ -84,3 +71,10 @@ export type contextType = {
   user: userType | null;
   changeUser: (newUser: userType) => void;
 };
+
+export interface WorkoutStep {
+  label: string;
+  duration: number;
+  type: string;
+  cycle?: number;
+}

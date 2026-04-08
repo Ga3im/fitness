@@ -1,17 +1,11 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-  type Dispatch,
-  type SetStateAction,
-} from "react";
+import { useEffect, useRef, useState } from "react";
 import type { exercisesType, workoutType } from "../types/types";
 import { InputTime } from "./InputTime";
 
 type ExercisePropType = {
   exercise: exercisesType;
   workout: workoutType;
-  setWorkout: Dispatch<SetStateAction<workoutType>>;
+  setWorkout: (workout: workoutType) => void;
 };
 
 export const Exercise = ({
@@ -42,7 +36,7 @@ export const Exercise = ({
       if (ex.id === exercise.id) {
         return {
           ...ex,
-          reps: reps,
+          reps: reps ?? undefined,
           sets: sets,
           timeBtwnSets: timebtwmSets,
         };

@@ -1,23 +1,23 @@
-import type { Dispatch, RefObject, SetStateAction } from "react";
-import { useAppDispatch, useAppSelector } from "../store/features/store";
-import type { workoutType } from "../types/types";
-import { timeHHMMSS } from "../utils/functions";
-import { BottomBtn } from "./BottomBtn";
-import { Stopwatch } from "./Stopwatch";
+import type { Dispatch, SetStateAction } from "react";
+import { useAppDispatch, useAppSelector } from "../../store/features/store";
+import type { workoutType } from "../../types/types";
+import { timeHHMMSS } from "../../utils/functions";
+import { BottomBtn } from "../BottomBtn";
+import { Stopwatch } from "../Stopwatch";
 import {
   setCompleteWorkout,
   setStartWorkout,
   setTimeSets,
   setWorkouts,
-} from "../store/features/workoutSlice";
+} from "../../store/features/workoutSlice";
 import { useNavigate } from "react-router-dom";
-import { router } from "../pages/router";
-import { Button } from "./Button";
+import { router } from "../../pages/router";
+import { Button } from "../Button";
+import { useWakeLock } from "../../hooks/useWakeLock";
+import { useWorkout } from "../../hooks/Workout/useWorkout";
 
 type DoneWorkoutType = {
   isEdit: boolean;
-  wakeLockRef: RefObject<WakeLockSentinel | null>;
-  doneWorkout: boolean;
   displayWorkout: workoutType | null;
   userWeight: number | null;
   setIsConfirm: Dispatch<SetStateAction<boolean>>;
@@ -26,8 +26,6 @@ type DoneWorkoutType = {
 
 export const DoneWorkout = ({
   isEdit,
-  wakeLockRef,
-  doneWorkout,
   displayWorkout,
   userWeight,
   setIsConfirm,
@@ -36,16 +34,10 @@ export const DoneWorkout = ({
   const { workouts, workoutTime, startedWorkout } = useAppSelector(
     (state) => state.workoutSlice
   );
+  const { requestWakeLock } = useWakeLock();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-
-  const requestWakeLock = async () => {
-    try {
-      wakeLockRef.current = await navigator.wakeLock.request("screen");
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const { doneWorkout } = useWorkout(displayWorkout);
 
   const editWeightBtn = () => {
     setIsEnteringWeight(true);

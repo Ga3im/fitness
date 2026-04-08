@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { Header } from "../components/Header";
 import { Outlet } from "react-router-dom";
 import type { workoutType } from "../types/types";
-import { Workout } from "../components/Workout";
+import { Workout } from "../components/Workout/Workout";
 import { BottomBtn } from "../components/BottomBtn";
 import { useAppSelector } from "../store/features/store";
-import { FilterWorkout } from "../components/FilterWorkout";
-import { TabataTimerSettings } from "../components/TabataTimer";
+import { FilterWorkout } from "../components/Workout/FilterWorkout";
+import { TabataTimerSettings } from "../components/IntervalWorkout/TabataTimer";
 
 export default function Main() {
   const { workouts } = useAppSelector((state) => state.workoutSlice);

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import type { StartTimeBtnProp } from "../types/types";
+import type { exercisesType, workoutType } from "../../types/types";
 import useSound from "use-sound";
 import boopSfx from "/sounds/notification.mp3";
+import { useWorkout } from "../../hooks/Workout/useWorkout";
 
 const timeHHMMSS = (time: number): string => {
   let hour;
@@ -18,10 +19,16 @@ const timeHHMMSS = (time: number): string => {
   return time >= 3600 ? `${HH}:${MM}:${SS}` : `${MM}:${SS}`;
 };
 
+type StartTimeBtnProp = {
+  exercise: exercisesType;
+  time: number;
+  displayWorkout: workoutType;
+};
+
 export const StartTimeBtn = ({
-  addRepsBtn,
   exercise,
   time,
+  displayWorkout,
 }: StartTimeBtnProp) => {
   const [isStarted, setIsStarted] = useState<boolean>(false);
   let [timer, setTimer] = useState<number>(time);
@@ -29,10 +36,12 @@ export const StartTimeBtn = ({
   let timerInterval: number;
   let exerciseTimer: number;
   const [play, { stop }] = useSound(boopSfx, {
-    volume: 0.5, 
-    playbackRate: 1, 
-    interrupt: true, 
+    volume: 0.5,
+    playbackRate: 1,
+    interrupt: true,
   });
+
+  const { handleAddReps } = useWorkout(displayWorkout);
 
   // обратный отсчет
   useEffect(() => {
@@ -63,7 +72,7 @@ export const StartTimeBtn = ({
         if (timer < 0) {
           clearInterval(exerciseTimer);
           stop();
-          addRepsBtn(exercise, Number(exercise.reps));
+          handleAddReps(exercise, Number(exercise.reps));
           if (!exercise.done) {
             setTimer(time);
           }

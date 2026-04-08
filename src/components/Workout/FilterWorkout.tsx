@@ -1,4 +1,4 @@
-import type { FilterWorkoutProp, workoutType } from "../types/types";
+import type { FilterWorkoutProp, workoutType } from "../../types/types";
 
 export const FilterWorkout = ({
   search,

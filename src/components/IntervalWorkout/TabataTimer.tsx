@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "../store/features/store";
-import { setIsFavoriteTabata } from "../store/features/userSlice";
-import { router } from "../pages/router";
+import { useAppDispatch, useAppSelector } from "../../store/features/store";
+import { setIsFavoriteTabata } from "../../store/features/userSlice";
+import { router } from "../../pages/router";
 
 export const TabataTimerSettings = () => {
   const { isAuth, isFavoriteTabata } = useAppSelector(

@@ -1,8 +1,8 @@
-import type { workoutType } from "../types/types";
+import type { workoutType } from "../../types/types";
 import { useNavigate } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "../store/features/store";
-import { setViewWorkout } from "../store/features/workoutSlice";
-import { setUser } from "../store/features/userSlice";
+import { useAppDispatch, useAppSelector } from "../../store/features/store";
+import { setViewWorkout } from "../../store/features/workoutSlice";
+import { setUser } from "../../store/features/userSlice";
 
 export type WorkoutPropType = {
   workout: workoutType;
@@ -144,6 +144,8 @@ export const Workout = ({ workout }: WorkoutPropType) => {
           </div>
         )}
       </div>
+
+      
     </div>
   );
 };

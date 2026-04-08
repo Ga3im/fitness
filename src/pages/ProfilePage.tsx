@@ -3,7 +3,6 @@ import { Header } from "../components/Header";
 import { useNavigate } from "react-router-dom";
 import { router } from "./router";
 import type { workoutType } from "../types/types";
-import { Workout } from "../components/Workout";
 import { BottomBtn } from "../components/BottomBtn";
 import { useOutsideClick } from "../hooks/modalClose";
 import {
@@ -12,8 +11,9 @@ import {
   setUser,
 } from "../store/features/userSlice";
 import { useAppDispatch, useAppSelector } from "../store/features/store";
-import { FilterWorkout } from "../components/FilterWorkout";
-import { TabataTimerSettings } from "../components/TabataTimer";
+import { FilterWorkout } from "../components/Workout/FilterWorkout";
+import { TabataTimerSettings } from "../components/IntervalWorkout/TabataTimer";
+import { Workout } from "../components/Workout/Workout";
 
 export default function Profile() {
   const [isOpenSetting, setIsOpenSetting] = useState<boolean>(false);

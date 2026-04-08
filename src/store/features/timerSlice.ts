@@ -9,6 +9,7 @@ type WorkoutTimerStateType = {
   isStart: boolean;
   status: string;
   currentCycle: number;
+  workoutTime: number;
 };
 
 const initialState: WorkoutTimerStateType = {
@@ -20,6 +21,7 @@ const initialState: WorkoutTimerStateType = {
   isStart: false,
   status: "",
   currentCycle: 1,
+  workoutTime: 0,
 };
 
 const timerSlice = createSlice({
@@ -48,7 +50,7 @@ const timerSlice = createSlice({
       state.status = "";
       state.isStart = false;
     },
-    setTickTime: (state) => {
+    setTickTimer: (state) => {
       if (state.time > 0) {
         state.time -= 1;
       }
@@ -72,6 +74,12 @@ const timerSlice = createSlice({
         }
       }
     },
+    setWorkoutTime: (state, action) => {
+      state.workoutTime = action.payload;
+    },
+    setTickTime: (state) => {
+      state.workoutTime += 1;
+    },
   },
 });
 
@@ -82,6 +90,8 @@ export const {
   setCycles,
   startWorkout,
   finishWorkout,
+  setTickTimer,
+  setWorkoutTime,
   setTickTime,
 } = timerSlice.actions;
 export const timerReduser = timerSlice.reducer;
