@@ -24,9 +24,7 @@ export const AddingExercise = ({
 
     const currentScroll = container.scrollLeft;
     const targetScroll =
-      direction === "next"
-        ? Math.ceil((currentScroll + 1) / step) * step
-        : Math.floor((currentScroll - 1) / step) * step;
+      direction === "next" ? currentScroll + step : currentScroll - step;
 
     container.scrollTo({
       left: targetScroll,
@@ -47,14 +45,14 @@ export const AddingExercise = ({
   return (
     <>
       <div className="w-full pt-[20px] border-[black] border-1 rounded-[20px] shadow-[0px_0px_15px_-10px] cursor-pointer">
-        <div className="flex justify-center gap-[10px] relative top-[30px]">
+        <div className="flex justify-center gap-[10px] relative">
           <button onClick={() => scrollContainer("back")}>Back</button>
           <button onClick={() => scrollContainer("next")}>Next</button>
         </div>
 
         <div
           ref={containerRef}
-          className="flex snap-x snap-mandatory scroll-p-[20px] overflow-x-auto overflow-y-hidden gap-[30px] pt-[40px] flex-row border-1 rounded-[10px] p-[20px] shadow-[0px_0px_15px_-5px] w-full"
+          className="flex px-[30px] snap-x snap-mandatory scroll-p-[20px] overflow-x-auto overflow-y-hidden gap-[30px] py-[10px] flex-row w-full"
         >
           {exercises.map((addExercise, index) => (
             <>

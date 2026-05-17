@@ -34,9 +34,9 @@ export const ResultTable = ({ exercise }: ResultTableType) => {
       </div>
 
       <progress
-        className="w-full pt-[10px] [&::-webkit-progress-bar]:rounded-[50px] [&::-webkit-progress-bar]:h-[6px] [&::-webkit-progress-bar]:bg-[#F7F7F7] [&::-webkit-progress-value]:bg-[#00C1FF] [&::-webkit-progress-value]:rounded-[50px] "
-        value={exercise.doneReps}
-        max={exercise.reps ?? 0 * (exercise.sets ?? 0)}
+        className="w-full pt-[10px] [&::-webkit-progress-bar]:rounded-[50px] [&::-webkit-progress-bar]:h-[6px] [&::-webkit-progress-bar]:bg-[#F7F7F7] [&::-webkit-progress-value]:bg-[#00C1FF] [&::-webkit-progress-value]:rounded-[50px]"
+        value={exercise.doneReps || 0} 
+        max={exercise.reps && exercise.sets ? exercise.reps * exercise.sets : 1} 
       ></progress>
     </div>
   );

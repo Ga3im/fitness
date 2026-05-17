@@ -34,6 +34,7 @@ export const ExerciseProccess = ({
     repsRef,
     exerciseQueue,
     setExerciseQueue,
+    handleKeyDown,
   } = useWorkout(displayWorkout);
 
   const selectQueue = (exercise: exercisesType) => {
@@ -51,7 +52,7 @@ export const ExerciseProccess = ({
   };
 
   return (
-    <div className="flex flex-wrap gap-[10px] justify-center py-[30px] mb-[10px] bg-white rounded-[30px] w-full shadow-[0px_0px_10px_-7px]">
+    <div className="flex flex-wrap gap-[10px] justify-center py-[30px] mb-[10px] bg-white w-full">
       {isAddingExercise && (
         <AddingExercise
           displayWorkout={displayWorkout}
@@ -195,6 +196,19 @@ export const ExerciseProccess = ({
                                 className="w-full textfield rounded-tl-[5px] rounded-bl-[5px] py-[5px] px-[10px] border-t-1 border-l-1 border-b-1 focus: outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 type="number"
                                 placeholder="Количество повторений"
+                                onKeyDown={(e) =>
+                                  handleKeyDown(
+                                    e,
+                                    exercise,
+                                    Number(
+                                      repsRef.current[
+                                        displayWorkout.exercises.indexOf(
+                                          exercise
+                                        )
+                                      ]?.value
+                                    )
+                                  )
+                                }
                               />
                               <button
                                 onClick={() =>
@@ -227,6 +241,19 @@ export const ExerciseProccess = ({
                                 className="w-full textfield rounded-tl-[5px] rounded-bl-[5px] py-[5px] px-[10px] border-t-1 border-l-1 border-b-1 focus: outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 type="number"
                                 placeholder="Количество повторений"
+                                onKeyDown={(e) =>
+                                  handleKeyDown(
+                                    e,
+                                    exercise,
+                                    Number(
+                                      repsRef.current[
+                                        displayWorkout.exercises.indexOf(
+                                          exercise
+                                        )
+                                      ]?.value
+                                    )
+                                  )
+                                }
                               />
                               <button
                                 onClick={() =>

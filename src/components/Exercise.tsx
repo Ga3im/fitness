@@ -190,9 +190,6 @@ export const Exercise = ({
             </div>
           </div>
         )}
-        <button className="mt-[10px] text-[16px] w-full rounded-[45px] bg-[#BCEC30] px-[16px] hover:bg-[#C6FF00] hover:cursor-pointer">
-          Добавить
-        </button>
       </div>
     </>
   );

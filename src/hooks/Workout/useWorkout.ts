@@ -1,21 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../store/features/store";
 import {
-  setTickTime,
-  setRestTimeSets,
   setBreakWorkout,
   setAddExerciseRep,
   setTimeSets,
   setConfirmWeight,
+  setStartedWorkout,
 } from "../../store/features/workoutSlice";
 import { useWakeLock } from "../useWakeLock";
 import type { exercisesType, workoutType } from "../../types/types";
+import { setUser } from "../../store/features/userSlice";
 
 export const useWorkout = (displayWorkout: workoutType | null) => {
   const dispatch = useAppDispatch();
   const { startedWorkout, restTimeSets } = useAppSelector(
     (state) => state.workoutSlice
   );
+  const { user } = useAppSelector((state) => state.userSlice);
 
   const [exerciseQueue, setExerciseQueue] = useState<exercisesType[]>([]);
   const [isEnteringWeight, setIsEnteringWeight] = useState<boolean>(false);
@@ -51,38 +52,14 @@ export const useWorkout = (displayWorkout: workoutType | null) => {
     else releaseWakeLock();
   }, [startedWorkout, requestWakeLock, releaseWakeLock]);
 
-  // 2. Таймер тренировки и проверка завершения
-  useEffect(() => {
-    let intervalId: ReturnType<typeof setInterval> | null = null;
-
-    if (startedWorkout) {
-      // Создаем интервал только при старте
-      intervalId = setInterval(() => {
-        dispatch(setTickTime());
-      }, 1000);
-    }
-
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, [startedWorkout, dispatch]); // Зависит только от факта старта/паузы
-
   // 2. ОТДЕЛЬНЫЙ ЭФФЕКТ ДЛЯ ПРОВЕРКИ ЗАВЕРШЕНИЯ
   useEffect(() => {
     const allDone = displayWorkout?.exercises.every((ex) => ex.done);
-
     if (allDone && (displayWorkout?.exercises.length ?? 0) > 0) {
       setDoneWorkout(true);
-      // Остановить таймер можно через диспатч экшена паузы/финиша,
-      // либо он сам остановится, когда startedWorkout станет false
+      dispatch(setStartedWorkout(null));
     }
-  }, [displayWorkout?.exercises]); // Следит только за прогрессом
-
-  // 3. Таймер отдыха между сетами
-  useEffect(() => {
-    const intervalId = setInterval(() => dispatch(setRestTimeSets()), 1000);
-    return () => clearInterval(intervalId);
-  }, []);
+  }, [displayWorkout?.exercises, dispatch]);
 
   // 4. Логика режимов (переключение упражнений)
   useEffect(() => {
@@ -118,6 +95,33 @@ export const useWorkout = (displayWorkout: workoutType | null) => {
   }, [displayWorkout?.exercises]);
 
   // Методы управления
+  const addFavoriteWorkout = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.stopPropagation();
+    if (!user) return;
+    const isExist = user.myWorkouts.some((w) => w.id === displayWorkout?.id);
+    if (displayWorkout) {
+      if (isExist) {
+        dispatch(
+          setUser({
+            ...user,
+            myWorkouts: user.myWorkouts.filter(
+              (i) => i.id !== displayWorkout?.id
+            ),
+          })
+        );
+      } else {
+        dispatch(
+          setUser({
+            ...user,
+            myWorkouts: [...user.myWorkouts, displayWorkout],
+          })
+        );
+      }
+    }
+  };
+
   const handleAddReps = (exercise: exercisesType, currentReps: number) => {
     if (exercise.timeBtwnSets && exercise.timeBtwnSets > 0)
       dispatch(setTimeSets(exercise.timeBtwnSets));
@@ -136,6 +140,33 @@ export const useWorkout = (displayWorkout: workoutType | null) => {
     );
     if (index !== undefined && index !== -1 && repsRef.current[index]) {
       repsRef.current[index]!.value = "";
+    }
+  };
+
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    exercise: exercisesType,
+    currentReps: number
+  ) => {
+    if (e.key === "Enter") {
+      if (exercise.timeBtwnSets && exercise.timeBtwnSets > 0)
+        dispatch(setTimeSets(exercise.timeBtwnSets));
+      dispatch(setAddExerciseRep({ exerciseId: exercise.id, currentReps }));
+
+      if (exerciseMode === "круговое" && displayWorkout) {
+        const idx = displayWorkout.exercises.findIndex(
+          (ex) => ex.id === exercise.id
+        );
+        const nextIdx = (idx + 1) % displayWorkout.exercises.length;
+        setProssesingExercise(displayWorkout.exercises[nextIdx]);
+      }
+      if (exercise.static) return;
+      const index = displayWorkout?.exercises.findIndex(
+        (ex) => ex.id === exercise.id
+      );
+      if (index !== undefined && index !== -1 && repsRef.current[index]) {
+        repsRef.current[index]!.value = "";
+      }
     }
   };
 
@@ -165,5 +196,7 @@ export const useWorkout = (displayWorkout: workoutType | null) => {
     repsRef,
     exerciseQueue,
     setExerciseQueue,
+    addFavoriteWorkout,
+    handleKeyDown,
   };
 };

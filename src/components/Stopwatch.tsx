@@ -1,7 +1,7 @@
-import type { StopwatchropType } from "../types/types";
+import { useAppSelector } from "../store/features/store";
 import { timeHHMMSS } from "../utils/functions";
 
-export const Stopwatch = ({ time }: StopwatchropType) => {
-
-  return <p>{timeHHMMSS(time)}</p>;
+export const Stopwatch = () => {
+  const { workoutTime } = useAppSelector((state) => state.workoutSlice);
+  return <p>{timeHHMMSS(workoutTime)}</p>;
 };

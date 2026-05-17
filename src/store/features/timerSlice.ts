@@ -77,9 +77,6 @@ const timerSlice = createSlice({
     setWorkoutTime: (state, action) => {
       state.workoutTime = action.payload;
     },
-    setTickTime: (state) => {
-      state.workoutTime += 1;
-    },
   },
 });
 
@@ -92,6 +89,5 @@ export const {
   finishWorkout,
   setTickTimer,
   setWorkoutTime,
-  setTickTime,
 } = timerSlice.actions;
 export const timerReduser = timerSlice.reducer;

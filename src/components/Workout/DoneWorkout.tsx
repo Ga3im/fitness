@@ -104,7 +104,7 @@ export const DoneWorkout = ({
         startedWorkout.id === displayWorkout.id ? (
         <>
           <div className="text-center text-[20px] pb-[10px]">
-            Время тренировки: <Stopwatch time={workoutTime} />{" "}
+            Время тренировки: <Stopwatch/>
           </div>
 
           <Button onClick={() => setIsConfirm(true)} color="#ec3030">
