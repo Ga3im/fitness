@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import type { exercisesType, workoutType } from "../types/types";
 import { InputTime } from "./InputTime";
+import type { exercisesType, workoutType } from "../types/types";
 
 type ExercisePropType = {
   exercise: exercisesType;
@@ -13,14 +13,33 @@ export const Exercise = ({
   workout,
   setWorkout,
 }: ExercisePropType) => {
+  const currentExercise = workout.exercises.find((ex) => ex.id === exercise.id);
+  const isSelectedExercise = !!currentExercise;
+
+  const [sets, setSets] = useState<number>(currentExercise?.sets || 1);
+  const [reps, setReps] = useState<number | null>(
+    currentExercise?.reps || null
+  );
+  const [timebtwmSets, setTimebtwmSets] = useState<number>(
+    currentExercise?.timeBtwnSets || 0
+  );
+
   const [isAdditionalSetting, setIsAdditionalSetting] =
     useState<boolean>(false);
-  const [reps, setReps] = useState<number | null>(null);
-  const [timebtwmSets, setTimebtwmSets] = useState<number>(0);
-  const [sets, setSets] = useState<number>(1);
-  const [isSelected, setIsSelected] = useState<boolean>(false);
+  const [isOpenSettings, setIsOpenSettings] = useState<boolean>(false); // Заменяет дублирующий isSelected для панели
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Синхронизируем локальные стейты, если карточку добавили/удалили внешним кликом
+  useEffect(() => {
+    if (currentExercise) {
+      setSets(currentExercise.sets || 1);
+      setReps(currentExercise.reps || null);
+      setTimebtwmSets(currentExercise.timeBtwnSets || 0);
+    }
+  }, [currentExercise?.id]);
+
+  // Дебаунс для плавной отправки данных наверх без лагов при вводе цифр
   const updateWorkoutDebounced = (newExercises: exercisesType[]) => {
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
@@ -28,79 +47,73 @@ export const Exercise = ({
         ...workout,
         exercises: newExercises,
       });
-    }, 500);
+    }, 300);
   };
 
   useEffect(() => {
+    if (!isSelectedExercise) return;
+
+    if (sets <= 0 || reps === null || reps <= 0) {
+      return;
+    }
+
     const newExercise: exercisesType[] = workout.exercises.map((ex) => {
       if (ex.id === exercise.id) {
         return {
           ...ex,
-          reps: reps ?? undefined,
+          reps: reps, 
           sets: sets,
           timeBtwnSets: timebtwmSets,
         };
       }
       return ex;
     });
+
     updateWorkoutDebounced(newExercise);
-  }, [sets, reps, timebtwmSets]);
+  }, [sets, reps, timebtwmSets, isSelectedExercise]);
 
   const exerciseClick = (exercise: exercisesType) => {
-    if (isSelected) {
+    if (isSelectedExercise) {
       setWorkout({
         ...workout,
         exercises: workout.exercises.filter((ex) => ex.id !== exercise.id),
       });
-
-      setIsSelected(false);
+      setIsOpenSettings(false);
     } else {
+      // Добавляем заготовку: подходы 1, повторения null.
+      // Зелёный бордер загорится (так как id совпадает), но инпут повторений будет красным!
       setWorkout({
         ...workout,
-        exercises: [...workout.exercises, { ...exercise, sets: 1 }],
+        exercises: [
+          ...workout.exercises,
+          { ...exercise, sets: 1, reps: undefined },
+        ],
       });
-
-      setIsSelected(true);
+      setIsOpenSettings(true);
     }
   };
-
   const handleWheel = (e: React.WheelEvent<HTMLInputElement>) => {
     (e.target as HTMLElement).blur();
   };
 
   const changeSets = (val: number) => {
-    if (val > 0) {
-      setSets(val);
-    }
+    if (val > 0) setSets(val);
   };
 
   const changeReps = (val: number) => {
-    if (val > 0) {
-      setReps(val);
-    }
+    if (val > 0) setReps(val);
   };
 
   const changeTimeSets = (val: number) => {
-    if (val > 0) {
-      setTimebtwmSets(val);
-    }
+    if (val >= 0) setTimebtwmSets(val);
   };
 
-  const isSelectedExercise = workout.exercises.some(
-    (ex) => ex.id === exercise.id
-  );
-
-  const isEmptySets = workout.exercises.some((ex) => (ex.sets ?? 0) > 0);
-  const isEmptyReps = workout.exercises.some((ex) => (ex.reps ?? 0) > 0);
-  const currentExercise = workout.exercises.find((ex) => ex.id === exercise.id);
-
-  const repsValue = currentExercise?.reps || 0;
-  const setsValue = currentExercise?.sets || 1;
+  const isEmptySets = sets > 0;
+  const isEmptyReps = reps !== null && reps > 0;
 
   return (
     <>
       <div
-        key={exercise.id}
         className={
           isSelectedExercise
             ? `w-[250px] p-[20px] border-[#00ff14] border-1 rounded-[20px] shadow-[0px_0px_10px_0px_#00ff14]`
@@ -111,72 +124,77 @@ export const Exercise = ({
           <img
             loading="lazy"
             onClick={() => exerciseClick(exercise)}
-            className="mb-[10px]"
+            className="mb-[10px] cursor-pointer"
             src={exercise.img}
+            alt={exercise.name}
           />
         </div>
         <p
           onClick={() => exerciseClick(exercise)}
-          className="text-[18px] pb-[20px]"
+          className="text-[18px] pb-[20px] cursor-pointer"
         >
           {exercise.name}
         </p>
 
         <div
-          onClick={() => setIsSelected(!isSelected)}
+          onClick={() => setIsOpenSettings(!isOpenSettings)}
           className={
-            "h-[20px] w-full bg-[#f7f7f7] flex justify-center items-end shadow-[0px_0px_14px_-10px] rounded-[5px]"
+            "h-[20px] w-full bg-[#f7f7f7] flex justify-center items-end shadow-[0px_0px_14px_-10px] rounded-[5px] cursor-pointer"
           }
         >
           <div
             className={
-              isSelected
-                ? "w-[15px] mb-[0px] h-[15px] border-l-2 border-b-2 rotate-[135deg]"
-                : "w-[15px] mb-[7px] h-[15px] border-l-2 border-b-2 rotate-[-45deg]"
+              isOpenSettings
+                ? "w-[15px] mb-[0px] h-[15px] border-l-2 border-b-2 rotate-[135deg] transition-transform"
+                : "w-[15px] mb-[7px] h-[15px] border-l-2 border-b-2 rotate-[-45deg] transition-transform"
             }
           ></div>
         </div>
-        {isSelected && (
+
+        {isOpenSettings && (
           <div>
+            {/* ПОДХОДЫ */}
             <div className="flex flex-col gap-[5px] pb-[10px]">
               <p className="text-[16px] pt-[10px]">Подходы:</p>
               <input
-                onWheel={(e) => handleWheel(e)}
-                onChange={(e) => changeSets(Number(e.target.value))}
+                onWheel={handleWheel}
+                onChange={(e) => changeSets(Number(e.target.value) || 0)}
+                value={sets}
+                type="number"
+                placeholder="Количество подходов"
                 className={
                   !isEmptySets
-                    ? "border-[2px] border-[red] px-[10px] py-[5px] rounded-[10px] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:margin-[0] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:margin-[0]"
-                    : "border-[1px] border-[#000000] px-[10px] py-[5px] rounded-[10px] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:margin-[0] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:margin-[0]"
+                    ? "border-[2px] border-[red] px-[10px] py-[5px] rounded-[10px] focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:margin-[0] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:margin-[0]"
+                    : "border-[1px] border-[#000000] px-[10px] py-[5px] rounded-[10px] focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:margin-[0] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:margin-[0]"
                 }
-                type="number"
-                defaultValue={setsValue}
-                placeholder="Количество подходов"
               />
             </div>
 
+            {/* ПОВТОРЕНИЯ */}
             <div className="flex flex-col gap-[5px] pb-[10px]">
               <p className="text-[16px]">Повторения:</p>
               <input
                 onWheel={handleWheel}
-                onChange={(e) => changeReps(Number(e.target.value))}
-                className={
-                  !isEmptyReps
-                    ? "border-[2px] border-[red] px-[10px] py-[5px] rounded-[10px] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:margin-[0] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:margin-[0]"
-                    : "border-[1px] border-[#000000] px-[10px] py-[5px] rounded-[10px] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:margin-[0] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:margin-[0]"
-                }
+                onChange={(e) => changeReps(Number(e.target.value) || 0)}
+                value={reps === null ? "" : reps}
                 type="number"
                 placeholder="Количество повторений"
-                defaultValue={repsValue}
+                className={
+                  !isEmptyReps
+                    ? "border-[2px] border-[red] px-[10px] py-[5px] rounded-[10px] focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:margin-[0] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:margin-[0]"
+                    : "border-[1px] border-[#000000] px-[10px] py-[5px] rounded-[10px] focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:margin-[0] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:margin-[0]"
+                }
               />
             </div>
 
+            {/* ДОПОЛНИТЕЛЬНЫЕ НАСТРОЙКИ */}
             <div>
               <p
                 onClick={() => setIsAdditionalSetting(!isAdditionalSetting)}
                 className={
                   isAdditionalSetting
-                    ? "text-center pt-[10px] cursor-pointer underline"
-                    : "text-center pt-[10px] cursor-pointer"
+                    ? "text-center pt-[10px] cursor-pointer underline select-none"
+                    : "text-center pt-[10px] cursor-pointer select-none"
                 }
               >
                 Дополнительные настройки

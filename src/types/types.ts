@@ -4,6 +4,8 @@ export type MyProps = {
   children?: ReactNode;
 };
 
+export type ModeTypes = "свободное" | "круговое" | "поподходное";
+
 export type userType = {
   name: string;
   img?: string;
@@ -36,6 +38,7 @@ export type workoutType = {
   custom?: boolean;
   timeLimit?: number;
   needWeight?: boolean;
+  mode?: ModeTypes;
 };
 
 export type addTimeType = {

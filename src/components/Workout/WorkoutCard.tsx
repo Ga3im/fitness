@@ -1,20 +1,23 @@
 import type { workoutType } from "../../types/types";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../store/features/store";
-import { setViewWorkout } from "../../store/features/workoutSlice";
+import { setCurrentWorkout } from "../../store/features/workoutSlice";
 import { setUser } from "../../store/features/userSlice";
+import { FreeWorkoutIcon } from "../icons/FreeWorkoutIcon";
+import { CircuitIcon } from "../icons/CircuitIcon";
+import { SetsIcon } from "../icons/SetsIcon";
 
 export type WorkoutPropType = {
   workout: workoutType;
 };
 
-export const Workout = ({ workout }: WorkoutPropType) => {
+export const WorkoutCard = ({ workout }: WorkoutPropType) => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { user, isAuth } = useAppSelector((state) => state.userSlice);
 
   const workoutClick = (workout: workoutType) => {
-    dispatch(setViewWorkout(workout));
+    dispatch(setCurrentWorkout(workout));
     navigate(`/workout/${workout.id}`);
   };
 
@@ -67,7 +70,7 @@ export const Workout = ({ workout }: WorkoutPropType) => {
 
         <div className="flex text-[10px] flex-wrap gap-[10px] items-center">
           <div
-            title="Упражнений"
+            title="Количество упражнений"
             className="flex items-center gap-1 rounded-[20px] py-[1px] px-[5px] bg-[#00000061] backdrop-blur-sm text-[#fff]"
           >
             <svg
@@ -91,22 +94,33 @@ export const Workout = ({ workout }: WorkoutPropType) => {
             </span>
           </div>
 
-          <div
+          {/* <div
             title="Можно дома"
             className="rounded-[20px] py-[3px] px-[5px] bg-[#00000061] backdrop-blur-sm"
           >
-            🏠 {/* Или лаконичный SVG домика */}
-          </div>
+            🏠 
+          </div> */}
 
           {/* Пример компактной иконки сложности */}
-          <div
+          {/* <div
             title="3 уровня сложности"
             className="flex items-end justify-center gap-[2px] h-[20px] px-[6px] bg-[#00000061] backdrop-blur-sm rounded-full pb-[3px]"
           >
             <div className="w-[3px] h-[6px] bg-[#BCEC30] rounded-full"></div>
             <div className="w-[3px] h-[10px] bg-[#BCEC30] rounded-full"></div>
             <div className="w-[3px] h-[14px] bg-[#BCEC30] rounded-full opacity-30"></div>
-          </div>
+          </div> */}
+
+          {workout.mode && (
+            <div
+              title={`Режим тренировки: ${workout.mode}`}
+              className="flex items-center justify-center w-[24px] h-[24px] p-[3px] rounded-full bg-[#00000061] backdrop-blur-sm text-[#BCEC30]"
+            >
+              {workout.mode === "свободное" && <FreeWorkoutIcon />}
+              {workout.mode === "круговое" && <CircuitIcon />}
+              {workout.mode === "поподходное" && <SetsIcon />}
+            </div>
+          )}
         </div>
       </div>
       {/* Кнопка "Избранное" теперь привязана к верхнему правому углу всей карточки */}
@@ -144,8 +158,6 @@ export const Workout = ({ workout }: WorkoutPropType) => {
           </div>
         )}
       </div>
-
-      
     </div>
   );
 };

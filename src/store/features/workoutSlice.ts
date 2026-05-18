@@ -5,22 +5,26 @@ import { sortArray } from "../../utils/functions";
 
 type WorkoutStateType = {
   workouts: workoutType[];
-  viewWorkout: workoutType | null;
+  currentWorkout: workoutType | null;
   startedWorkout: workoutType | null;
   workoutTime: number;
   emptyExerciseReps: string[];
   lastOrder: number | null;
   restTimeSets: number;
+  editWorkout: workoutType | null;
 };
 
 const initialState: WorkoutStateType = {
-  workouts: data.workouts.sort((a, b) => sortArray(a.order, b.order)),
-  viewWorkout: null,
+  workouts: (data.workouts as workoutType[]).sort((a, b) =>
+    sortArray(a.order, b.order)
+  ),
+  currentWorkout: null,
   startedWorkout: null,
   workoutTime: 0,
   emptyExerciseReps: [],
   lastOrder: Number(sessionStorage.getItem("lastOrder")) ?? 0,
   restTimeSets: 0,
+  editWorkout: null,
 };
 
 const workoutSlice = createSlice({
@@ -36,8 +40,8 @@ const workoutSlice = createSlice({
     setStartedWorkout: (state, action: PayloadAction<workoutType | null>) => {
       state.startedWorkout = action.payload;
     },
-    setViewWorkout: (state, action: PayloadAction<workoutType | null>) => {
-      state.viewWorkout = action.payload;
+    setCurrentWorkout: (state, action: PayloadAction<workoutType | null>) => {
+      state.currentWorkout = action.payload;
     },
 
     //добавление повторения во время тренировки
@@ -98,7 +102,7 @@ const workoutSlice = createSlice({
     // подтверждение веса
     setConfirmWeight: (state, action) => {
       const { reps } = action.payload;
-      state.startedWorkout = state.viewWorkout;
+      state.startedWorkout = state.currentWorkout;
       if (state.startedWorkout) {
         state.startedWorkout.needWeight = false;
         state.startedWorkout.exercises.forEach(
@@ -122,12 +126,25 @@ const workoutSlice = createSlice({
     setRestTimeSets: (state) => {
       state.restTimeSets = state.restTimeSets - 1;
     },
+    // редактируемая тренировка
+    setEditWorkout: (state, action) => {
+      state.editWorkout = action.payload;
+    },
+    // удаление упражнения при редактировании
+    deleteExercise: (state, action) => {
+      const exercise = action.payload;
+      if (state.editWorkout) {
+        state.editWorkout.exercises = state.editWorkout?.exercises.filter(
+          (ex) => ex.id !== exercise.id
+        );
+      }
+    },
   },
 });
 
 export const {
   setWorkouts,
-  setViewWorkout,
+  setCurrentWorkout,
   setConfirmWeight,
   setAddExerciseRep,
   setStartedWorkout,
@@ -137,5 +154,7 @@ export const {
   setCompleteWorkout,
   setTimeSets,
   setRestTimeSets,
+  setEditWorkout,
+  deleteExercise,
 } = workoutSlice.actions;
 export const workoutReducer = workoutSlice.reducer;
