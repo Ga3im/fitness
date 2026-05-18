@@ -23,7 +23,10 @@ export const useWorkout = (displayWorkout: workoutType | null) => {
   const [userWeight, setUserWeight] = useState<number | null>(null);
   const [doneWorkout, setDoneWorkout] = useState(false);
   const [isConfirm, setIsConfirm] = useState<boolean>(false);
-  const [exerciseMode, setExerciseMode] = useState<string>("свободное");
+  
+  // Читаем режим НАПРЯМУЮ, без лишнего стейта exerciseMode
+  const exerciseMode = displayWorkout?.mode || "свободное";
+
   const [prossesingExercise, setProssesingExercise] =
     useState<exercisesType | null>(null);
   const repsRef = useRef<(HTMLInputElement | null)[]>([]);
@@ -52,7 +55,7 @@ export const useWorkout = (displayWorkout: workoutType | null) => {
     else releaseWakeLock();
   }, [startedWorkout, requestWakeLock, releaseWakeLock]);
 
-  // 2. ОТДЕЛЬНЫЙ ЭФФЕКТ ДЛЯ ПРОВЕРКИ ЗАВЕРШЕНИЯ
+  // 2. Проверка завершения всей тренировки
   useEffect(() => {
     const allDone = displayWorkout?.exercises.every((ex) => ex.done);
     if (allDone && (displayWorkout?.exercises.length ?? 0) > 0) {
@@ -61,83 +64,84 @@ export const useWorkout = (displayWorkout: workoutType | null) => {
     }
   }, [displayWorkout?.exercises, dispatch]);
 
-  // 4. Логика режимов (переключение упражнений)
+  // 3. Логика инициализации активного упражнения при старте
   useEffect(() => {
-    if (exerciseMode === "свободное") setProssesingExercise(null);
-    else if (displayWorkout) setProssesingExercise(displayWorkout.exercises[0]);
+    if (exerciseMode === "свободное") {
+      setProssesingExercise(null);
+    } else if (displayWorkout && displayWorkout.exercises.length > 0) {
+      // Ищем первое незавершенное упражнение
+      const firstUnfinished = displayWorkout.exercises.find(
+        (ex) => !ex.done && (ex.doneReps ?? 0) < (ex.reps ?? 0) * (ex.sets ?? 0)
+      );
+      setProssesingExercise(firstUnfinished || displayWorkout.exercises[0]);
+    }
   }, [exerciseMode, displayWorkout?.id]);
 
-  useEffect(() => {
-    if (!prossesingExercise || !displayWorkout) return;
+  // 4. Умная функция переключения очередей (для круговой и поподходной)
+  const switchToNextExercise = (currentExercise: exercisesType, addedReps: number) => {
+    if (!displayWorkout) return;
 
-    const currentIndex = displayWorkout.exercises.findIndex(
-      (ex) => ex.id === prossesingExercise.id
-    );
-    const currentEx = displayWorkout.exercises[currentIndex];
-
-    if (
-      exerciseMode === "поподходное" &&
-      currentEx.doneReps &&
-      prossesingExercise.sets &&
-      prossesingExercise.reps
-    ) {
-      const isFinished =
-        currentEx.doneReps >= prossesingExercise.sets * prossesingExercise.reps;
-      if (isFinished)
-        setProssesingExercise(
-          displayWorkout.exercises[currentIndex + 1] || null
-        );
-    }
+    const totalExercises = displayWorkout.exercises.length;
+    const currentIdx = displayWorkout.exercises.findIndex((ex) => ex.id === currentExercise.id);
 
     if (exerciseMode === "круговое") {
-      // Здесь логика переключения после каждого добавления репсов (можно вызывать вручную)
+      // Ищем следующее по кругу упражнение, которое еще не завершено полностью
+      for (let i = 1; i <= totalExercises; i++) {
+        const nextIdx = (currentIdx + i) % totalExercises;
+        const candidate = displayWorkout.exercises[nextIdx];
+        
+        // Высчитываем лимит повторений для кандидата
+        const totalNeeded = (candidate.sets ?? 0) * (candidate.reps ?? 0);
+        
+        // ВАЖНО: Если кандидат — это то самое упражнение, в которое мы ТОЛЬКО ЧТО добавили повторения,
+        // мы должны учесть их виртуально (addedReps), так как Redux еще не обновился.
+        const currentCandidateReps = (candidate.doneReps ?? 0) + (candidate.id === currentExercise.id ? addedReps : 0);
+        
+        const isCandidateFinished = currentCandidateReps >= totalNeeded;
+        
+        if (!isCandidateFinished && !candidate.done) {
+          setProssesingExercise(candidate);
+          return;
+        }
+      }
+      setProssesingExercise(null);
     }
-  }, [displayWorkout?.exercises]);
 
-  // Методы управления
-  const addFavoriteWorkout = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    e.stopPropagation();
-    if (!user) return;
-    const isExist = user.myWorkouts.some((w) => w.id === displayWorkout?.id);
-    if (displayWorkout) {
-      if (isExist) {
-        dispatch(
-          setUser({
-            ...user,
-            myWorkouts: user.myWorkouts.filter(
-              (i) => i.id !== displayWorkout?.id
-            ),
-          })
-        );
-      } else {
-        dispatch(
-          setUser({
-            ...user,
-            myWorkouts: [...user.myWorkouts, displayWorkout],
-          })
-        );
+    if (exerciseMode === "поподходное") {
+      const currentExInWorkout = displayWorkout.exercises[currentIdx];
+      
+      // Прибавляем только что введенные повторения к уже существующим в стейте
+      const futureDoneReps = (currentExInWorkout.doneReps ?? 0) + addedReps;
+      const totalNeededReps = (currentExercise.sets ?? 0) * (currentExercise.reps ?? 0);
+      
+      const isFinished = futureDoneReps >= totalNeededReps;
+      
+      if (isFinished) {
+        // Ищем строго следующее невыполненное упражнение ниже по списку
+        const nextUnfinished = displayWorkout.exercises
+          .slice(currentIdx + 1)
+          .find((ex) => {
+            const needed = (ex.sets ?? 0) * (ex.reps ?? 0);
+            return !ex.done && (ex.doneReps ?? 0) < needed;
+          });
+        
+        setProssesingExercise(nextUnfinished || null);
       }
     }
   };
 
+  // 5. Обработка добавления подходов
   const handleAddReps = (exercise: exercisesType, currentReps: number) => {
     if (exercise.timeBtwnSets && exercise.timeBtwnSets > 0)
       dispatch(setTimeSets(exercise.timeBtwnSets));
+    
     dispatch(setAddExerciseRep({ exerciseId: exercise.id, currentReps }));
 
-    if (exerciseMode === "круговое" && displayWorkout) {
-      const idx = displayWorkout.exercises.findIndex(
-        (ex) => ex.id === exercise.id
-      );
-      const nextIdx = (idx + 1) % displayWorkout.exercises.length;
-      setProssesingExercise(displayWorkout.exercises[nextIdx]);
-    }
+    // ИСПРАВЛЕНО: Пробрасываем текущие вводимые повторения в функцию расчета
+    switchToNextExercise(exercise, currentReps);
+
     if (exercise.static) return;
-    const index = displayWorkout?.exercises.findIndex(
-      (ex) => ex.id === exercise.id
-    );
+    const index = displayWorkout?.exercises.findIndex((ex) => ex.id === exercise.id);
     if (index !== undefined && index !== -1 && repsRef.current[index]) {
       repsRef.current[index]!.value = "";
     }
@@ -149,24 +153,7 @@ export const useWorkout = (displayWorkout: workoutType | null) => {
     currentReps: number
   ) => {
     if (e.key === "Enter") {
-      if (exercise.timeBtwnSets && exercise.timeBtwnSets > 0)
-        dispatch(setTimeSets(exercise.timeBtwnSets));
-      dispatch(setAddExerciseRep({ exerciseId: exercise.id, currentReps }));
-
-      if (exerciseMode === "круговое" && displayWorkout) {
-        const idx = displayWorkout.exercises.findIndex(
-          (ex) => ex.id === exercise.id
-        );
-        const nextIdx = (idx + 1) % displayWorkout.exercises.length;
-        setProssesingExercise(displayWorkout.exercises[nextIdx]);
-      }
-      if (exercise.static) return;
-      const index = displayWorkout?.exercises.findIndex(
-        (ex) => ex.id === exercise.id
-      );
-      if (index !== undefined && index !== -1 && repsRef.current[index]) {
-        repsRef.current[index]!.value = "";
-      }
+      handleAddReps(exercise, currentReps); // Просто вызываем метод выше, чтобы не дублировать код
     }
   };
 
@@ -174,6 +161,17 @@ export const useWorkout = (displayWorkout: workoutType | null) => {
     setIsConfirm(false);
     releaseWakeLock();
     dispatch(setBreakWorkout({ id: displayWorkout?.id }));
+  };
+
+  const addFavoriteWorkout = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.stopPropagation();
+    if (!user || !displayWorkout) return;
+    const isExist = user.myWorkouts.some((w) => w.id === displayWorkout.id);
+    if (isExist) {
+      dispatch(setUser({ ...user, myWorkouts: user.myWorkouts.filter((i) => i.id !== displayWorkout.id) }));
+    } else {
+      dispatch(setUser({ ...user, myWorkouts: [...user.myWorkouts, displayWorkout] }));
+    }
   };
 
   return {
@@ -187,8 +185,7 @@ export const useWorkout = (displayWorkout: workoutType | null) => {
     setIsConfirm,
     isEnteringWeight,
     restTimeSets,
-    exerciseMode,
-    setExerciseMode,
+    exerciseMode, // Возвращаем для обратной совместимости, если используется в JSX
     prossesingExercise,
     handleAddReps,
     breakWorkout,

@@ -1,6 +1,8 @@
 import { useRef } from "react";
 import { Exercise } from "../Exercise";
 import type { exercisesType, workoutType } from "../../types/types";
+import { setCurrentWorkout } from "../../store/features/workoutSlice";
+import { useAppDispatch } from "../../store/features/store";
 
 type AddingExerciseType = {
   displayWorkout: workoutType | null;
@@ -13,6 +15,7 @@ export const AddingExercise = ({
 }: AddingExerciseType) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const btnRef = useRef<(HTMLDivElement | null)[]>([]);
+  const dispatch = useAppDispatch();
 
   const scrollContainer = (direction: "next" | "back") => {
     const container = containerRef.current;
@@ -39,7 +42,7 @@ export const AddingExercise = ({
   };
 
   const changedisplayWorkout = (workout: workoutType): void => {
-    // dispatch(setViewWorkout(workout));
+    dispatch(setCurrentWorkout(workout));
   };
 
   return (

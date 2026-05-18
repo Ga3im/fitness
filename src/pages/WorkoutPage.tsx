@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Header } from "../components/Header";
 import { useNavigate } from "react-router-dom";
-import type { workoutType } from "../types/types";
 import { Confirm } from "../components/Confirm";
 import { useAppDispatch, useAppSelector } from "../store/features/store";
 import {
+  setEditWorkout,
   setRestTimeSets,
   setTickTime,
-  setViewWorkout,
 } from "../store/features/workoutSlice";
 import { DoneWorkout } from "../components/Workout/DoneWorkout";
 import { useWakeLock } from "../hooks/useWakeLock";
@@ -16,11 +15,10 @@ import { EnteringWeight } from "../components/Workout/EnteringWeight";
 import { ExerciseProccess } from "../components/Workout/ExerciseProccess";
 import { LikeIcon } from "../components/icons/LikeIcon";
 import { FillLikeIcon } from "../components/icons/FillLikeIcon";
-import { PlusIcon } from "../components/icons/PlusIcon";
-import { MinusIcon } from "../components/icons/MinusIcon";
+import { EdittingWorkout } from "../components/Workout/EdittingWorkout";
 
 export default function WorkoutPage() {
-  const { viewWorkout, startedWorkout } = useAppSelector(
+  const { startedWorkout, currentWorkout } = useAppSelector(
     (state) => state.workoutSlice
   );
   const { isAuth, user } = useAppSelector((state) => state.userSlice);
@@ -29,38 +27,23 @@ export default function WorkoutPage() {
   const editBtnRef = useRef<HTMLDivElement | null>(null);
 
   const navigate = useNavigate();
-  const [isAddingExercise, setIsAddingExercise] = useState<boolean>(false);
-  const [addingQueue, setAddingQueue] = useState<boolean>(false);
-  const [openMode, setOpenMode] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
-  const [editWorkout, setEditWorkout] = useState<workoutType | null>(null);
 
   const { releaseWakeLock } = useWakeLock();
 
   const displayWorkout =
-    startedWorkout?.id === viewWorkout?.id ? startedWorkout : viewWorkout;
+    startedWorkout === null ? currentWorkout : startedWorkout;
 
   const {
     setIsConfirm,
     isEnteringWeight,
     isConfirm,
-    exerciseMode,
-    setExerciseMode,
-    exerciseQueue,
-    setExerciseQueue,
     breakWorkout,
     setIsEnteringWeight,
     userWeight,
     doneWorkout,
     addFavoriteWorkout,
   } = useWorkout(displayWorkout);
-
-  const isFillAddingQueueRef = useRef(false);
-
-  if (isFillAddingQueueRef) {
-    isFillAddingQueueRef.current =
-      displayWorkout?.exercises.length === exerciseQueue.length;
-  }
 
   useEffect(() => {
     let mainInterval: ReturnType<typeof setInterval> | null = null;
@@ -81,15 +64,6 @@ export default function WorkoutPage() {
     };
   }, [startedWorkout, dispatch]);
 
-  useEffect(() => {
-    if (isFillAddingQueueRef.current) {
-      if (viewWorkout) {
-        dispatch(setViewWorkout({ ...viewWorkout, exercises: exerciseQueue }));
-      }
-      setAddingQueue(false);
-    }
-  }, [isFillAddingQueueRef.current]);
-
   const backBtn = () => {
     if (startedWorkout) {
       setIsConfirm(true);
@@ -99,22 +73,12 @@ export default function WorkoutPage() {
     }
   };
 
-  const openAddingExercise = () => {
-    setIsAddingExercise(!isAddingExercise);
-  };
-
   const editWorkoutBtn = () => {
-    if (isEdit) {
-      setIsAddingExercise(false);
-    }
     setIsEdit(!isEdit);
-    setExerciseQueue([]);
-    setEditWorkout(displayWorkout);
-    setAddingQueue(true);
+    dispatch(setEditWorkout(displayWorkout));
   };
 
   const isFavorite = user?.myWorkouts.some((w) => w.id === displayWorkout?.id);
-
   return (
     <>
       {isEnteringWeight && <EnteringWeight displayWorkout={displayWorkout} />}
@@ -182,49 +146,7 @@ export default function WorkoutPage() {
           <div className="flex justify-between ">
             <div>
               <p className="text-[18px] pl-[10px]">Упражнения:</p>
-
-              {isEdit && (
-                <div className="pl-[20px]">
-                  <p
-                    onClick={openAddingExercise}
-                    className="text-[14px] font-medium text-[#00C1FF] hover:text-[#00a3d9] active:scale-95 flex items-center gap-[4px] cursor-pointer select-none transition-all w-fit"
-                  >
-                    {isAddingExercise ? <MinusIcon /> : <PlusIcon />}
-                    Добавить упражнение
-                  </p>
-                  <div
-                    onClick={() => setOpenMode(!openMode)}
-                    className="text-[14px] relative cursor-pointer select-none hover:opacity-90 transition-opacity"
-                  >
-                    Режим:{" "}
-                    <span className="bg-[#BCEC30] text-black font-semibold rounded-[6px] px-[8px] py-[2px] ml-[4px] shadow-sm inline-block">
-                      {exerciseMode}
-                    </span>
-                    {openMode && (
-                      <div className="absolute z-20 p-[6px] left-[50px] top-[24px] bg-[#16171d] text-white rounded-[8px] border border-gray-700 shadow-lg min-w-[120px]">
-                        <p
-                          onClick={() => setExerciseMode("свободное")}
-                          className="px-[8px] py-[4px] rounded-[4px] hover:bg-gray-700 cursor-pointer transition-colors"
-                        >
-                          свободное
-                        </p>
-                        <p
-                          onClick={() => setExerciseMode("круговое")}
-                          className="px-[8px] py-[4px] rounded-[4px] hover:bg-gray-700 cursor-pointer transition-colors"
-                        >
-                          круговое
-                        </p>
-                        <p
-                          onClick={() => setExerciseMode("поподходное")}
-                          className="px-[8px] py-[4px] rounded-[4px] hover:bg-gray-700 cursor-pointer transition-colors"
-                        >
-                          поподходное
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+              <p className="pl-[10px]">Режим: {displayWorkout?.mode}</p>
             </div>
             <div className="flex flex-col items-end relative">
               {!startedWorkout && (
@@ -246,20 +168,19 @@ export default function WorkoutPage() {
               )}
             </div>
           </div>
-
-          <ExerciseProccess
-            displayWorkout={displayWorkout}
-            addingQueue={addingQueue}
-            isAddingExercise={isAddingExercise}
-            isEdit={isEdit}
-          />
-          <DoneWorkout
-            isEdit={isEdit}
-            displayWorkout={displayWorkout}
-            userWeight={userWeight}
-            setIsConfirm={setIsConfirm}
-            setIsEnteringWeight={setIsEnteringWeight}
-          />
+          {isEdit ? (
+            <EdittingWorkout setIsEdit={setIsEdit} />
+          ) : (
+            <>
+              <ExerciseProccess displayWorkout={displayWorkout} />
+              <DoneWorkout
+                displayWorkout={displayWorkout}
+                userWeight={userWeight}
+                setIsConfirm={setIsConfirm}
+                setIsEnteringWeight={setIsEnteringWeight}
+              />
+            </>
+          )}
         </div>
       }
     </>

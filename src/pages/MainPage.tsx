@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Header } from "../components/Header";
 import { Outlet } from "react-router-dom";
 import type { workoutType } from "../types/types";
-import { Workout } from "../components/Workout/Workout";
+import { WorkoutCard } from "../components/Workout/WorkoutCard";
 import { BottomBtn } from "../components/BottomBtn";
 import { useAppSelector } from "../store/features/store";
 import { FilterWorkout } from "../components/Workout/FilterWorkout";
@@ -48,8 +48,8 @@ export default function Main() {
         <div className="pt-[20px] grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 px-4">
           <TabataTimerSettings />
           {search === ""
-            ? workouts.map((i) => <Workout workout={i} />)
-            : filteredCourses.map((i) => <Workout workout={i} />)}
+            ? workouts.map((i) => <WorkoutCard workout={i} />)
+            : filteredCourses.map((i) => <WorkoutCard workout={i} />)}
         </div>
         <BottomBtn onClick={handleToTopBtn} btnText={<p>Наверх &#8593;</p>} />
       </div>

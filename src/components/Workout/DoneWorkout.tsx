@@ -17,7 +17,6 @@ import { useWakeLock } from "../../hooks/useWakeLock";
 import { useWorkout } from "../../hooks/Workout/useWorkout";
 
 type DoneWorkoutType = {
-  isEdit: boolean;
   displayWorkout: workoutType | null;
   userWeight: number | null;
   setIsConfirm: Dispatch<SetStateAction<boolean>>;
@@ -25,7 +24,6 @@ type DoneWorkoutType = {
 };
 
 export const DoneWorkout = ({
-  isEdit,
   displayWorkout,
   userWeight,
   setIsConfirm,
@@ -41,9 +39,7 @@ export const DoneWorkout = ({
 
   const editWeightBtn = () => {
     setIsEnteringWeight(true);
-  };
-
-  const saveEdittedWorkout = () => {};
+  };  
 
   const startWorkout = () => {
     dispatch(setTimeSets(0));
@@ -133,9 +129,7 @@ export const DoneWorkout = ({
           )}
           {startedWorkout !== null &&
           displayWorkout &&
-          startedWorkout.id !== displayWorkout.id ? null : isEdit ? (
-            <BottomBtn onClick={saveEdittedWorkout} btnText={"Сохранить"} />
-          ) : (
+          startedWorkout.id !== displayWorkout.id ? null : (
             <BottomBtn onClick={startWorkout} btnText={"Начать тренировку"} />
           )}
           {displayWorkout && displayWorkout.custom && (
