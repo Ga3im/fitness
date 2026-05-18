@@ -3,8 +3,9 @@ export const router = {
   login: "/login",
   register: "/register",
   profile: "/profile",
-  courses: "/course/:courseId",
-  workout: "/workout/:workoutId",
+  createWorkout: "/create-workout",
+  workouts: "/workout/:workoutId",
   selectWorkout: "/select-workout",
   workoutFilling: "/workout/:workoutId/filling-workout",
+  timerWorkout: '/workout/interval-training'
 };

@@ -1,14 +1,13 @@
 import { Route, Routes } from "react-router-dom";
-import "./App.css";
-import Main from "./pages/Main";
+
+import Main from "./pages/MainPage";
 import { router } from "./pages/router";
-import { Login } from "./pages/Login";
-import { Register } from "./pages/Register";
-import Profile from "./pages/Profile";
-import Course from "./pages/Courses";
-import { Workout } from "./pages/Workout";
-import { SelectWorkout } from "./pages/SelectWorkout";
-import { Progress } from "./pages/Progress";
+import { Login } from "./pages/LoginPage";
+import { Register } from "./pages/RegisterPage";
+import Profile from "./pages/ProfilePage";
+import { CreateWorkout } from "./pages/CreateWorkoutPage";
+import WorkoutPage from "./pages/WorkoutPage";
+import { IntervalWorkoutPage } from "./pages/IntervalWorkoutPage";
 
 function App() {
   return (
@@ -16,13 +15,11 @@ function App() {
       <Route path={router.main} element={<Main />}>
         <Route path={router.login} element={<Login />} />
         <Route path={router.register} element={<Register />} />
-        <Route path={router.selectWorkout} element={<SelectWorkout />} />
       </Route>
       <Route path={router.profile} element={<Profile />} />
-      <Route path={router.courses} element={<Course />} />
-      <Route path={router.workout} element={<Workout />}>
-        <Route path={router.workoutFilling} element={<Progress />} />
-      </Route>
+      <Route path={router.createWorkout} element={<CreateWorkout />} />
+      <Route path={router.workouts} element={<WorkoutPage />} />
+      <Route path={router.timerWorkout} element={<IntervalWorkoutPage />} />
     </Routes>
   );
 }
