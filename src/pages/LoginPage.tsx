@@ -14,7 +14,7 @@ export const Login = () => {
   const dispatch = useAppDispatch();
 
   let savedAccounts = localStorage.getItem("accounts");
-  let accounts: userType[];
+  let accounts: userType[] = []; // Инициализируем пустым массивом по умолчанию
   if (savedAccounts) {
     accounts = JSON.parse(savedAccounts);
   }
@@ -26,7 +26,10 @@ export const Login = () => {
     navigate(router.main);
   };
 
-  const handleLogin = () => {
+  // ИСПРАВЛЕНО: Принимаем объект события React.FormEvent
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault(); // 1. ОТМЕНЯЕМ ПЕРЕЗАГРУЗКУ СТРАНИЦЫ ПРИ ENTER
+    
     setIsLoading(true);
     if (loginRef.current?.value === "") {
       setError("Введите логин");
@@ -54,7 +57,14 @@ export const Login = () => {
             })
           );
         } else {
-          accounts.map((i: userType) => {
+          // ИСПРАВЛЕНО: Предотвращаем падение, если accounts пустой
+          if (accounts.length === 0) {
+            setError("Пользователь не найден");
+            setIsLoading(false);
+            return;
+          }
+
+          accounts.forEach((i: userType) => {
             if (
               i.login === loginRef.current?.value.toLowerCase() &&
               i.password === passwordRef.current?.value
@@ -79,7 +89,8 @@ export const Login = () => {
     }
   };
 
-  const handleRegister = () => {
+  const handleRegister = (e: React.MouseEvent) => {
+    e.preventDefault(); // Защита кнопки регистрации внутри тега form
     setIsLoading(false);
     navigate(router.register);
   };
@@ -93,25 +104,27 @@ export const Login = () => {
         >
           x
         </div>
-        <div className="flex flex-col mr-[30px]">
+
+        {/* Привязываем handleLogin на onSubmit формы */}
+        <form onSubmit={handleLogin} className="flex flex-col mr-[30px]">
           <Logo />
           <div className="pt-[20px] pb-[10px] flex flex-col gap-[10px]">
             <input
               ref={loginRef}
               className={
                 error === "Введите логин"
-                  ? "py-[5px] px-[10px] rounded-[8px] border-1 border-[#DB0030]"
-                  : "py-[5px] px-[10px] rounded-[8px] border-1 border-[#D0CECE]"
+                  ? "py-[5px] px-[10px] rounded-[8px] border-1 border-[#DB0030] focus:outline-none"
+                  : "py-[5px] px-[10px] rounded-[8px] border-1 border-[#D0CECE] focus:outline-none"
               }
               placeholder="Логин"
-              type="email"
+              type="text" // ИСПРАВЛЕНО: type="text" вместо "email", чтобы admin подходил
             />
             <input
               ref={passwordRef}
               className={
                 error === "Введите пароль"
-                  ? "py-[5px] px-[10px] rounded-[8px] border-1 border-[#DB0030]"
-                  : "py-[5px] px-[10px] rounded-[8px] border-1 border-[#D0CECE]"
+                  ? "py-[5px] px-[10px] rounded-[8px] border-1 border-[#DB0030] focus:outline-none"
+                  : "py-[5px] px-[10px] rounded-[8px] border-1 border-[#D0CECE] focus:outline-none"
               }
               placeholder="Пароль"
               type="password"
@@ -121,11 +134,11 @@ export const Login = () => {
 
           <button
             disabled={isLoading}
-            onClick={handleLogin}
+            type="submit" // Работает и как клик, и как Enter
             className={
               isLoading
                 ? "text-[16px] mt-[20px] rounded-[45px] bg-[#F7F7F7] text-[#999999] px-[16px] py-[5px] mb-[10px]"
-                : "text-[16px] mt-[20px] rounded-[45px] bg-[#BCEC30] hover:bg-[#C6FF00] active:bg-[#A0B000] active:text-[white] px-[16px] py-[5px] mb-[10px]"
+                : "text-[16px] mt-[20px] rounded-[45px] bg-[#BCEC30] hover:bg-[#C6FF00] active:bg-[#A0B000] active:text-[white] px-[16px] py-[5px] mb-[10px] cursor-pointer"
             }
           >
             Войти
@@ -135,12 +148,12 @@ export const Login = () => {
             className={
               isLoading
                 ? "text-[16px] rounded-[45px] bg-[white] text-[#999999] px-[16px] py-[5px] border-1"
-                : "text-[16px] rounded-[45px] bg-white active:bg-[#E9ECED] hover:bg-[#F7F7F7] px-[16px] py-[5px] border-1"
+                : "text-[16px] rounded-[45px] bg-white active:bg-[#E9ECED] hover:bg-[#F7F7F7] px-[16px] py-[5px] border-1 cursor-pointer"
             }
           >
             Зарегистрироваться
           </button>
-        </div>
+        </form>
       </div>
     </div>
   );

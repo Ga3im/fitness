@@ -1,16 +1,16 @@
 import { useRef } from "react";
 import { Exercise } from "../Exercise";
 import type { exercisesType, workoutType } from "../../types/types";
-import { setCurrentWorkout } from "../../store/features/workoutSlice";
+import { setEditWorkout } from "../../store/features/workoutSlice";
 import { useAppDispatch } from "../../store/features/store";
 
 type AddingExerciseType = {
-  displayWorkout: workoutType | null;
+  editWorkout: workoutType | null;
   exercises: exercisesType[];
 };
 
 export const AddingExercise = ({
-  displayWorkout,
+  editWorkout,
   exercises,
 }: AddingExerciseType) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -35,54 +35,63 @@ export const AddingExercise = ({
     });
   };
 
-  const exerciseClick = (e: HTMLElement | null) => {
+  const exerciseClick = (e: HTMLElement | null, exercise: exercisesType) => {
     if (e) {
       e.scrollIntoView({ inline: "center", behavior: "smooth" });
+    }
+
+    const isAlreadyInWorkout = editWorkout?.exercises.some(
+      (ex) => ex.id === exercise.id
+    );
+
+    if (!isAlreadyInWorkout && editWorkout) {
+      dispatch(
+        setEditWorkout({
+          ...editWorkout,
+          exercises: [...(editWorkout.exercises || []), exercise],
+        })
+      );
     }
   };
 
   const changedisplayWorkout = (workout: workoutType): void => {
-    dispatch(setCurrentWorkout(workout));
+    dispatch(setEditWorkout(workout));
   };
 
   return (
-    <>
-      <div className="w-full pt-[20px] border-[black] border-1 rounded-[20px] shadow-[0px_0px_15px_-10px] cursor-pointer">
-        <div className="flex justify-center gap-[10px] relative">
-          <button onClick={() => scrollContainer("back")}>Back</button>
-          <button onClick={() => scrollContainer("next")}>Next</button>
-        </div>
-
-        <div
-          ref={containerRef}
-          className="flex px-[30px] snap-x snap-mandatory scroll-p-[20px] overflow-x-auto overflow-y-hidden gap-[30px] py-[10px] flex-row w-full"
-        >
-          {exercises.map((addExercise, index) => (
-            <>
-              {addExercise &&
-                displayWorkout &&
-                !displayWorkout?.exercises.some(
-                  (ex) => ex.id === addExercise.id
-                ) && (
-                  <div
-                    className="snap-center"
-                    key={index}
-                    ref={(el) => {
-                      btnRef.current[index] = el;
-                    }}
-                    onClick={() => exerciseClick(btnRef.current[index])}
-                  >
-                    <Exercise
-                      workout={displayWorkout}
-                      setWorkout={changedisplayWorkout}
-                      exercise={addExercise}
-                    />
-                  </div>
-                )}
-            </>
-          ))}
-        </div>
+    <div className="w-full pt-[20px] border-[black] border-1 rounded-[20px] shadow-[0px_0px_15px_-10px]">
+      <div className="flex justify-center gap-[10px] relative">
+        <button onClick={() => scrollContainer("back")}>Back</button>
+        <button onClick={() => scrollContainer("next")}>Next</button>
       </div>
-    </>
+
+      <div
+        ref={containerRef}
+        className="flex px-[30px] snap-x snap-mandatory scroll-p-[20px] overflow-x-auto overflow-y-hidden gap-[30px] py-[10px] flex-row w-full"
+      >
+        {exercises.map((addExercise, index) => {
+          if (!addExercise || !editWorkout) {
+            return null;
+          }
+
+          return (
+            <div
+              className="snap-center"
+              key={addExercise.id}
+              ref={(el) => {
+                btnRef.current[index] = el;
+              }}
+              onClick={() => exerciseClick(btnRef.current[index], addExercise)}
+            >
+              <Exercise
+                workout={editWorkout}
+                setWorkout={changedisplayWorkout}
+                exercise={addExercise}
+              />
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 };

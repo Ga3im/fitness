@@ -3,25 +3,28 @@ import { useWorkout } from "../../hooks/Workout/useWorkout";
 import { useAppDispatch, useAppSelector } from "../../store/features/store";
 import type { exercisesType, ModeTypes, workoutType } from "../../types/types";
 import { InputTime } from "../InputTime";
-import { AddingExercise } from "./AddingExercise";
 import { CloseIcon } from "../icons/CloseIcon";
 import { BottomBtn } from "../BottomBtn";
 import {
   deleteExercise,
   setEditWorkout,
   setCurrentWorkout,
+  setWorkouts,
 } from "../../store/features/workoutSlice";
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { MinusIcon } from "../icons/MinusIcon";
 import { PlusIcon } from "../icons/PlusIcon";
+import { AddingExercise } from "./AddingExercise";
+import { ModeWorkouts } from "./ModeWorkouts";
 
 type EdittingWorkoutProp = {
   setIsEdit: Dispatch<SetStateAction<boolean>>;
 };
 
 export const EdittingWorkout = ({ setIsEdit }: EdittingWorkoutProp) => {
-  const { editWorkout } = useAppSelector((state) => state.workoutSlice);
-  const [openMode, setOpenMode] = useState<boolean>(false);
+  const { editWorkout, workouts } = useAppSelector(
+    (state) => state.workoutSlice
+  );
   const [isAddingExercise, setIsAddingExercise] = useState<boolean>(false);
 
   const dispatch = useAppDispatch();
@@ -84,15 +87,18 @@ export const EdittingWorkout = ({ setIsEdit }: EdittingWorkoutProp) => {
   };
 
   const saveEditedWorkout = () => {
+    if (!editWorkout) return;
+    const updatedWorkouts = workouts.map((w) =>
+      w.id === editWorkout.id ? editWorkout : w
+    );
+    dispatch(setWorkouts(updatedWorkouts));
     dispatch(setCurrentWorkout(editWorkout));
     setIsEdit(false);
   };
 
-  console.log(editWorkout);
-
   return (
     <div className="flex flex-wrap gap-[10px] justify-center py-[30px] mb-[10px] bg-white w-full">
-      <div className="flex flex-col gap-[8px]">
+      <div className="flex flex-col items-center justify-center w-full gap-[8px]">
         <p
           onClick={openAddingExercise}
           className="text-[14px] font-medium text-[#00C1FF] hover:text-[#00a3d9] active:scale-95 flex items-center gap-[4px] cursor-pointer select-none transition-all w-fit"
@@ -100,41 +106,14 @@ export const EdittingWorkout = ({ setIsEdit }: EdittingWorkoutProp) => {
           {isAddingExercise ? <MinusIcon /> : <PlusIcon />}
           Добавить упражнение
         </p>
-        <div
-          onClick={() => setOpenMode(!openMode)}
-          className="text-[14px] relative cursor-pointer select-none hover:opacity-90 transition-opacity"
-        >
-          Режим:{" "}
-          <span className="bg-[#BCEC30] text-black font-semibold rounded-[6px] px-[8px] py-[2px] ml-[4px] shadow-sm inline-block">
-            {editWorkout?.mode}
-          </span>
-          {openMode && (
-            <div className="absolute z-20 p-[6px] left-[50px] top-[24px] bg-[#16171d] text-white rounded-[8px] border border-gray-700 shadow-lg min-w-[120px]">
-              <p
-                onClick={() => handleModeChange("свободное")}
-                className="px-[8px] py-[4px] rounded-[4px] hover:bg-gray-700 cursor-pointer transition-colors"
-              >
-                свободное
-              </p>
-              <p
-                onClick={() => handleModeChange("круговое")}
-                className="px-[8px] py-[4px] rounded-[4px] hover:bg-gray-700 cursor-pointer transition-colors"
-              >
-                круговое
-              </p>
-              <p
-                onClick={() => handleModeChange("поподходное")}
-                className="px-[8px] py-[4px] rounded-[4px] hover:bg-gray-700 cursor-pointer transition-colors"
-              >
-                поподходное
-              </p>
-            </div>
-          )}
-        </div>
+        <ModeWorkouts
+          handleModeChange={handleModeChange}
+          currentMode={editWorkout?.mode || "свободное"}
+        />
       </div>
       {isAddingExercise && (
         <AddingExercise
-          displayWorkout={editWorkout}
+          editWorkout={editWorkout}
           exercises={exercises.filter((ex): ex is exercisesType => !!ex)}
         />
       )}

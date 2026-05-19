@@ -22,12 +22,20 @@ export const InputTime = ({ value, changeVal }: InputTimeProps) => {
   };
 
   useEffect(() => {
+    // UX-улучшение: если время отдыха равно 0, не пишем "00:00" на невыбранных карточках,
+    // чтобы разметка оставалась чистой и не спамила нулями
+    if (value === 0) {
+      setInputValue("");
+      return;
+    }
+
     const mins = Math.floor(value / 60)
       .toString()
       .padStart(2, "0");
     const secs = (value % 60).toString().padStart(2, "0");
     setInputValue(`${mins}:${secs}`);
   }, [value]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let digits = e.target.value.replace(/\D/g, "");
 
@@ -69,9 +77,12 @@ export const InputTime = ({ value, changeVal }: InputTimeProps) => {
           <input
             autoFocus
             onChange={(e) => changeVal(Number(e.target.value) || 0)}
-            defaultValue={value}
+            // ИСПРАВЛЕНО: Заменили defaultValue на контролируемый value.
+            // Теперь при скролле карусели инпут будет мгновенно очищаться или брать правильные секунды
+            value={value === 0 ? "" : value}
             onWheel={handleWheel}
             type="number"
+            min={0}
             className="focus:outline-none w-full [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:margin- [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:margin-"
           />
           <button onClick={() => setIsInputNumber(false)}>
@@ -83,14 +94,14 @@ export const InputTime = ({ value, changeVal }: InputTimeProps) => {
           <div className="flex items-center">
             <input
               type="text"
-              inputMode="numeric" // Только цифровая клавиатура на смартфонах
+              inputMode="numeric"
               pattern="[0-9]*"
               placeholder="00:00"
               value={inputValue}
               onChange={handleInputChange}
               onBlur={handleBlur}
               onWheel={handleWheel}
-              onClick={(e) => (e.target as HTMLInputElement).select()} // Выделение при клике
+              onClick={(e) => (e.target as HTMLInputElement).select()}
               className="w-[50px] text-center focus:outline-none bg-transparent font-mono font-medium"
             />
           </div>

@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Header } from "../components/Header";
 import { router } from "./router";
 import { useEffect, useState } from "react";
-import type { exercisesType, workoutType } from "../types/types";
+import type { exercisesType, ModeTypes, workoutType } from "../types/types";
 import { exercises } from "../data";
 import { BottomBtn } from "../components/BottomBtn";
 import { Exercise } from "../components/Exercise";
@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector } from "../store/features/store";
 import { setWorkouts } from "../store/features/workoutSlice";
 import { setIsOpenProfile } from "../store/features/userSlice";
 import { FilterExercise } from "../components/FilterExercise";
+import { ModeWorkouts } from "../components/Workout/ModeWorkouts";
 
 export const CreateWorkout = () => {
   const { workouts, emptyExerciseReps } = useAppSelector(
@@ -28,6 +29,7 @@ export const CreateWorkout = () => {
   const [workout, setWorkout] = useState<workoutType>({
     id: "",
     description: "",
+    mode: "свободное",
     order: workouts.length,
     img: "",
     nameRU: "",
@@ -108,6 +110,11 @@ export const CreateWorkout = () => {
       arr.push(element);
     }
     setDisplayedExercisess(arr);
+  };
+
+  const handleModeChange = (value: ModeTypes) => {
+    if (!workout) return;
+    setWorkout({ ...workout, mode: value });
   };
 
   const moreExercisesBtn = () => {
@@ -222,6 +229,10 @@ export const CreateWorkout = () => {
               : ""
           }
         >
+          <ModeWorkouts
+            handleModeChange={handleModeChange}
+            currentMode={workout.mode || "свободное"}
+          />
           <p className="text-[20px] pb-[10px]">Упражнения:</p>
           <FilterExercise
             search={search}
