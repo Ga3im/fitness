@@ -87,7 +87,7 @@ export const ExerciseProccess = ({ displayWorkout }: ExerciseProccessProp) => {
                 </span>
               </div>
 
-              {exercise.timeBtwnSets && exercise.timeBtwnSets > 0 && (
+              {!!exercise.timeBtwnSets && exercise.timeBtwnSets > 0 && (
                 <div>
                   <span>Отдых:</span>
                   <span> {timeHHMMSS(Number(exercise.timeBtwnSets))} мин</span>
@@ -122,11 +122,14 @@ export const ExerciseProccess = ({ displayWorkout }: ExerciseProccessProp) => {
                   <>
                     {(() => {
                       if (displayWorkout.mode === "свободное") return true;
-                      if (displayWorkout.mode === "круговое") return prossesingExercise?.id === exercise.id;
+                      if (displayWorkout.mode === "круговое")
+                        return prossesingExercise?.id === exercise.id;
                       if (displayWorkout.mode === "поподходное") {
-                        if (prossesingExercise) return prossesingExercise.id === exercise.id;
+                        if (prossesingExercise)
+                          return prossesingExercise.id === exercise.id;
                         const firstUnfinished = displayWorkout.exercises.find(
-                          (ex) => (ex.doneReps ?? 0) < (ex.reps ?? 0) * (ex.sets ?? 0)
+                          (ex) =>
+                            (ex.doneReps ?? 0) < (ex.reps ?? 0) * (ex.sets ?? 0)
                         );
                         return firstUnfinished?.id === exercise.id;
                       }
@@ -170,21 +173,22 @@ export const ExerciseProccess = ({ displayWorkout }: ExerciseProccessProp) => {
               </>
             )}
 
+            {/* нули здесь */}
             {/* Блок таймера отдыха */}
-            {exercise.timeBtwnSets && (
+            {!!exercise.timeBtwnSets && (
               <div className="mt-[10px]" onClick={(e) => e.stopPropagation()}>
-                {restTimeSets < 0 && exercise.table && exercise.table.length > 0 ? (
+                {restTimeSets < 0 &&
+                exercise.table &&
+                exercise.table.length > 0 ? (
                   <p className="text-center pt-[10px] font-medium text-red-500 animate-pulse">
                     Пора делать подход
                   </p>
-                ) : (
-                  /* ИСПРАВЛЕНО: Заменили логические && на тернарный оператор для защиты от вывода нуля */
-                  startedWorkout && restTimeSets > 0 ? (
-                    <p className="text-center pt-[10px] font-mono font-bold text-gray-600">
-                      {timeHHMMSS(restTimeSets)}
-                    </p>
-                  ) : null
-                )}
+                ) : /* ИСПРАВЛЕНО: Заменили логические && на тернарный оператор для защиты от вывода нуля */
+                startedWorkout && restTimeSets > 0 ? (
+                  <p className="text-center pt-[10px] font-mono font-bold text-gray-600">
+                    {timeHHMMSS(restTimeSets)}
+                  </p>
+                ) : null}
               </div>
             )}
           </div>

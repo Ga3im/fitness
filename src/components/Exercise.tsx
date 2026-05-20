@@ -166,7 +166,6 @@ export const Exercise = ({
           </div>
 
           {/* ПОВТОРЕНИЯ */}
-
           {exercise.static ? (
             <InputTime
               value={reps && reps > 0 ? reps : 0}
