@@ -20,7 +20,7 @@ export const TabataTimerSettings = () => {
   return (
     <div
       onClick={() => navigate(router.timerWorkout)}
-      className="relative flex flex-col rounded-[30px] overflow-hidden shadow-[0px_0px_10px_-7px] hover:cursor-pointer transition-all duration-300 hover:scale-105 bg-white"
+      className="relative max-w-[280px] flex flex-col rounded-[30px] overflow-hidden shadow-[0px_0px_10px_-7px] hover:cursor-pointer transition-all duration-300 hover:scale-105 bg-white"
     >
       {/* Контейнер для иконки — имитирует блок с фото */}
       <div className="relative w-full aspect-square bg-[#F7F7F7] flex items-center justify-center overflow-hidden">

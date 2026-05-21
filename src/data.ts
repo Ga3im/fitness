@@ -234,6 +234,7 @@ export const exercises = [
     id: "pushup",
     name: "Отжимание",
     img: "/workouts/push-ups.jpg",
+    noEquipment: true,
   },
   {
     id: "leglift",
@@ -244,6 +245,7 @@ export const exercises = [
     id: "squat",
     name: "Приседание",
     img: "/workouts/prised.jpg",
+    noEquipment: true,
   },
   {
     id: "dips",
@@ -269,6 +271,7 @@ export const exercises = [
     id: "lunges",
     name: "Выпады",
     img: "/workouts/lunges.jpg",
+    noEquipment: true,
   },
   {
     id: "hangonthebar",
@@ -281,11 +284,13 @@ export const exercises = [
     id: "press",
     name: "Подъем туловища",
     img: "/workouts/presslie.png",
+    noEquipment: true,
   },
   {
     id: "hyperextension",
     name: "Гиперэкстензия",
     img: "/workouts/hyperextension.png",
+    noEquipment: true,
   },
   {
     id: "bentoverbarbellrow",
@@ -362,6 +367,7 @@ export const exercises = [
     id: "stepup",
     name: "Вышагивания",
     img: "/workouts/step up.png",
+    noEquipment: true,
   },
   {
     id: "romaniandeadlift",
@@ -382,23 +388,27 @@ export const exercises = [
     id: "standincvalfraises",
     name: "Подъемы на носки",
     img: "/workouts/Standing Calf Raises.png",
+    noEquipment: true,
   },
   {
     id: "elbowplanc",
     name: "Планка на локтях",
     img: "/workouts/elbow planck.jpg",
     static: true,
+    noEquipment: true,
   },
   {
     id: "planc",
     name: "Полная планка",
     img: "/workouts/planck.jpg",
     static: true,
+    noEquipment: true,
   },
   {
     id: "benchdips",
     name: "Обратные отжимания",
     img: "/workouts/Bench Dips.png",
+    noEquipment: true,
   },
   {
     id: "dumbbellkickback",
@@ -414,5 +424,6 @@ export const exercises = [
     id: "crunches",
     name: "Скручивание на пресс",
     img: "/workouts/crunches.jpg",
+    noEquipment: true,
   },
 ];
