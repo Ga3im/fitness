@@ -25,6 +25,7 @@ export type exercisesType = {
   done?: boolean;
   table?: number[];
   timeBtwnSets?: number;
+  noEquipment?: boolean;
 };
 
 export type workoutType = {
