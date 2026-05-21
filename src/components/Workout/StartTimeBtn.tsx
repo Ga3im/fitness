@@ -43,48 +43,84 @@ export const StartTimeBtn = ({
 
   const { handleAddReps } = useWorkout(displayWorkout);
 
-  // обратный отсчет
   useEffect(() => {
-    if (isStarted) {
+    if (isStarted && secondsToStart > 0) {
       timerInterval = setInterval(() => {
-        setSecondsToStart(secondsToStart--);
-        if (secondsToStart <= 2 && secondsToStart >= 0) {
-          play();
-        }
-        if (secondsToStart < 0) {
-          clearInterval(timerInterval);
-          stop();
-        }
-      }, 900);
+        setSecondsToStart((prev) => {
+          const next = prev - 1;
 
-      return () => clearInterval(timerInterval);
+          if (next <= 2 && next >= 0) {
+            play();
+          }
+
+          if (next === 0) {
+            clearInterval(timerInterval);
+            stop();
+          }
+
+          return next;
+        });
+      }, 1000); // Рекомендуется использовать стандартные 1000мс вместо 900мс
     }
-  }, [isStarted]);
 
-  // таймер
+    return () => {
+      if (timerInterval) clearInterval(timerInterval);
+    };
+  }, [isStarted, secondsToStart]);
+
+  // Основной таймер упражнения
   useEffect(() => {
+    // Запускаем только если тренировка идет и обратный отсчет ЗАВЕРШЕН
     if (isStarted && secondsToStart === 0) {
       exerciseTimer = setInterval(() => {
-        setTimer(timer--);
-        if (timer <= 2 && timer >= 0) {
-          play();
-        }
-        if (timer < 0) {
-          clearInterval(exerciseTimer);
-          stop();
-          handleAddReps(exercise, Number(exercise.reps));
-          if (!exercise.done) {
-            setTimer(time);
+        setTimer((prev) => {
+          const next = prev - 1;
+
+          if (next <= 2 && next >= 0) {
+            play();
           }
-          setIsStarted(false);
-        }
+
+          if (next < 0) {
+            clearInterval(exerciseTimer);
+            stop();
+
+            // САМАЯ ВАЖНАЯ ПРОВЕРКА: добавляем подход только если пользователь не нажал "Стоп"
+            // Используем функциональный подход, чтобы гарантировать актуальный стейт
+            setIsStarted((currentStarted) => {
+              if (currentStarted) {
+                handleAddReps(exercise, Number(exercise.reps));
+                if (!exercise.done) {
+                  setTimer(time); // сброс на исходное время упражнения
+                }
+              }
+              return false; // выключаем старт в любом случае по завершении
+            });
+          }
+
+          return next;
+        });
       }, 1000);
     }
-  }, [secondsToStart]);
 
+    // Очистка интервала при ЛЮБОМ изменении зависимостей (включая нажатие на Стоп)
+    return () => {
+      if (exerciseTimer) clearInterval(exerciseTimer);
+    };
+  }, [isStarted, secondsToStart, time, exercise]);
+
+  // Функция клика по кнопке
   const startBtn = () => {
-    setSecondsToStart(5);
-    setIsStarted(!isStarted);
+    if (isStarted) {
+      setIsStarted(false);
+      // Сбрасываем таймеры в дефолтное состояние, интервалы очистятся сами благодаря return в useEffect
+      setTimer(time); // или 0, смотря какое исходное состояние вам нужно при сбросе
+      setSecondsToStart(0);
+      stop();
+      console.log("stop");
+    } else {
+      setSecondsToStart(5);
+      setIsStarted(true);
+    }
   };
 
   return (
