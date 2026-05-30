@@ -1,6 +1,6 @@
 import { exercises } from "../../data";
 import { useWorkout } from "../../hooks/Workout/useWorkout";
-import { useAppDispatch, useAppSelector } from "../../store/features/store";
+import { useAppDispatch, useAppSelector } from "../../store/store";
 import type { exercisesType, ModeTypes, workoutType } from "../../types/types";
 import { InputTime } from "../InputTime";
 import { CloseIcon } from "../icons/CloseIcon";
@@ -19,18 +19,21 @@ import { ModeWorkouts } from "./ModeWorkouts";
 
 type EdittingWorkoutProp = {
   setIsEdit: Dispatch<SetStateAction<boolean>>;
+  editingWorkout: workoutType | null;
+  setEditingWorkout: Dispatch<SetStateAction<workoutType | null>>;
 };
 
-export const EdittingWorkout = ({ setIsEdit }: EdittingWorkoutProp) => {
+export const EdittingWorkout = ({
+  setIsEdit,
+  editingWorkout,
+  setEditingWorkout,
+}: EdittingWorkoutProp) => {
   const { editWorkout, workouts } = useAppSelector(
     (state) => state.workoutSlice
   );
   const [isAddingExercise, setIsAddingExercise] = useState<boolean>(false);
 
   const dispatch = useAppDispatch();
-  const [editingWorkout, setEditingWorkout] = useState<workoutType | null>(
-    editWorkout
-  );
 
   const { exerciseQueue, setExerciseQueue } = useWorkout(editWorkout);
 
@@ -207,7 +210,7 @@ export const EdittingWorkout = ({ setIsEdit }: EdittingWorkoutProp) => {
                     )}
                   </span>
                 </div>
-                {exercise.timeBtwnSets && exercise.timeBtwnSets > 0 && (
+                {!!exercise.timeBtwnSets && exercise.timeBtwnSets > 0 && (
                   <div>
                     <span>Отдых:</span>
                     <InputTime

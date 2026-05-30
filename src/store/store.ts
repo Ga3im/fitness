@@ -4,8 +4,7 @@ import {
   useSelector,
   type TypedUseSelectorHook,
 } from "react-redux";
-import { workoutReducer } from "./workoutSlice";
-import { authReduser } from "./userSlice";
+import { workoutReducer } from "./features/workoutSlice";
 import {
   persistStore,
   persistReducer,
@@ -17,11 +16,10 @@ import {
   REGISTER,
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
-import { timerReduser } from "./timerSlice";
+import { timerReduser } from "./features/timerSlice";
 
 const rootReducer = combineReducers({
   workoutSlice: workoutReducer,
-  userSlice: authReduser,
   timer: timerReduser,
 });
 

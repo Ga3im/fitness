@@ -6,9 +6,8 @@ import type { exercisesType, ModeTypes, workoutType } from "../types/types";
 import { exercises } from "../data";
 import { BottomBtn } from "../components/BottomBtn";
 import { Exercise } from "../components/Exercise";
-import { useAppDispatch, useAppSelector } from "../store/features/store";
+import { useAppDispatch, useAppSelector } from "../store/store";
 import { setWorkouts } from "../store/features/workoutSlice";
-import { setIsOpenProfile } from "../store/features/userSlice";
 import { FilterExercise } from "../components/FilterExercise";
 import { ModeWorkouts } from "../components/Workout/ModeWorkouts";
 
@@ -82,7 +81,7 @@ export const CreateWorkout = () => {
   }, [workout]);
 
   const backBtn = () => {
-    navigate(router.profile);
+    navigate(-1);
   };
 
   let previewUrl;
@@ -154,7 +153,6 @@ export const CreateWorkout = () => {
       emptyExerciseReps.length === 0
     ) {
       dispatch(setWorkouts([...workouts, workout]));
-      dispatch(setIsOpenProfile(false));
       navigate(router.main);
       localStorage.removeItem("workout");
     }

@@ -1,8 +1,6 @@
 export const router = {
   main: "/",
-  login: "/login",
-  register: "/register",
-  profile: "/profile",
+  favoriteWorkouts: "/favorite",
   createWorkout: "/create-workout",
   workouts: "/workout/:workoutId",
   selectWorkout: "/select-workout",

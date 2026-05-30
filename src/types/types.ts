@@ -69,13 +69,6 @@ export type ConfirmProp = {
   yesBtn: () => void;
 };
 
-export type contextType = {
-  isAuth: boolean;
-  setIsAuth: Dispatch<SetStateAction<boolean>>;
-  user: userType | null;
-  changeUser: (newUser: userType) => void;
-};
-
 export interface WorkoutStep {
   label: string;
   duration: number;

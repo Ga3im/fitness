@@ -1,16 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { Header } from "../components/Header";
-import { useAppDispatch, useAppSelector } from "../store/features/store";
-import { setIsFavoriteTabata } from "../store/features/userSlice";
+import { useAppDispatch, useAppSelector } from "../store/store";
 import { setTickTimer } from "../store/features/timerSlice";
-import { setTickTime } from "../store/features/workoutSlice";
+import { setIsFavoriteTabata, setTickTime } from "../store/features/workoutSlice";
 import { useEffect, useMemo, useRef } from "react";
 import useSound from "use-sound";
 import boopSfx from "/sounds/notification.mp3";
 import { SetIntervalWorkout } from "../components/IntervalWorkout/SetIntervalWorkout";
 
 export const IntervalWorkoutPage = () => {
-  const { isAuth, isFavoriteTabata } = useAppSelector((state) => state.userSlice);
+  const {  isFavoriteTabata } = useAppSelector((state) => state.workoutSlice);
   const {
     prepTime,
     workTime,
@@ -116,7 +115,7 @@ export const IntervalWorkoutPage = () => {
             <div onClick={() => navigate(-1)} className="text-sm opacity-60 cursor-pointer hover:underline">
               &laquo; Назад
             </div>
-            {isAuth && <HeartIcon />}
+            {/* {isAuth && <HeartIcon />} */}
           </div>
 
           <h1 className="text-xl font-bold text-center mb-4">Интервальный таймер</h1>

@@ -1,4 +1,4 @@
-import { useAppDispatch, useAppSelector } from "../../store/features/store";
+import { useAppDispatch, useAppSelector } from "../../store/store";
 import {
   finishWorkout,
   setCycles,

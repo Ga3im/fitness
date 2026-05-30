@@ -1,64 +1,69 @@
-import { useNavigate } from "react-router-dom";
-import { router } from "../pages/router";
+import { useRef, useState } from "react";
+import { useOutsideClick } from "../hooks/modalClose";
 import { Logo } from "./Logo";
-import { setIsOpenProfile } from "../store/features/userSlice";
-import { useAppDispatch, useAppSelector } from "../store/features/store";
+import { router } from "../pages/router";
+import { useNavigate } from "react-router-dom";
 
 export const Header = () => {
-  const { isOpenProfile, isAuth } = useAppSelector((state) => state.userSlice);
-  const dispatch = useAppDispatch();
-  let navigate = useNavigate();
+  const [isOpenSetting, setIsOpenSetting] = useState<boolean>(false);
 
-  const handleToLogin = () => {
-    navigate(router.login);
+  const navigate = useNavigate();
+
+  const profileMenuRef = useRef(null);
+  const profileMenuBtnRef = useRef(null);
+
+  const handleOpenSetting = () => {
+    setIsOpenSetting(!isOpenSetting);
   };
 
-  const handleOpenProfile = () => {
-    dispatch(setIsOpenProfile(!isOpenProfile));
-    if (!isOpenProfile) {
-      navigate(router.profile);
-    } else {
-      navigate(router.main);
-    }
+  const closeProfileMenu = () => {
+    setIsOpenSetting(false);
   };
+
+  const handleCreateWorkout = () => {
+    navigate(router.createWorkout);
+  };
+
+  const handleOpenFavorite = () => {
+    navigate(router.favoriteWorkouts);
+  };
+
+  useOutsideClick(profileMenuRef, profileMenuBtnRef, closeProfileMenu);
 
   return (
     <>
       <header className="mb-[10px] py-[10px] px-[16px] flex justify-between items-center bg-gradient-to-b bg-[#007386] to-[#ebfdff]">
         <Logo />
-        {isAuth ? (
+        <div>
           <div
-            onClick={handleOpenProfile}
-            className="flex gap-[13px] items-center"
+            ref={profileMenuBtnRef}
+            onClick={handleOpenSetting}
+            className="flex flex-col relative gap-[5px] place-self-end cursor-pointer"
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 30 30"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M30 15C30 23.2843 23.2843 30 15 30C6.71573 30 0 23.2843 0 15C0 6.71573 6.71573 0 15 0C23.2843 0 30 6.71573 30 15ZM24 20.3571C24 22.8424 19.9706 25.5 15 25.5C10.0294 25.5 6 22.8424 6 20.3571C6 17.8719 10.0294 16.5 15 16.5C19.9706 16.5 24 17.8719 24 20.3571ZM15 13.5C17.4853 13.5 19.5 11.4853 19.5 9C19.5 6.51472 17.4853 4.5 15 4.5C12.5147 4.5 10.5 6.51472 10.5 9C10.5 11.4853 12.5147 13.5 15 13.5Z"
-                fill="#D9D9D9"
-              />
-            </svg>
-            {isOpenProfile ? (
-              <div className="w-[8px] h-[8px] relative bottom-[-2px] border-b-2 border-l-2 rotate-[135deg]"></div>
-            ) : (
-              <div className="w-[8px] h-[8px] relative bottom-[2px] border-b-2 border-l-2 rotate-[-45deg]"></div>
-            )}
+            <div className="bg-[#4f4f4f] rounded-full w-[20px] h-[3px]"></div>
+            <div className="bg-[#4f4f4f] rounded-full w-[20px] h-[3px]"></div>
+            <div className="bg-[#4f4f4f] rounded-full w-[20px] h-[3px]"></div>
           </div>
-        ) : (
-          <button
-            onClick={handleToLogin}
-            className="text-[12px] rounded-[45px] hover:bg-[#C6FF00] active:bg-black active:text-[#FFFFFF] bg-[#BCEC30] px-[10px] py-[5px] "
-          >
-            Войти
-          </button>
-        )}
+          {isOpenSetting && (
+            <div
+              ref={profileMenuRef}
+              className="absolute top-[30px] py-[10px] px-[20px] mt-[20px] rounded-[10px] bg-[#f4f4f4] place-self-end mr-[10px] shadow-[0px_0px_10px_-5px]"
+            >
+              <p
+                onClick={handleCreateWorkout}
+                className="cursor-pointer hover:underline"
+              >
+                Создать тренировку
+              </p>
+              <p
+                onClick={handleOpenFavorite}
+                className="cursor-pointer hover:underline"
+              >
+                Избранные тренировки
+              </p>
+            </div>
+          )}
+        </div>
       </header>
     </>
   );

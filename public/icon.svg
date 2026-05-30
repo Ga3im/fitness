@@ -1,9 +1,9 @@
-<!-- http://www.w3.org/2000/svg -->
-
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32">
-  <!-- Энергичный фон с белым бордером -->
-  <circle cx="12" cy="12" r="10" fill="#22c55e" stroke="#ffffff" stroke-width="1.5" />
+<svg xmlns="http://w3.org" viewBox="0 0 24 24" width="32" height="32">
+  <!-- Темный круглый фон для контраста на вкладках -->
+  <circle cx="12" cy="12" r="11" fill="#18181b" />
   
-  <!-- Минималистичная молния -->
-  <path d="M13 3L6 13h5v8l7-10h-5z" fill="#ffffff" stroke="#ffffff" stroke-width="1" stroke-linejoin="round"/>
+  <!-- Гантель яркого лаймового цвета -->
+  <path d="M6 9h1v6H6zm11 0h1v6h-1zM8 11h8v2H8zm-3 0h1v2H5zm13 0h1v2h-1z" fill="#BCEC30" />
+  <rect x="7" y="8" width="2" height="8" rx="1" fill="#BCEC30" />
+  <rect x="15" y="8" width="2" height="8" rx="1" fill="#BCEC30" />
 </svg>
