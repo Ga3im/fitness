@@ -1,4 +1,4 @@
-import { useAppSelector } from "../store/features/store";
+import { useAppSelector } from "../store/store";
 import { timeHHMMSS } from "../utils/functions";
 
 export const Stopwatch = () => {

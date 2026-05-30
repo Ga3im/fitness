@@ -1,9 +1,13 @@
 import { useWorkout } from "../../hooks/Workout/useWorkout";
-import { useAppSelector } from "../../store/features/store";
+import { useAppDispatch, useAppSelector } from "../../store/store";
 import type { exercisesType, workoutType } from "../../types/types";
 import { timeHHMMSS } from "../../utils/functions";
 import { ResultTable } from "./ResultTable";
 import { StartTimeBtn } from "./StartTimeBtn";
+import { setIsEnteringWeight } from "../../store/features/workoutSlice";
+import useSound from "use-sound";
+import boopSfx from "/sounds/timer.mp3";
+import { useEffect } from "react";
 
 type ExerciseProccessProp = {
   displayWorkout: workoutType | null;
@@ -13,16 +17,31 @@ export const ExerciseProccess = ({ displayWorkout }: ExerciseProccessProp) => {
   const { startedWorkout, restTimeSets } = useAppSelector(
     (state) => state.workoutSlice
   );
+  const [play] = useSound(boopSfx, { volume: 0.5, interrupt: true });
+
+  const dispatch = useAppDispatch();
 
   const {
     prossesingExercise,
     handleAddReps,
-    setIsEnteringWeight,
     repsRef,
     exerciseQueue,
     setExerciseQueue,
     handleKeyDown,
   } = useWorkout(displayWorkout);
+
+  const handleEnterWeight = (
+    e: React.MouseEvent<HTMLParagraphElement, MouseEvent>
+  ) => {
+    e.stopPropagation();
+    dispatch(setIsEnteringWeight(true));
+  };
+
+  useEffect(() => {
+    if (restTimeSets === 0) {
+      play();
+    }
+  }, [restTimeSets]);
 
   const selectQueue = (exercise: exercisesType) => {
     if (exerciseQueue.some((ex) => ex.id === exercise.id)) {
@@ -70,7 +89,7 @@ export const ExerciseProccess = ({ displayWorkout }: ExerciseProccessProp) => {
                     "Время: "
                   ) : displayWorkout.needWeight ? (
                     <p
-                      onClick={() => setIsEnteringWeight(true)}
+                      onClick={handleEnterWeight}
                       className="cursor-pointer hover:font-bold text-blue-600"
                     >
                       Введите вес вашего тела
@@ -173,7 +192,6 @@ export const ExerciseProccess = ({ displayWorkout }: ExerciseProccessProp) => {
               </>
             )}
 
-            {/* нули здесь */}
             {/* Блок таймера отдыха */}
             {!!exercise.timeBtwnSets && (
               <div className="mt-[10px]" onClick={(e) => e.stopPropagation()}>
@@ -183,8 +201,7 @@ export const ExerciseProccess = ({ displayWorkout }: ExerciseProccessProp) => {
                   <p className="text-center pt-[10px] font-medium text-red-500 animate-pulse">
                     Пора делать подход
                   </p>
-                ) : /* ИСПРАВЛЕНО: Заменили логические && на тернарный оператор для защиты от вывода нуля */
-                startedWorkout && restTimeSets > 0 ? (
+                ) : startedWorkout && restTimeSets > 0 ? (
                   <p className="text-center pt-[10px] font-mono font-bold text-gray-600">
                     {timeHHMMSS(restTimeSets)}
                   </p>

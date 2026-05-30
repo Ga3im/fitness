@@ -12,6 +12,9 @@ type WorkoutStateType = {
   lastOrder: number | null;
   restTimeSets: number;
   editWorkout: workoutType | null;
+  isEnteringWeight: boolean;
+  isFavoriteTabata: boolean;
+  favoriteWorkouts: workoutType[];
 };
 
 const initialState: WorkoutStateType = {
@@ -25,6 +28,9 @@ const initialState: WorkoutStateType = {
   lastOrder: Number(sessionStorage.getItem("lastOrder")) ?? 0,
   restTimeSets: 0,
   editWorkout: null,
+  isEnteringWeight: false,
+  isFavoriteTabata: false,
+  favoriteWorkouts: [],
 };
 
 const workoutSlice = createSlice({
@@ -139,6 +145,37 @@ const workoutSlice = createSlice({
         );
       }
     },
+    setIsEnteringWeight: (state, action) => {
+      state.isEnteringWeight = action.payload;
+    },
+    confirmWeight: (state, action) => {
+      const userWeight = action.payload;
+      if (userWeight) {
+        let reps = Math.ceil(5000 / userWeight);
+        state.startedWorkout = state.currentWorkout;
+        if (state.startedWorkout) {
+          state.startedWorkout.needWeight = false;
+          state.startedWorkout.exercises.forEach(
+            (ex) => ((ex.reps = reps), (ex.sets = 1))
+          );
+        }
+        state.isEnteringWeight = false;
+      }
+    },
+    setIsFavoriteTabata: (state, action) => {
+      state.isFavoriteTabata = action.payload;
+    },
+    setFavoriteWorkout: (state, action: PayloadAction<workoutType>) => {
+      const workout = action.payload;
+      const isExist = state.favoriteWorkouts.some((w) => w.id === workout.id);
+      if (isExist) {
+        state.favoriteWorkouts = state.favoriteWorkouts.filter(
+          (i) => i.id !== workout.id
+        );
+      } else {
+        state.favoriteWorkouts.push(workout);
+      }
+    },
   },
 });
 
@@ -156,5 +193,9 @@ export const {
   setRestTimeSets,
   setEditWorkout,
   deleteExercise,
+  setIsEnteringWeight,
+  confirmWeight,
+  setIsFavoriteTabata,
+  setFavoriteWorkout,
 } = workoutSlice.actions;
 export const workoutReducer = workoutSlice.reducer;

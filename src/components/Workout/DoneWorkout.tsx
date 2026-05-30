@@ -1,11 +1,12 @@
 import type { Dispatch, SetStateAction } from "react";
-import { useAppDispatch, useAppSelector } from "../../store/features/store";
+import { useAppDispatch, useAppSelector } from "../../store/store";
 import type { workoutType } from "../../types/types";
 import { timeHHMMSS } from "../../utils/functions";
 import { BottomBtn } from "../BottomBtn";
 import { Stopwatch } from "../Stopwatch";
 import {
   setCompleteWorkout,
+  setIsEnteringWeight,
   setStartWorkout,
   setTimeSets,
   setWorkouts,
@@ -20,14 +21,12 @@ type DoneWorkoutType = {
   displayWorkout: workoutType | null;
   userWeight: number | null;
   setIsConfirm: Dispatch<SetStateAction<boolean>>;
-  setIsEnteringWeight: Dispatch<SetStateAction<boolean>>;
 };
 
 export const DoneWorkout = ({
   displayWorkout,
   userWeight,
   setIsConfirm,
-  setIsEnteringWeight,
 }: DoneWorkoutType) => {
   const { workouts, workoutTime, startedWorkout } = useAppSelector(
     (state) => state.workoutSlice
@@ -38,15 +37,15 @@ export const DoneWorkout = ({
   const { doneWorkout } = useWorkout(displayWorkout);
 
   const editWeightBtn = () => {
-    setIsEnteringWeight(true);
-  };  
+    dispatch(setIsEnteringWeight(true));
+  };
 
   const startWorkout = () => {
     dispatch(setTimeSets(0));
     if (!displayWorkout) return;
     requestWakeLock();
     if (displayWorkout.needWeight) {
-      setIsEnteringWeight(true);
+      dispatch(setIsEnteringWeight(true));
     } else {
       dispatch(setStartWorkout(displayWorkout));
     }
@@ -100,7 +99,7 @@ export const DoneWorkout = ({
         startedWorkout.id === displayWorkout.id ? (
         <>
           <div className="text-center text-[20px] pb-[10px]">
-            Время тренировки: <Stopwatch/>
+            Время тренировки: <Stopwatch />
           </div>
 
           <Button onClick={() => setIsConfirm(true)} color="#ec3030">

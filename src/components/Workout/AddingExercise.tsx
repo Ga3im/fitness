@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { Exercise } from "../Exercise";
 import type { exercisesType, workoutType } from "../../types/types";
 import { setEditWorkout } from "../../store/features/workoutSlice";
-import { useAppDispatch } from "../../store/features/store";
+import { useAppDispatch } from "../../store/store";
 
 type AddingExerciseType = {
   editWorkout: workoutType | null;

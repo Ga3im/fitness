@@ -1,8 +1,7 @@
 import type { workoutType } from "../../types/types";
 import { useNavigate } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "../../store/features/store";
-import { setCurrentWorkout } from "../../store/features/workoutSlice";
-import { setUser } from "../../store/features/userSlice";
+import { useAppDispatch, useAppSelector } from "../../store/store";
+import { setCurrentWorkout, setFavoriteWorkout } from "../../store/features/workoutSlice";
 import { FreeWorkoutIcon } from "../icons/FreeWorkoutIcon";
 import { CircuitIcon } from "../icons/CircuitIcon";
 import { SetsIcon } from "../icons/SetsIcon";
@@ -14,7 +13,8 @@ export type WorkoutPropType = {
 export const WorkoutCard = ({ workout }: WorkoutPropType) => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { user, isAuth } = useAppSelector((state) => state.userSlice);
+
+  const { favoriteWorkouts } = useAppSelector((state) => state.workoutSlice);
 
   const workoutClick = (workout: workoutType) => {
     dispatch(setCurrentWorkout(workout));
@@ -26,26 +26,10 @@ export const WorkoutCard = ({ workout }: WorkoutPropType) => {
     workout: workoutType
   ) => {
     e.stopPropagation();
-    if (!user) return;
-    const isExist = user.myWorkouts.some((w) => w.id === workout?.id);
-    if (isExist) {
-      dispatch(
-        setUser({
-          ...user,
-          myWorkouts: user.myWorkouts.filter((i) => i.id !== workout?.id),
-        })
-      );
-    } else {
-      dispatch(
-        setUser({
-          ...user,
-          myWorkouts: [...user.myWorkouts, workout],
-        })
-      );
-    }
+    dispatch(setFavoriteWorkout(workout));
   };
 
-  const isFavorite = user?.myWorkouts.some((w) => w.id === workout.id);
+  const isFavorite = favoriteWorkouts?.some((w) => w.id === workout.id);
 
   return (
     <div
@@ -124,39 +108,37 @@ export const WorkoutCard = ({ workout }: WorkoutPropType) => {
         </div>
       </div>
       {/* Кнопка "Избранное" теперь привязана к верхнему правому углу всей карточки */}
-      <div className="absolute top-[2px] right-[10px] z-10">
-        {isAuth && (
-          <div onClick={(e) => addFavoriteWorkout(e, workout)}>
-            {isFavorite ? (
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org"
-              >
-                <path
-                  d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                  fill="red"
-                />
-              </svg>
-            ) : (
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org"
-              >
-                <path
-                  d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                  stroke="currentColor"
-                  stroke-width="2"
-                />
-              </svg>
-            )}
-          </div>
-        )}
+      <div className="absolute top-[5px] right-[10px] z-10">
+        <div onClick={(e) => addFavoriteWorkout(e, workout)}>
+          {isFavorite ? (
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org"
+            >
+              <path
+                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                fill="red"
+              />
+            </svg>
+          ) : (
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org"
+            >
+              <path
+                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+            </svg>
+          )}
+        </div>
       </div>
     </div>
   );
