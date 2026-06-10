@@ -7,6 +7,7 @@ import { BottomBtn } from "../components/BottomBtn";
 import { useAppSelector } from "../store/store";
 import { FilterWorkout } from "../components/Workout/FilterWorkout";
 import { TabataTimerSettings } from "../components/IntervalWorkout/TabataTimer";
+import { BackBtn } from "../components/BackBtn";
 
 export default function FavoriteWorkoutsPage() {
   const { favoriteWorkouts, isFavoriteTabata } = useAppSelector(
@@ -14,6 +15,7 @@ export default function FavoriteWorkoutsPage() {
   );
   const [search, setSearch] = useState<string>("");
   const [filteredCourses, setFilteredCourses] = useState<workoutType[]>([]);
+  const { theme } = useAppSelector((state) => state.setting);
 
   const navigate = useNavigate();
 
@@ -43,14 +45,14 @@ export default function FavoriteWorkoutsPage() {
     <>
       <Outlet />
       <Header />
-
-      <div className="px-[16px] pb-[20px]">
-        <div
-          onClick={backBtn}
-          className="text-[16px] opacity-[0.7] pb-[5px] hover:underline cursor-pointer"
-        >
-          &laquo; Назад
-        </div>
+      <div
+        className={
+          theme === "night"
+            ? "px-[16px] pb-[20px] bg-[#000] text-[#ffffff] transition-all duration-500"
+            : "px-[16px] pb-[20px] text-[#000] transition-all duration-500"
+        }
+      >
+        <BackBtn onClick={backBtn} />
         <h1 className="pb-[15px] text-[20px] font-medium leading-none">
           Избранные тренировки
         </h1>
@@ -60,7 +62,7 @@ export default function FavoriteWorkoutsPage() {
           array={favoriteWorkouts}
           setFilteredArray={setFilteredCourses}
         />
-        <div className="pt-[20px] grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 px-4">
+        <div className="h-full pt-[20px] grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 px-4">
           {isFavoriteTabata && <TabataTimerSettings />}
           {search === "" && favoriteWorkouts?.length > 0
             ? favoriteWorkouts.map((i) => <WorkoutCard workout={i} />)

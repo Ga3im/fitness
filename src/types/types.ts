@@ -63,12 +63,6 @@ export type BottomBtnProp = {
   btnText: React.ReactElement | string;
 };
 
-export type ConfirmProp = {
-  text: string;
-  noBtn: () => void;
-  yesBtn: () => void;
-};
-
 export interface WorkoutStep {
   label: string;
   duration: number;

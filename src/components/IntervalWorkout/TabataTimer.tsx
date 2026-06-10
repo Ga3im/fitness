@@ -18,7 +18,7 @@ export const TabataTimerSettings = () => {
   return (
     <div
       onClick={() => navigate(router.timerWorkout)}
-      className="relative max-w-[280px] flex flex-col rounded-[30px] overflow-hidden shadow-[0px_0px_10px_-7px] hover:cursor-pointer transition-all duration-300 hover:scale-105 bg-white"
+      className="bg-bg-primary text-text-primary relative max-w-[280px] flex flex-col rounded-[30px] overflow-hidden shadow-[0px_0px_10px_-7px] hover:cursor-pointer transition-all duration-300 hover:scale-105"
     >
       {/* Контейнер для иконки — имитирует блок с фото */}
       <div className="relative w-full aspect-square bg-[#F7F7F7] flex items-center justify-center overflow-hidden">
@@ -68,7 +68,7 @@ export const TabataTimerSettings = () => {
       </div>
 
       {/* Кнопка "Избранное" теперь привязана к верхнему правому углу всей карточки */}
-      <div className="absolute top-[2px] right-[10px] z-10">
+      <div className="absolute top-[2px] right-[10px] z-20">
         <div onClick={handleFavoriteClick}>
           {isFavoriteTabata ? (
             <svg
@@ -93,7 +93,7 @@ export const TabataTimerSettings = () => {
             >
               <path
                 d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                stroke="currentColor"
+                stroke="black"
                 stroke-width="2"
               />
             </svg>

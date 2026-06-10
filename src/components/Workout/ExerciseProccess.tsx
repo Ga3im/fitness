@@ -17,7 +17,9 @@ export const ExerciseProccess = ({ displayWorkout }: ExerciseProccessProp) => {
   const { startedWorkout, restTimeSets } = useAppSelector(
     (state) => state.workoutSlice
   );
-  const [play] = useSound(boopSfx, { volume: 0.5, interrupt: true });
+
+  const { theme } = useAppSelector((state) => state.setting);
+  // const [play] = useSound(boopSfx, { volume: 0.5, interrupt: true });
 
   const dispatch = useAppDispatch();
 
@@ -39,7 +41,7 @@ export const ExerciseProccess = ({ displayWorkout }: ExerciseProccessProp) => {
 
   useEffect(() => {
     if (restTimeSets === 0) {
-      play();
+      // play();
     }
   }, [restTimeSets]);
 
@@ -52,13 +54,23 @@ export const ExerciseProccess = ({ displayWorkout }: ExerciseProccessProp) => {
   };
 
   return (
-    <div className="flex flex-wrap gap-[10px] justify-center py-[30px] mb-[10px] bg-white w-full">
+    <div
+      className={
+        theme === "night"
+          ? "bg-[#000] flex flex-wrap gap-[10px] justify-center py-[30px] mb-[10px] w-full"
+          : "flex flex-wrap gap-[10px] justify-center py-[30px] mb-[10px] bg-white w-full"
+      }
+    >
       {displayWorkout?.exercises.map(
         (exercise: exercisesType, index: number) => (
           <div
             key={exercise.id}
             onClick={() => selectQueue(exercise)}
-            className="w-[300px] p-[20px] border-[black] border-1 rounded-[20px] shadow-[0px_0px_15px_-10px] bg-white"
+            className={
+              theme === "night"
+                ? "w-[300px] p-[20px] border-[black] border-1 rounded-[20px] shadow-[0px_0px_20px_-10px] bg-[#0f172a]"
+                : "w-[300px] p-[20px] border-[black] border-1 rounded-[20px] shadow-[0px_0px_15px_-10px] bg-white"
+            }
           >
             <div className="h-[250px] flex items-center">
               <img

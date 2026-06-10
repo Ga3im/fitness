@@ -221,7 +221,7 @@ export const exercises = [
   {
     id: "pullup",
     name: "Подтягивание",
-    img: "/workouts/pull-ups.jpg",
+    img: "/workouts/pull-ups.png",
   },
   {
     id: "corner",

@@ -16,11 +16,13 @@ import {
   REGISTER,
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
-import { timerReduser } from "./features/timerSlice";
+import { timerReducer } from "./features/timerSlice";
+import { settingReducer } from "./features/settingSlice";
 
 const rootReducer = combineReducers({
   workoutSlice: workoutReducer,
-  timer: timerReduser,
+  timer: timerReducer,
+  setting: settingReducer,
 });
 
 const persistConfig = {

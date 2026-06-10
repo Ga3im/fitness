@@ -31,6 +31,7 @@ export const EdittingWorkout = ({
   const { editWorkout, workouts } = useAppSelector(
     (state) => state.workoutSlice
   );
+  const { theme } = useAppSelector((state) => state.setting);
   const [isAddingExercise, setIsAddingExercise] = useState<boolean>(false);
 
   const dispatch = useAppDispatch();
@@ -100,7 +101,13 @@ export const EdittingWorkout = ({
   };
 
   return (
-    <div className="flex flex-wrap gap-[10px] justify-center py-[30px] mb-[10px] bg-white w-full">
+    <div
+      className={
+        theme === "night"
+          ? "bg-[#000] flex flex-wrap gap-[10px] justify-center py-[30px] mb-[10px] w-full"
+          : "flex flex-wrap gap-[10px] justify-center py-[30px] mb-[10px] bg-white w-full"
+      }
+    >
       <div className="flex flex-col items-center justify-center w-full gap-[8px]">
         <p
           onClick={openAddingExercise}
@@ -125,7 +132,11 @@ export const EdittingWorkout = ({
         <div
           key={exercise.id}
           onClick={() => selectQueue(exercise)}
-          className="w-[300px] p-[20px] border-[black] border-1 rounded-[20px] shadow-[0px_0px_15px_-10px]"
+          className={
+            theme === "night"
+              ? "w-[300px] p-[20px] border-[black] border-1 rounded-[20px] shadow-[0px_0px_20px_-10px] bg-[#0f172a]"
+              : "w-[300px] p-[20px] border-[black] border-1 rounded-[20px] shadow-[0px_0px_15px_-10px] bg-white"
+          }
         >
           <div className="flex place-self-end gap-[10px]">
             {exerciseQueue.some((ex) => ex.id === exercise.id) ? (
@@ -137,7 +148,11 @@ export const EdittingWorkout = ({
             ) : (
               <div
                 onClick={() => selectQueue(exercise)}
-                className="w-[25px] h-[25px] border-1 border-[#000] place-self-end rounded-full"
+                className={
+                  theme === "night"
+                    ? "w-[25px] h-[25px] border-1 border-[#fff] place-self-end rounded-full"
+                    : "w-[25px] h-[25px] border-1 border-[#000] place-self-end rounded-full"
+                }
               ></div>
             )}
             <button onClick={(e) => handleDeleteExercise(e, exercise)}>

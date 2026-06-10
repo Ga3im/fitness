@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { InputTime } from "./InputTime";
 import type { exercisesType, workoutType } from "../types/types";
+import { useAppSelector } from "../store/store";
 
 type ExercisePropType = {
   exercise: exercisesType;
@@ -27,7 +28,7 @@ export const Exercise = ({
   const [isAdditionalSetting, setIsAdditionalSetting] =
     useState<boolean>(false);
   const [isOpenSettings, setIsOpenSettings] = useState<boolean>(false);
-
+  const { theme } = useAppSelector((state) => state.setting);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Синхронизируем локальные стейты, если карточку добавили/удалили внешним кликом
@@ -135,7 +136,11 @@ export const Exercise = ({
 
       <div
         onClick={() => setIsOpenSettings(!isOpenSettings)}
-        className="h-[20px] w-full bg-[#f7f7f7] flex justify-center items-end shadow-[0px_0px_14px_-10px] rounded-[5px] cursor-pointer"
+        className={
+          theme === "night"
+            ? "h-[20px] w-full bg-[#323232] flex justify-center items-end shadow-[0px_0px_14px_-10px] rounded-[5px] cursor-pointer"
+            : "h-[20px] w-full bg-[#f7f7f7] flex justify-center items-end shadow-[0px_0px_14px_-10px] rounded-[5px] cursor-pointer"
+        }
       >
         <div
           className={

@@ -223,4 +223,4 @@ export const {
   skipCurrentStep,
   restartCurrentStep,
 } = timerSlice.actions;
-export const timerReduser = timerSlice.reducer;
+export const timerReducer = timerSlice.reducer;
