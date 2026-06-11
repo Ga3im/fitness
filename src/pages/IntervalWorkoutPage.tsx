@@ -149,7 +149,7 @@ export const IntervalWorkoutPage = () => {
           </div>
 
           <h1 className="text-xl font-bold text-center mb-4">
-            Интервальный таймер
+            Интервальная тренировка
           </h1>
 
           {/* КОМПАКТНАЯ ГОРЗОНТАЛЬНАЯ ЛЕНТА ШАГОВ (ТОЛЬКО ПРИ СТАРТЕ) */}
@@ -199,14 +199,25 @@ export const IntervalWorkoutPage = () => {
         </div>
 
         {/* Описание показываем только в режиме настроек, в самом низу */}
-  
+
         {!isStart && (
-          <div className="p-4 bg-gray-50/70 rounded-2xl border border-gray-100 mt-4 text-xs text-gray-600 leading-relaxed">
-            <strong className="text-gray-800 block mb-1">
-              Интервальная тренировка:
-            </strong>
-            Чередование высокой интенсивности с периодами отдыха. Сжигает жир и
-            развивает выносливость.
+          <div className="w-full pt-[10px]">
+            <p className="text-[18px] pl-[10px] place-self-start">Описание:</p>
+            <div
+              className={
+                theme === "night"
+                  ? "bg-[#0f172a] relative p-[20px] mb-[10px] rounded-[30px] w-full shadow-[0px_0px_20px_-7px]"
+                  : "relative p-[20px] mb-[10px] rounded-[30px] w-full shadow-[0px_0px_10px_-7px]"
+              }
+            >
+              <p className="text-justify">
+                <span className="text-[18px] font-[600]"></span>
+                Интервальная тренировка - максимальная нагрузка за минимальное
+                время. Развивает взрывную силу, сжигает жир во время и после
+                тренировки и укрепляет сердечно-сосудистую
+                систему.
+              </p>
+            </div>
           </div>
         )}
       </div>

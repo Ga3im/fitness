@@ -8,13 +8,15 @@ import { useAppSelector } from "../store/store";
 import { FilterWorkout } from "../components/Workout/FilterWorkout";
 import { TabataTimerSettings } from "../components/IntervalWorkout/TabataTimer";
 import { BackBtn } from "../components/BackBtn";
+import { router } from "./router";
 
 export default function FavoriteWorkoutsPage() {
   const { favoriteWorkouts, isFavoriteTabata } = useAppSelector(
     (state) => state.workoutSlice
   );
   const [search, setSearch] = useState<string>("");
-  const [filteredCourses, setFilteredCourses] = useState<workoutType[]>([]);
+  const [scroll, setScroll] = useState<number>(0);
+  const [filteredWorkouts, setFilteredWorkouts] = useState<workoutType[]>([]);
   const { theme } = useAppSelector((state) => state.setting);
 
   const navigate = useNavigate();
@@ -26,8 +28,16 @@ export default function FavoriteWorkoutsPage() {
         arr.push(i);
       }
     });
-    setFilteredCourses(arr);
+    setFilteredWorkouts(arr);
   }, [search]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScroll(window.scrollY);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  });
 
   const backBtn = () => {
     navigate(-1);
@@ -56,19 +66,36 @@ export default function FavoriteWorkoutsPage() {
         <h1 className="pb-[15px] text-[20px] font-medium leading-none">
           Избранные тренировки
         </h1>
-        <FilterWorkout
-          search={search}
-          setSearch={setSearch}
-          array={favoriteWorkouts}
-          setFilteredArray={setFilteredCourses}
-        />
+        {!isFavoriteTabata && favoriteWorkouts.length > 0 && (
+          <FilterWorkout
+            search={search}
+            setSearch={setSearch}
+            array={favoriteWorkouts}
+            setFilteredArray={setFilteredWorkouts}
+          />
+        )}
+
         <div className="h-full pt-[20px] grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 px-4">
           {isFavoriteTabata && <TabataTimerSettings />}
-          {search === "" && favoriteWorkouts?.length > 0
+          {search === "" && favoriteWorkouts?.length > -1
             ? favoriteWorkouts.map((i) => <WorkoutCard workout={i} />)
-            : filteredCourses.map((i) => <WorkoutCard workout={i} />)}
+            : filteredWorkouts.map((i) => <WorkoutCard workout={i} />)}
         </div>
-        <BottomBtn onClick={handleToTopBtn} btnText={<p>Наверх &#8593;</p>} />
+        {!isFavoriteTabata && favoriteWorkouts.length === 0 && (
+          <p className="text-center">
+            Нет избранных тренировок, добавим{" "}
+            <span
+              onClick={() => navigate(router.main)}
+              className="underline cursor-pointer"
+            >
+              тренировку
+            </span>
+            ?
+          </p>
+        )}
+        {scroll >= 50 && (
+          <BottomBtn onClick={handleToTopBtn} btnText={<p>Наверх &#8593;</p>} />
+        )}
       </div>
     </>
   );

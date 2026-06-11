@@ -29,7 +29,7 @@ export const BottomBtn = ({ onClick, btnText }: BottomBtnProp) => {
   }, []);
 
   return (
-    <div className="w-full flex justify-center md:justify-end mt-[20px] min-h-[46px]">
+    <div className="w-full flex justify-center md:justify-end mt-[20px] min-h-[25px]">
       <button
         onClick={onClick}
         className={`text-[16px] rounded-[45px] bg-[#BCEC30] px-[16px] py-[6px] text-black font-semibold shadow-md transition-all active:scale-95 duration-200 cursor-pointer
