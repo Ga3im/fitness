@@ -68,13 +68,13 @@ export const ExerciseProccess = ({ displayWorkout }: ExerciseProccessProp) => {
             onClick={() => selectQueue(exercise)}
             className={
               theme === "night"
-                ? "w-[300px] p-[20px] border-[black] border-1 rounded-[20px] shadow-[0px_0px_20px_-10px] bg-[#0f172a]"
+                ? "w-[300px] p-[20px] border-1 rounded-[20px] border-[#fff] bg-[#0f172a]"
                 : "w-[300px] p-[20px] border-[black] border-1 rounded-[20px] shadow-[0px_0px_15px_-10px] bg-white"
             }
           >
             <div className="h-[250px] flex items-center">
               <img
-                className="cursor-pointer w-full object-contain"
+                className="cursor-pointer w-full object-contain max-h-[250px]"
                 src={exercise.img}
                 alt={exercise.name}
               />

@@ -7,15 +7,19 @@ import { exercises } from "../data";
 import { BottomBtn } from "../components/BottomBtn";
 import { Exercise } from "../components/Exercise";
 import { useAppDispatch, useAppSelector } from "../store/store";
-import { setWorkouts } from "../store/features/workoutSlice";
+import { filterExercise, setWorkouts } from "../store/features/workoutSlice";
 import { FilterExercise } from "../components/FilterExercise";
 import { ModeWorkouts } from "../components/Workout/ModeWorkouts";
 import { BackBtn } from "../components/BackBtn";
 
 export const CreateWorkout = () => {
-  const { workouts, emptyExerciseReps } = useAppSelector(
-    (state) => state.workoutSlice
-  );
+  const {
+    workouts,
+    emptyExerciseReps,
+    filterExercises,
+    showDynamic,
+    showStatic,
+  } = useAppSelector((state) => state.workoutSlice);
   const dispatch = useAppDispatch();
   const [isSelectedName, setIsSelectedName] = useState<boolean>(true);
   const [isSelectedExercise, setIsSelectedExercise] = useState<boolean>(true);
@@ -23,9 +27,7 @@ export const CreateWorkout = () => {
     exercisesType[]
   >([]);
   const [search, setSearch] = useState<string>("");
-  const [filteredExercises, setFilteredExercises] = useState<
-    exercisesType[] | []
-  >([]);
+
   const [workout, setWorkout] = useState<workoutType>({
     id: "",
     description: "",
@@ -43,27 +45,18 @@ export const CreateWorkout = () => {
 
   useEffect(() => {
     const arr: exercisesType[] = [];
-
-    exercises.map((i: exercisesType | undefined) => {
-      if (i !== undefined) {
-        if (i.name.toLowerCase()?.includes(search.toLowerCase())) {
-          arr.push(i);
-        }
-      }
-    });
-    setFilteredExercises(arr);
-  }, [search]);
-
-  useEffect(() => {
-    const arr: exercisesType[] = [];
     for (let index = 0; index <= 5; index++) {
-      const element: exercisesType | undefined = exercises[index];
+      const element: exercisesType = exercises[index];
       if (element !== undefined) {
         arr.push(element);
       }
     }
     setDisplayedExercisess(arr);
   }, []);
+
+  useEffect(() => {
+    dispatch(filterExercise(search));
+  }, [search]);
 
   useEffect(() => {
     setWorkout({
@@ -125,7 +118,7 @@ export const CreateWorkout = () => {
       i < displayedExercises.length + 10;
       i++
     ) {
-      const element: exercisesType | undefined = exercises[i];
+      const element: exercisesType = exercises[i];
       if (element !== undefined) {
         arr.push(element);
       }
@@ -159,6 +152,11 @@ export const CreateWorkout = () => {
       localStorage.removeItem("workout");
     }
   };
+
+  const isFiltered = search !== "" || !showDynamic || !showStatic;
+
+  const renderExercises = isFiltered ? filterExercises : displayedExercises;
+
   return (
     <>
       <Header />
@@ -237,30 +235,17 @@ export const CreateWorkout = () => {
             currentMode={workout.mode || "свободное"}
           />
           <p className="text-[20px] pb-[10px]">Упражнения:</p>
-          <FilterExercise
-            search={search}
-            setSearch={setSearch}
-            array={exercises.filter((e): e is exercisesType => !!e)}
-            setFilteredArray={setFilteredExercises}
-          />
+          <FilterExercise search={search} setSearch={setSearch} />
           <div className="flex pt-[20px] flex-wrap gap-[20px] justify-center">
-            {search === ""
-              ? displayedExercises.map((ex: exercisesType) => (
-                  <Exercise
-                    workout={workout}
-                    setWorkout={setWorkout}
-                    exercise={ex}
-                  />
-                ))
-              : filteredExercises.map((ex: exercisesType) => (
-                  <Exercise
-                    workout={workout}
-                    setWorkout={setWorkout}
-                    exercise={ex}
-                  />
-                ))}
+            {renderExercises.map((ex: exercisesType) => (
+              <Exercise
+                workout={workout}
+                setWorkout={setWorkout}
+                exercise={ex}
+              />
+            ))}
 
-            {exercises.length === displayedExercises.length ? (
+            {isFiltered ? null : exercises.length === displayedExercises.length ? (
               <div
                 onClick={hideExercisesBtn}
                 className={
@@ -274,11 +259,12 @@ export const CreateWorkout = () => {
             ) : (
               <div
                 onClick={moreExercisesBtn}
-  className={
+                className={
                   theme === "night"
                     ? "h-[25px] w-full bg-[#323232] flex justify-center rounded-[5px]"
                     : "h-[25px] w-full bg-[#d1d1d1] flex justify-center rounded-[5px]"
-                }              >
+                }
+              >
                 <div className="w-[20px] h-[20px] border-l-2 border-b-2 rotate-[-45deg]"></div>
               </div>
             )}

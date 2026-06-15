@@ -122,7 +122,7 @@ export const Exercise = ({
         <img
           loading="lazy"
           onClick={() => exerciseClick(exercise)}
-          className="mb-[10px] cursor-pointer"
+          className="mb-[10px] cursor-pointer max-h-[200px] place-self-center"
           src={exercise.img}
           alt={exercise.name}
         />
