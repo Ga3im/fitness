@@ -1,15 +1,19 @@
-import { useNavigate } from "react-router-dom";
 import { Header } from "../components/Header";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import { setTickTimer } from "../store/features/timerSlice";
-import { setIsFavoriteTabata, setTickTime } from "../store/features/workoutSlice";
+import {
+  setIsFavoriteTabata,
+  setTickTime,
+} from "../store/features/workoutSlice";
 import { useEffect, useMemo, useRef } from "react";
 import useSound from "use-sound";
 import boopSfx from "/sounds/notification.mp3";
 import { SetIntervalWorkout } from "../components/IntervalWorkout/SetIntervalWorkout";
+import { BackBtn } from "../components/BackBtn";
+import { useNavigate } from "react-router-dom";
 
 export const IntervalWorkoutPage = () => {
-  const {  isFavoriteTabata } = useAppSelector((state) => state.workoutSlice);
+  const { isFavoriteTabata } = useAppSelector((state) => state.workoutSlice);
   const {
     prepTime,
     workTime,
@@ -21,9 +25,10 @@ export const IntervalWorkoutPage = () => {
     status,
   } = useAppSelector((state) => state.timer);
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
   const [play] = useSound(boopSfx, { volume: 0.5, interrupt: true });
 
+  const { theme } = useAppSelector((state) => state.setting);
+  const navigate = useNavigate();
   const activeStepRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -34,7 +39,9 @@ export const IntervalWorkoutPage = () => {
         dispatch(setTickTime());
       }, 1000);
     }
-    return () => { if (intervalId) clearInterval(intervalId); };
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
   }, [isStart, dispatch]);
 
   useEffect(() => {
@@ -58,7 +65,11 @@ export const IntervalWorkoutPage = () => {
   const plan = useMemo(() => {
     const steps = [];
     if (prepTime > 0) {
-      steps.push({ label: "Подготовка", duration: prepTime, type: "Подготовка" });
+      steps.push({
+        label: "Подготовка",
+        duration: prepTime,
+        type: "Подготовка",
+      });
     }
     for (let i = 1; i <= cycles; i++) {
       steps.push({
@@ -96,11 +107,25 @@ export const IntervalWorkoutPage = () => {
   }, [plan, status, currentCycle, workTime, restTime]);
 
   const HeartIcon = () => (
-    <div onClick={() => dispatch(setIsFavoriteTabata(!isFavoriteTabata))} className="cursor-pointer p-2">
+    <div
+      onClick={() => dispatch(setIsFavoriteTabata(!isFavoriteTabata))}
+      className="cursor-pointer p-2"
+    >
       {isFavoriteTabata ? (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="#ef4444"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="#ef4444">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+        </svg>
       ) : (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+        </svg>
       )}
     </div>
   );
@@ -108,17 +133,24 @@ export const IntervalWorkoutPage = () => {
   return (
     <>
       <Header />
-      <div className="max-w-[400px] mx-auto px-4 pb-6 flex flex-col min-h-[calc(100vh-70px)] justify-between">
+      <div
+        className={
+          theme === "night"
+            ? "bg-[#000] text-[#fff] mx-auto px-4 flex flex-col min-h-[calc(100vh-70px)] transition-all duration-500"
+            : "mx-auto px-4 flex flex-col min-h-[calc(100vh-70px)] transition-all duration-500"
+        }
+      >
+        <BackBtn onClick={() => navigate(-1)} />
+
         <div>
           {/* Навигация и заголовок */}
-          <div className="flex items-center justify-between mt-2 mb-4">
-            <div onClick={() => navigate(-1)} className="text-sm opacity-60 cursor-pointer hover:underline">
-              &laquo; Назад
-            </div>
-            {/* {isAuth && <HeartIcon />} */}
+          <div className="place-self-end mb-4">
+            <HeartIcon />
           </div>
 
-          <h1 className="text-xl font-bold text-center mb-4">Интервальный таймер</h1>
+          <h1 className="text-xl font-bold text-center mb-4">
+            Интервальная тренировка
+          </h1>
 
           {/* КОМПАКТНАЯ ГОРЗОНТАЛЬНАЯ ЛЕНТА ШАГОВ (ТОЛЬКО ПРИ СТАРТЕ) */}
           {isStart && status !== "Финиш" && (
@@ -130,8 +162,12 @@ export const IntervalWorkoutPage = () => {
 
                   let bgColor = "bg-white text-gray-400";
                   if (isActive) {
-                    if (step.type === "Работа") bgColor = "bg-red-500 text-white shadow-sm ring-2 ring-red-300";
-                    else if (step.type === "Отдых") bgColor = "bg-blue-500 text-white shadow-sm ring-2 ring-blue-300";
+                    if (step.type === "Работа")
+                      bgColor =
+                        "bg-red-500 text-white shadow-sm ring-2 ring-red-300";
+                    else if (step.type === "Отдых")
+                      bgColor =
+                        "bg-blue-500 text-white shadow-sm ring-2 ring-blue-300";
                     else bgColor = "bg-amber-500 text-white shadow-sm";
                   } else if (isPassed) {
                     bgColor = "bg-gray-200 text-gray-400 opacity-40";
@@ -163,10 +199,25 @@ export const IntervalWorkoutPage = () => {
         </div>
 
         {/* Описание показываем только в режиме настроек, в самом низу */}
+
         {!isStart && (
-          <div className="p-4 bg-gray-50/70 rounded-2xl border border-gray-100 mt-4 text-xs text-gray-600 leading-relaxed">
-            <strong className="text-gray-800 block mb-1">Интервальная тренировка:</strong>
-            Чередование высокой интенсивности с периодами отдыха. Сжигает жир и развивает выносливость.
+          <div className="w-full pt-[10px]">
+            <p className="text-[18px] pl-[10px] place-self-start">Описание:</p>
+            <div
+              className={
+                theme === "night"
+                  ? "bg-[#0f172a] relative p-[20px] mb-[10px] rounded-[30px] w-full shadow-[0px_0px_20px_-7px]"
+                  : "relative p-[20px] mb-[10px] rounded-[30px] w-full shadow-[0px_0px_10px_-7px]"
+              }
+            >
+              <p className="text-justify">
+                <span className="text-[18px] font-[600]"></span>
+                Интервальная тренировка - максимальная нагрузка за минимальное
+                время. Развивает взрывную силу, сжигает жир во время и после
+                тренировки и укрепляет сердечно-сосудистую
+                систему.
+              </p>
+            </div>
           </div>
         )}
       </div>

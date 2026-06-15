@@ -1,7 +1,10 @@
 import type { workoutType } from "../../types/types";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../store/store";
-import { setCurrentWorkout, setFavoriteWorkout } from "../../store/features/workoutSlice";
+import {
+  setCurrentWorkout,
+  setFavoriteWorkout,
+} from "../../store/features/workoutSlice";
 import { FreeWorkoutIcon } from "../icons/FreeWorkoutIcon";
 import { CircuitIcon } from "../icons/CircuitIcon";
 import { SetsIcon } from "../icons/SetsIcon";
@@ -15,6 +18,7 @@ export const WorkoutCard = ({ workout }: WorkoutPropType) => {
   const dispatch = useAppDispatch();
 
   const { favoriteWorkouts } = useAppSelector((state) => state.workoutSlice);
+  const { theme } = useAppSelector((state) => state.setting);
 
   const workoutClick = (workout: workoutType) => {
     dispatch(setCurrentWorkout(workout));
@@ -34,7 +38,11 @@ export const WorkoutCard = ({ workout }: WorkoutPropType) => {
   return (
     <div
       onClick={() => workoutClick(workout)}
-      className="relative flex flex-col w-full max-w-[280px] rounded-[30px] overflow-hidden shadow-[0px_0px_10px_-7px] hover:cursor-pointer transition-all duration-300 hover:scale-105 bg-white pb-[15px]"
+      className={
+        theme === "night"
+          ? "bg-[#0f172a] text-[#fff] relative flex flex-col w-full max-w-[280px] rounded-[30px] overflow-hidden shadow-[0px_0px_10px_-7px] hover:cursor-pointer transition-all duration-300 hover:scale-105  pb-[15px]"
+          : "bg-[#fff] text-[#1e293b] relative flex flex-col w-full max-w-[280px] rounded-[30px] overflow-hidden shadow-[0px_0px_10px_-7px] hover:cursor-pointer transition-all duration-300 hover:scale-105  pb-[15px]"
+      }
       key={workout.id}
     >
       {/* Контейнер изображения: aspect-square делает все фото квадратными, object-cover обрезает лишнее */}

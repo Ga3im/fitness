@@ -10,6 +10,7 @@ import { TabataTimerSettings } from "../components/IntervalWorkout/TabataTimer";
 
 export default function Main() {
   const { workouts } = useAppSelector((state) => state.workoutSlice);
+  const { theme } = useAppSelector((state) => state.setting);
   const [search, setSearch] = useState<string>("");
   const [filteredCourses, setFilteredCourses] = useState<workoutType[]>([]);
 
@@ -35,8 +36,14 @@ export default function Main() {
     <>
       <Outlet />
       <Header />
-      <div className="px-[16px] pb-[20px]">
-        <h1 className="pb-[15px] text-[20px] font-medium leading-none">
+      <div
+        className={
+          theme === "night"
+            ? "px-[16px] pb-[20px] bg-[#000] text-[#ffffff] transition-all duration-500"
+            : "px-[16px] pb-[20px] transition-all duration-500"
+        }
+      >
+        <h1 className="pb-[15px] text-[20px] font-medium leading-none pt-[10px]">
           Начните заниматься спортом и улучшите качество жизни
         </h1>
         <FilterWorkout

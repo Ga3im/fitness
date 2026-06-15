@@ -7,14 +7,19 @@ import { exercises } from "../data";
 import { BottomBtn } from "../components/BottomBtn";
 import { Exercise } from "../components/Exercise";
 import { useAppDispatch, useAppSelector } from "../store/store";
-import { setWorkouts } from "../store/features/workoutSlice";
+import { filterExercise, setWorkouts } from "../store/features/workoutSlice";
 import { FilterExercise } from "../components/FilterExercise";
 import { ModeWorkouts } from "../components/Workout/ModeWorkouts";
+import { BackBtn } from "../components/BackBtn";
 
 export const CreateWorkout = () => {
-  const { workouts, emptyExerciseReps } = useAppSelector(
-    (state) => state.workoutSlice
-  );
+  const {
+    workouts,
+    emptyExerciseReps,
+    filterExercises,
+    showDynamic,
+    showStatic,
+  } = useAppSelector((state) => state.workoutSlice);
   const dispatch = useAppDispatch();
   const [isSelectedName, setIsSelectedName] = useState<boolean>(true);
   const [isSelectedExercise, setIsSelectedExercise] = useState<boolean>(true);
@@ -22,9 +27,7 @@ export const CreateWorkout = () => {
     exercisesType[]
   >([]);
   const [search, setSearch] = useState<string>("");
-  const [filteredExercises, setFilteredExercises] = useState<
-    exercisesType[] | []
-  >([]);
+
   const [workout, setWorkout] = useState<workoutType>({
     id: "",
     description: "",
@@ -36,32 +39,24 @@ export const CreateWorkout = () => {
     exercises: [],
     custom: true,
   });
+  const { theme } = useAppSelector((state) => state.setting);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     const arr: exercisesType[] = [];
-
-    exercises.map((i: exercisesType | undefined) => {
-      if (i !== undefined) {
-        if (i.name.toLowerCase()?.includes(search.toLowerCase())) {
-          arr.push(i);
-        }
-      }
-    });
-    setFilteredExercises(arr);
-  }, [search]);
-
-  useEffect(() => {
-    const arr: exercisesType[] = [];
     for (let index = 0; index <= 5; index++) {
-      const element: exercisesType | undefined = exercises[index];
+      const element: exercisesType = exercises[index];
       if (element !== undefined) {
         arr.push(element);
       }
     }
     setDisplayedExercisess(arr);
   }, []);
+
+  useEffect(() => {
+    dispatch(filterExercise(search));
+  }, [search]);
 
   useEffect(() => {
     setWorkout({
@@ -123,7 +118,7 @@ export const CreateWorkout = () => {
       i < displayedExercises.length + 10;
       i++
     ) {
-      const element: exercisesType | undefined = exercises[i];
+      const element: exercisesType = exercises[i];
       if (element !== undefined) {
         arr.push(element);
       }
@@ -157,16 +152,22 @@ export const CreateWorkout = () => {
       localStorage.removeItem("workout");
     }
   };
+
+  const isFiltered = search !== "" || !showDynamic || !showStatic;
+
+  const renderExercises = isFiltered ? filterExercises : displayedExercises;
+
   return (
     <>
       <Header />
-      <div className="px-[16px] pb-[20px]">
-        <div
-          onClick={backBtn}
-          className="text-[16px] opacity-[0.7] pb-[5px] hover:underline cursor-pointer"
-        >
-          &laquo; Назад
-        </div>
+      <div
+        className={
+          theme === "night"
+            ? "px-[16px] pb-[20px] bg-[#000] text-[#ffffff] transition-all duration-500"
+            : "px-[16px] pb-[20px] text-[#000] transition-all duration-500"
+        }
+      >
+        <BackBtn onClick={backBtn} />
         <h1 className="text-[20px] font-medium leading-none mb-[10px]">
           Создайте свою тренировку
         </h1>
@@ -176,14 +177,16 @@ export const CreateWorkout = () => {
             onChange={(e) => setWorkout({ ...workout, nameRU: e.target.value })}
             className={
               isSelectedName
-                ? "border-[1px] border-[#000000] px-[16px] py-[5px] rounded-[10px]"
+                ? theme === "night"
+                  ? "border-[1px] border-[#fff] px-[16px] py-[5px] rounded-[10px] placeholder-gray-400"
+                  : "border-[1px] border-[#000000] px-[16px] py-[5px] rounded-[10px] placeholder-gray-400"
                 : "border-[2px] border-[red] px-[16px] py-[5px] rounded-[10px]"
             }
             type="text"
             placeholder="Введите назвавние тренировки"
           />
         </div>
-        <div className="text-center mt-[10px] text-[14px] w-full rounded-[45px] bg-[#BCEC30] hover:bg-[#C6FF00] active:bg-[#A0B000] active:text-[white] px-[16px] py-[5px] mb-[10px]">
+        <div className="text-center mt-[10px] text-[#000] text-[14px] w-full rounded-[45px] bg-[#BCEC30] hover:bg-[#C6FF00] active:bg-[#A0B000] active:text-[white] px-[16px] py-[5px] mb-[10px]">
           <label htmlFor="mainWorkoutPhoto">
             {previewUrl ? "Обновить фото" : "Загрузить фото тренировки"}
           </label>
@@ -214,7 +217,7 @@ export const CreateWorkout = () => {
           onChange={(e) =>
             setWorkout({ ...workout, description: e.target.value })
           }
-          className="resize-none w-full mt-[10px] px-[10px] py-[5px] border-1 rounded-[10px]"
+          className="resize-none w-full mt-[10px] px-[10px] py-[5px] border-1 rounded-[10px] placeholder-gray-400"
           name=""
           placeholder="Добавить описание"
           id=""
@@ -232,40 +235,35 @@ export const CreateWorkout = () => {
             currentMode={workout.mode || "свободное"}
           />
           <p className="text-[20px] pb-[10px]">Упражнения:</p>
-          <FilterExercise
-            search={search}
-            setSearch={setSearch}
-            array={exercises.filter((e): e is exercisesType => !!e)}
-            setFilteredArray={setFilteredExercises}
-          />
+          <FilterExercise search={search} setSearch={setSearch} />
           <div className="flex pt-[20px] flex-wrap gap-[20px] justify-center">
-            {search === ""
-              ? displayedExercises.map((ex: exercisesType) => (
-                  <Exercise
-                    workout={workout}
-                    setWorkout={setWorkout}
-                    exercise={ex}
-                  />
-                ))
-              : filteredExercises.map((ex: exercisesType) => (
-                  <Exercise
-                    workout={workout}
-                    setWorkout={setWorkout}
-                    exercise={ex}
-                  />
-                ))}
+            {renderExercises.map((ex: exercisesType) => (
+              <Exercise
+                workout={workout}
+                setWorkout={setWorkout}
+                exercise={ex}
+              />
+            ))}
 
-            {exercises.length === displayedExercises.length ? (
+            {isFiltered ? null : exercises.length === displayedExercises.length ? (
               <div
                 onClick={hideExercisesBtn}
-                className="h-[25px] w-full bg-[#d1d1d1] flex justify-center shadow-[0px_0px_20px_10px_#d1d1d1] rounded-[5px]"
+                className={
+                  theme === "night"
+                    ? "h-[25px] w-full bg-[#323232] flex justify-center shadow-[0px_0px_20px_10px_#d1d1d1] rounded-[5px]"
+                    : "h-[25px] w-full bg-[#d1d1d1] flex justify-center shadow-[0px_0px_20px_10px_#d1d1d1] rounded-[5px]"
+                }
               >
                 <div className="w-[20px] mt-[10px] h-[20px] border-l-2 border-b-2 rotate-[135deg]"></div>
               </div>
             ) : (
               <div
                 onClick={moreExercisesBtn}
-                className="h-[25px] w-full bg-[#d1d1d1] flex justify-center rounded-[5px]"
+                className={
+                  theme === "night"
+                    ? "h-[25px] w-full bg-[#323232] flex justify-center rounded-[5px]"
+                    : "h-[25px] w-full bg-[#d1d1d1] flex justify-center rounded-[5px]"
+                }
               >
                 <div className="w-[20px] h-[20px] border-l-2 border-b-2 rotate-[-45deg]"></div>
               </div>

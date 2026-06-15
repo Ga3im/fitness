@@ -1,6 +1,10 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { data } from "../../data";
-import type { workoutType } from "../../types/types";
+import { data, exercises } from "../../data";
+import type {
+  EquipmentType,
+  exercisesType,
+  workoutType,
+} from "../../types/types";
 import { sortArray } from "../../utils/functions";
 
 type WorkoutStateType = {
@@ -15,6 +19,11 @@ type WorkoutStateType = {
   isEnteringWeight: boolean;
   isFavoriteTabata: boolean;
   favoriteWorkouts: workoutType[];
+  filterExercises: exercisesType[];
+  search: string;
+  showDynamic: boolean;
+  showStatic: boolean;
+  selectedEquipment: EquipmentType[];
 };
 
 const initialState: WorkoutStateType = {
@@ -31,8 +40,47 @@ const initialState: WorkoutStateType = {
   isEnteringWeight: false,
   isFavoriteTabata: false,
   favoriteWorkouts: [],
+  filterExercises: exercises as exercisesType[],
+  search: "",
+  showDynamic: true,
+  showStatic: true,
+  selectedEquipment: [],
 };
 
+const applyFilters = (state: WorkoutStateType) => {
+  let list = exercises as exercisesType[];
+
+  // 1. Фильтр по строке поиска
+  if (state.search.trim() !== "") {
+    list = list.filter((ex) =>
+      ex.name.toLowerCase().includes(state.search.toLowerCase())
+    );
+  }
+
+  // 2. Фильтр по типу упражнений (Статика / Динамика)
+  if (state.showStatic && !state.showDynamic) {
+    list = list.filter((ex) => ex.static === true);
+  } else if (!state.showStatic && state.showDynamic) {
+    list = list.filter((ex) => ex.static !== true); 
+  } else if (!state.showStatic && !state.showDynamic) {
+    list = []; // Если выключены оба чекбокса — список пуст
+  }
+
+  // 3. Фильтр по оборудованию (исправлено под массивы данных)
+  // Если ни один чекбокс оборудования не выбран — показываем ВСЁ
+  // Если выбран хотя бы один — проверяем, есть ли выбранный инвентарь в массиве упражнения
+  if (state.selectedEquipment.length > 0) {
+    list = list.filter((ex) => {
+      // Защита, если у упражнения почему-то нет массива equipment
+      if (!ex.equipment || !Array.isArray(ex.equipment)) return false;
+
+      // Возвращаем true, если хотя бы один инвентарь упражнения выбран в чекбоксах
+      return ex.equipment.some((item) => state.selectedEquipment.includes(item));
+    });
+  }
+
+  return list;
+};
 const workoutSlice = createSlice({
   name: "workout",
   initialState,
@@ -148,6 +196,7 @@ const workoutSlice = createSlice({
     setIsEnteringWeight: (state, action) => {
       state.isEnteringWeight = action.payload;
     },
+    // подтверждение веса
     confirmWeight: (state, action) => {
       const userWeight = action.payload;
       if (userWeight) {
@@ -165,6 +214,7 @@ const workoutSlice = createSlice({
     setIsFavoriteTabata: (state, action) => {
       state.isFavoriteTabata = action.payload;
     },
+    // избранное
     setFavoriteWorkout: (state, action: PayloadAction<workoutType>) => {
       const workout = action.payload;
       const isExist = state.favoriteWorkouts.some((w) => w.id === workout.id);
@@ -175,6 +225,30 @@ const workoutSlice = createSlice({
       } else {
         state.favoriteWorkouts.push(workout);
       }
+    },
+    handleDynamic: (state) => {
+      state.showDynamic = !state.showDynamic;
+      state.filterExercises = applyFilters(state);
+    },
+    handleStatic: (state) => {
+      state.showStatic = !state.showStatic;
+      state.filterExercises = applyFilters(state);
+    },
+    filterExercise: (state, action) => {
+      state.search = action.payload;
+      state.filterExercises = applyFilters(state);
+    },
+    handleEquipment: (state, action) => {
+      const equipment = action.payload;
+      if (state.selectedEquipment.includes(equipment)) {
+        state.selectedEquipment = state.selectedEquipment.filter(
+          (i) => i !== equipment
+        );
+      } else {
+        state.selectedEquipment.push(equipment);
+      }
+
+      state.filterExercises = applyFilters(state);
     },
   },
 });
@@ -197,5 +271,9 @@ export const {
   confirmWeight,
   setIsFavoriteTabata,
   setFavoriteWorkout,
+  handleDynamic,
+  handleStatic,
+  filterExercise,
+  handleEquipment,
 } = workoutSlice.actions;
 export const workoutReducer = workoutSlice.reducer;

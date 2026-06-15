@@ -18,11 +18,13 @@ import { FillLikeIcon } from "../components/icons/FillLikeIcon";
 import { EdittingWorkout } from "../components/Workout/EdittingWorkout";
 import type { workoutType } from "../types/types";
 import { Button } from "../components/Button";
+import { BackBtn } from "../components/BackBtn";
 
 export default function WorkoutPage() {
   const { startedWorkout, currentWorkout, isEnteringWeight, favoriteWorkouts } =
     useAppSelector((state) => state.workoutSlice);
   const dispatch = useAppDispatch();
+  const { theme } = useAppSelector((state) => state.setting);
 
   const editBtnRef = useRef<HTMLDivElement | null>(null);
 
@@ -116,23 +118,25 @@ export default function WorkoutPage() {
           text={"Вы хотите завершить тренировку?"}
           noBtn={() => setIsConfirm(false)}
           yesBtn={breakWorkout}
+          theme={theme}
         />
       )}
       <Header />
       {
-        <div className="sm:px-[16px] px-[0px] pb-[10px]">
-          <div
-            onClick={backBtn}
-            className="text-[16px] pl-[20px] opacity-[0.7] pb-[5px] hover:underline cursor-pointer"
-          >
-            &laquo; Назад
-          </div>
+        <div
+          className={
+            theme === "night"
+              ? "px-[16px] pb-[20px] bg-[#000] text-[#ffffff] transition-all duration-500"
+              : "px-[16px] pb-[20px] text-[#000] transition-all duration-500"
+          }
+        >
+          <BackBtn onClick={backBtn} />
           <h1 className="text-[24px] text-center sm:text-start font-600">
             {displayWorkout && displayWorkout.nameRU}
           </h1>
-          <div className="flex flex-col md:flex-row md:gap-[20px] place-items-center  md:items-center justify-center">
+          <div className=" flex flex-col md:flex-row md:gap-[20px] place-items-center  md:items-center justify-center">
             <div className="max-w-[300px] w-full">
-              { displayWorkout ? (
+              {displayWorkout ? (
                 isFavorite ? (
                   <button
                     className="flex relative place-self-end right-[10px]"
@@ -181,7 +185,7 @@ export default function WorkoutPage() {
             </div>
 
             {displayWorkout?.description && (
-              <div className="w-full p-[20px]">
+              <div className="w-full">
                 <p className="text-[18px] pl-[10px] place-self-start">
                   Описание:
                 </p>
@@ -194,13 +198,23 @@ export default function WorkoutPage() {
                         description: e.target.value,
                       });
                     }}
-                    className="h-[180px] resize-none appearance-none border-0 bg-transparent outline-none ring-0 w-full p-[20px] mb-[10px] bg-white rounded-[30px] shadow-[0px_0px_10px_-7px]"
+                    className={
+                      theme === "night"
+                        ? "h-[180px] resize-none appearance-none border-0 bg-[#0f172a] outline-none ring-0 w-full p-[20px] mb-[10px] rounded-[30px] shadow-[0px_0px_20px_-7px]"
+                        : "h-[180px] resize-none appearance-none border-0 bg-transparent outline-none ring-0 w-full p-[20px] mb-[10px] rounded-[30px] shadow-[0px_0px_10px_-7px]"
+                    }
                     name=""
                     defaultValue={displayWorkout.description}
                     id=""
                   ></textarea>
                 ) : (
-                  <div className="relative p-[20px] mb-[10px] bg-white rounded-[30px] w-full shadow-[0px_0px_10px_-7px]">
+                  <div
+                    className={
+                      theme === "night"
+                        ? "bg-[#0f172a] relative p-[20px] mb-[10px] rounded-[30px] w-full shadow-[0px_0px_20px_-7px]"
+                        : "relative p-[20px] mb-[10px] rounded-[30px] w-full shadow-[0px_0px_10px_-7px]"
+                    }
+                  >
                     <p className="text-justify">
                       <span className="text-[18px] font-[600]"></span>
                       {displayWorkout.description}

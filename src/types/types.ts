@@ -14,6 +14,8 @@ export type userType = {
   myWorkouts: workoutType[];
 };
 
+export type EquipmentType = "bodyweight" | "dumbbell" | "barbell" | "machine";
+
 export type exercisesType = {
   id: string;
   name: string;
@@ -25,7 +27,7 @@ export type exercisesType = {
   done?: boolean;
   table?: number[];
   timeBtwnSets?: number;
-  noEquipment?: boolean;
+  equipment: EquipmentType[];
 };
 
 export type workoutType = {
@@ -61,12 +63,6 @@ export type FilterWorkoutProp = {
 export type BottomBtnProp = {
   onClick: () => void;
   btnText: React.ReactElement | string;
-};
-
-export type ConfirmProp = {
-  text: string;
-  noBtn: () => void;
-  yesBtn: () => void;
 };
 
 export interface WorkoutStep {

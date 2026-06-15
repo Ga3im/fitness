@@ -1,10 +1,21 @@
 @import "tailwindcss";
-@layer utilities {
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
+
+@theme {
+  /* Цвета по умолчанию (светлые) */
+  --color-bg-primary: #ffffff;
+  --color-bg-main: #ffffff;
+  --color-text-primary: #1e293b;
+
+  --color-header-start: #007386; /* Ваш текущий bg-[#007386] */
+  --color-header-end: #ebfdff; /* Ваш текущий to-[#ebfdff] */
+}
+
+/* Напрямую говорим CSS менять переменные, когда у html есть класс .dark */
+.dark {
+  --color-bg-primary: #0f172a;
+  --color-bg-main: #000;
+  --color-text-primary: #f8fafc;
+
+  --color-header-start: #0f2d37; /* Чуть темнее и приглушеннее */
+  --color-header-end: #0b191e; /* Уходит в глубокую темноту */
 }
