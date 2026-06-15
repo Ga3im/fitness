@@ -1,4 +1,9 @@
-export const RoundCheckbox = ({ checked, onChange }) => {
+type RoundCheckboxType = {
+  checked: boolean;
+  onChange: () => void;
+};
+
+export const RoundCheckbox = ({ checked, onChange }: RoundCheckboxType) => {
   return (
     <label className="relative inline-flex items-center cursor-pointer">
       <input

@@ -46,7 +46,7 @@ export const CreateWorkout = () => {
   useEffect(() => {
     const arr: exercisesType[] = [];
     for (let index = 0; index <= 5; index++) {
-      const element: exercisesType = exercises[index];
+      const element = exercises[index] as unknown as exercisesType | undefined;
       if (element !== undefined) {
         arr.push(element);
       }
@@ -118,7 +118,7 @@ export const CreateWorkout = () => {
       i < displayedExercises.length + 10;
       i++
     ) {
-      const element: exercisesType = exercises[i];
+      const element = exercises[i] as unknown as exercisesType | undefined;
       if (element !== undefined) {
         arr.push(element);
       }
@@ -245,7 +245,8 @@ export const CreateWorkout = () => {
               />
             ))}
 
-            {isFiltered ? null : exercises.length === displayedExercises.length ? (
+            {isFiltered ? null : exercises.length ===
+              displayedExercises.length ? (
               <div
                 onClick={hideExercisesBtn}
                 className={

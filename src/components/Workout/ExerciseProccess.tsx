@@ -5,8 +5,6 @@ import { timeHHMMSS } from "../../utils/functions";
 import { ResultTable } from "./ResultTable";
 import { StartTimeBtn } from "./StartTimeBtn";
 import { setIsEnteringWeight } from "../../store/features/workoutSlice";
-import useSound from "use-sound";
-import boopSfx from "/sounds/timer.mp3";
 import { useEffect } from "react";
 
 type ExerciseProccessProp = {
