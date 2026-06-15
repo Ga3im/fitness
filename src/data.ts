@@ -470,4 +470,4 @@ export const exercises = [
     img: "/workouts/Lat pull-down.png",
     equipment: ["machine"],
   },
-];
+]; 
