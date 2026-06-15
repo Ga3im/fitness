@@ -1,7 +1,6 @@
 type RoundCheckboxType = {
   checked: boolean;
-  onChange: () => void;
-};
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void};
 
 export const RoundCheckbox = ({ checked, onChange }: RoundCheckboxType) => {
   return (

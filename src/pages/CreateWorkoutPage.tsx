@@ -19,6 +19,7 @@ export const CreateWorkout = () => {
     filterExercises,
     showDynamic,
     showStatic,
+    selectedEquipment
   } = useAppSelector((state) => state.workoutSlice);
   const dispatch = useAppDispatch();
   const [isSelectedName, setIsSelectedName] = useState<boolean>(true);
@@ -153,7 +154,11 @@ export const CreateWorkout = () => {
     }
   };
 
-  const isFiltered = search !== "" || !showDynamic || !showStatic;
+  const isFiltered =
+    search !== "" ||
+    !showDynamic ||
+    !showStatic ||
+    selectedEquipment.length > 0;
 
   const renderExercises = isFiltered ? filterExercises : displayedExercises;
 
